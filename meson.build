@@ -22,9 +22,9 @@ if not py_installation.language_version().version_compare('>= 3.10')
 endif
 
 # Constants
-PACKAGE_URL = 'https://github.com/irving/soundsgood'
-PACKAGE_URL_BUG = 'https://github.com/irving/soundsgood/issues'
-PROJECT_RDNN_NAME = 'io.github.irving.soundsgood'
+PACKAGE_URL = 'https://github.com/N1ghthill/soundsgood'
+PACKAGE_URL_BUG = 'https://github.com/N1ghthill/soundsgood/issues'
+PROJECT_RDNN_NAME = 'io.github.n1ghthill.soundsgood'
 
 if get_option('profile') == 'development'
   PROFILE = '.Devel'
@@ -34,7 +34,7 @@ else
   NAME_SUFFIX = ''
 endif
 
-APPLICATION_ID = 'io.github.irving.soundsgood@0@'.format(PROFILE)
+APPLICATION_ID = 'io.github.n1ghthill.soundsgood@0@'.format(PROFILE)
 PYTHON_DIR = py_installation.get_install_dir()
 PKGDATA_DIR = join_paths(get_option('prefix'), get_option('datadir'), APPLICATION_ID)
 PKGLIB_DIR = join_paths(get_option('prefix'), get_option('libdir'), APPLICATION_ID)

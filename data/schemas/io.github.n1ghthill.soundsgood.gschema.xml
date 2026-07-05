@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <schemalist>
-  <enum id="io.github.irving.soundsgood.RepeatMode">
+  <enum id="io.github.n1ghthill.soundsgood.RepeatMode">
     <value value="0" nick="none"/>
     <value value="1" nick="song"/>
     <value value="2" nick="all"/>
     <value value="3" nick="shuffle"/>
   </enum>
 
-  <schema id="io.github.irving.soundsgood" path="/io/github/irving/soundsgood/">
-    <key name="repeat" enum="io.github.irving.soundsgood.RepeatMode">
+  <schema id="io.github.n1ghthill.soundsgood" path="/io/github/n1ghthill/soundsgood/">
+    <key name="repeat" enum="io.github.n1ghthill.soundsgood.RepeatMode">
       <default>'none'</default>
       <summary>Repeat mode</summary>
       <description>The repeat mode of the player</description>

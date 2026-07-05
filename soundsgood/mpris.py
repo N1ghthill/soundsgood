@@ -265,7 +265,7 @@ class MprisService:
             "CanRaise": GLib.Variant("b", True),
             "HasTrackList": GLib.Variant("b", False),
             "Identity": GLib.Variant("s", "SoundsGood"),
-            "DesktopEntry": GLib.Variant("s", "io.github.irving.soundsgood"),
+            "DesktopEntry": GLib.Variant("s", "io.github.n1ghthill.soundsgood"),
             "SupportedUriSchemes": GLib.Variant("as", ["file"]),
             "SupportedMimeTypes": GLib.Variant(
                 "as",

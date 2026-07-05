@@ -39,8 +39,8 @@ Recursos ja implementados:
 - Estados explicitos de biblioteca: escaneando, vazio, pronto e erro, com feedback quando a pasta configurada nao existe.
 - UI principal programatica em Python; templates `.ui` antigos foram removidos.
 - Testes unitarios para biblioteca, cache persistente, busca, player e logica MPRIS registrados no Meson.
-- App ID preparado para Flathub: `io.github.irving.soundsgood`.
-- Manifest Flatpak inicial em `io.github.irving.soundsgood.yml`.
+- App ID preparado para Flathub: `io.github.n1ghthill.soundsgood`.
+- Manifest Flatpak inicial em `io.github.n1ghthill.soundsgood.yml`.
 
 Pontos conhecidos:
 
@@ -124,10 +124,10 @@ O formato recomendado para distribuicao e Flatpak/Flathub.
 
 Arquivos relevantes:
 
-- `io.github.irving.soundsgood.yml`: manifest Flatpak local inicial.
-- `data/metainfo/io.github.irving.soundsgood.metainfo.xml.in`: metainfo AppStream.
-- `data/desktop/io.github.irving.soundsgood.desktop.in`: desktop entry.
-- `data/icons/io.github.irving.soundsgood.svg`: icone da aplicacao.
+- `io.github.n1ghthill.soundsgood.yml`: manifest Flatpak local inicial.
+- `data/metainfo/io.github.n1ghthill.soundsgood.metainfo.xml.in`: metainfo AppStream.
+- `data/desktop/io.github.n1ghthill.soundsgood.desktop.in`: desktop entry.
+- `data/icons/io.github.n1ghthill.soundsgood.svg`: icone da aplicacao.
 - `COPYING`: licenca GPL-2.0.
 
 Veja o roteiro em [docs/FLATPAK.md](docs/FLATPAK.md).

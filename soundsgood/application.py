@@ -81,7 +81,7 @@ class SoundsGoodApplication(Adw.Application):
             application_id=application_id,
             flags=Gio.ApplicationFlags.FLAGS_NONE,
         )
-        self.props.resource_base_path = "/io/github/irving/soundsgood"
+        self.props.resource_base_path = "/io/github/n1ghthill/soundsgood"
         GLib.set_application_name(_("SoundsGood"))
         GLib.set_prgname(application_id)
         GLib.setenv("PULSE_PROP_application.id", application_id, True)
@@ -190,7 +190,7 @@ class SoundsGoodApplication(Adw.Application):
             self._player.props.repeat_mode = int(RepeatMode.SHUFFLE)
 
     def _create_settings(self):
-        schema_id = os.environ.get("RDNN_NAME", "io.github.irving.soundsgood")
+        schema_id = os.environ.get("RDNN_NAME", "io.github.n1ghthill.soundsgood")
         schema_source = Gio.SettingsSchemaSource.get_default()
         if schema_source and schema_source.lookup(schema_id, True):
             return Gio.Settings.new(schema_id)
@@ -243,7 +243,7 @@ class SoundsGoodApplication(Adw.Application):
 
 
 def main():
-    application_id = os.environ.get("APPLICATION_ID", "io.github.irving.soundsgood")
+    application_id = os.environ.get("APPLICATION_ID", "io.github.n1ghthill.soundsgood")
     version = os.environ.get("VERSION", "0.1.0")
 
     app = SoundsGoodApplication(application_id, version)

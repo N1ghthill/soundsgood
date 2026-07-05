@@ -17,12 +17,12 @@ class AboutDialog:
     def __init__(self, version: str):
         self._dialog = Adw.AboutDialog(
             application_name="SoundsGood",
-            application_icon="io.github.irving.soundsgood",
+            application_icon="io.github.n1ghthill.soundsgood",
             developer_name="SoundsGood Developers",
             version=version,
             comments="A local music player for GNOME.",
-            website="https://github.com/irving/soundsgood",
-            issue_url="https://github.com/irving/soundsgood/issues",
+            website="https://github.com/N1ghthill/soundsgood",
+            issue_url="https://github.com/N1ghthill/soundsgood/issues",
             license_type=Gtk.License.GPL_2_0,
         )
 

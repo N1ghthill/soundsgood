@@ -7,17 +7,17 @@ O formato recomendado para distribuir o SoundsGood e Flatpak, com publicacao fin
 O app ID preparado para publicacao e:
 
 ```text
-io.github.irving.soundsgood
+io.github.n1ghthill.soundsgood
 ```
 
 Esse ID deve permanecer sincronizado entre:
 
 - `meson.build`
-- `io.github.irving.soundsgood.yml`
-- `data/metainfo/io.github.irving.soundsgood.metainfo.xml.in`
-- `data/desktop/io.github.irving.soundsgood.desktop.in`
-- `data/schemas/io.github.irving.soundsgood.gschema.xml`
-- `data/icons/io.github.irving.soundsgood.svg`
+- `io.github.n1ghthill.soundsgood.yml`
+- `data/metainfo/io.github.n1ghthill.soundsgood.metainfo.xml.in`
+- `data/desktop/io.github.n1ghthill.soundsgood.desktop.in`
+- `data/schemas/io.github.n1ghthill.soundsgood.gschema.xml`
+- `data/icons/io.github.n1ghthill.soundsgood.svg`
 
 ## Build Local
 
@@ -31,8 +31,8 @@ flatpak install flathub org.flatpak.Builder
 Build e instalacao local:
 
 ```bash
-flatpak run org.flatpak.Builder --user --install --force-clean build-flatpak io.github.irving.soundsgood.yml
-flatpak run io.github.irving.soundsgood
+flatpak run org.flatpak.Builder --user --install --force-clean build-flatpak io.github.n1ghthill.soundsgood.yml
+flatpak run io.github.n1ghthill.soundsgood
 ```
 
 O manifest local usa:
@@ -48,7 +48,7 @@ Para submissao ao Flathub, substitua essa fonte por uma fonte versionada, de pre
 ```yaml
 sources:
   - type: git
-    url: https://github.com/irving/soundsgood.git
+    url: https://github.com/N1ghthill/soundsgood.git
     tag: v0.1.0
     commit: COMMIT_DA_TAG
 ```
@@ -68,15 +68,15 @@ meson test -C builddir
 Validacao dos metadados instalados:
 
 ```bash
-desktop-file-validate builddir/data/io.github.irving.soundsgood.desktop
-appstreamcli validate --no-net --pedantic builddir/data/io.github.irving.soundsgood.metainfo.xml
+desktop-file-validate builddir/data/io.github.n1ghthill.soundsgood.desktop
+appstreamcli validate --no-net --pedantic builddir/data/io.github.n1ghthill.soundsgood.metainfo.xml
 glib-compile-schemas --strict builddir/data
 ```
 
 Validacao do manifest, quando `org.flatpak.Builder` estiver instalado:
 
 ```bash
-flatpak run --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.irving.soundsgood.yml
+flatpak run --command=flatpak-builder-lint org.flatpak.Builder manifest io.github.n1ghthill.soundsgood.yml
 ```
 
 ## Permissoes
@@ -93,7 +93,7 @@ Se o app passar a depender somente de portal/document portal para pastas escolhi
 ## Antes do Flathub
 
 - Criar release/tag versionada.
-- Publicar ou tornar acessivel `https://github.com/irving/soundsgood` antes da validacao final sem `--no-net`.
+- Confirmar que `https://github.com/N1ghthill/soundsgood` continua acessivel antes da validacao final sem `--no-net`.
 - Substituir `type: dir` por fonte versionada no manifest.
 - Gerar screenshots reais da janela do app para o metainfo.
 - Rodar `flatpak-builder-lint`.

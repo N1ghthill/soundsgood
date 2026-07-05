@@ -1,12 +1,12 @@
 # Install GSettings schema
 schema_file = configure_file(
-    input: 'schemas' / 'io.github.irving.soundsgood.gschema.xml',
-    output: 'io.github.irving.soundsgood.gschema.xml',
+    input: 'schemas' / 'io.github.n1ghthill.soundsgood.gschema.xml',
+    output: 'io.github.n1ghthill.soundsgood.gschema.xml',
     copy: true,
 )
 
 install_data(
-    'schemas' / 'io.github.irving.soundsgood.gschema.xml',
+    'schemas' / 'io.github.n1ghthill.soundsgood.gschema.xml',
     install_dir: join_paths(get_option('datadir'), 'glib-2.0', 'schemas')
 )
 
@@ -22,7 +22,7 @@ custom_target(
 # Install desktop file
 desktop_file = APPLICATION_ID + '.desktop'
 configure_file(
-    input: 'desktop' / 'io.github.irving.soundsgood.desktop.in',
+    input: 'desktop' / 'io.github.n1ghthill.soundsgood.desktop.in',
     output: desktop_file,
     copy: true,
     install: true,
@@ -32,7 +32,7 @@ configure_file(
 # Install AppStream metainfo
 metainfo_file = APPLICATION_ID + '.metainfo.xml'
 configure_file(
-    input: 'metainfo' / 'io.github.irving.soundsgood.metainfo.xml.in',
+    input: 'metainfo' / 'io.github.n1ghthill.soundsgood.metainfo.xml.in',
     output: metainfo_file,
     copy: true,
     install: true,
@@ -41,7 +41,7 @@ configure_file(
 
 # Install icons
 install_data(
-    'icons' / 'io.github.irving.soundsgood.svg',
+    'icons' / 'io.github.n1ghthill.soundsgood.svg',
     install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', 'scalable', 'apps')
 )
 

@@ -1,4 +1,4 @@
-id: io.github.irving.soundsgood
+id: io.github.n1ghthill.soundsgood
 runtime: org.gnome.Platform
 runtime-version: '50'
 sdk: org.gnome.Sdk
