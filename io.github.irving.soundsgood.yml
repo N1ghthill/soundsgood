@@ -1,0 +1,34 @@
+id: io.github.irving.soundsgood
+runtime: org.gnome.Platform
+runtime-version: '50'
+sdk: org.gnome.Sdk
+command: soundsgood
+
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --socket=pulseaudio
+  - --filesystem=xdg-music:ro
+  - --own-name=org.mpris.MediaPlayer2.SoundsGood
+
+cleanup:
+  - /include
+  - /lib/pkgconfig
+  - /share/man
+
+modules:
+  - name: soundsgood
+    buildsystem: meson
+    sources:
+      - type: dir
+        path: .
+        skip:
+          - .deepcode
+          - .flatpak-builder
+          - builddir
+          - build-flatpak
+          - soundsgood/__pycache__
+          - soundsgood/views/__pycache__
+          - soundsgood/widgets/__pycache__
+          - tests/__pycache__

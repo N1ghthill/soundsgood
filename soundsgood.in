@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+# Copyright 2025 SoundsGood developers
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+import os
+import sys
+
+application_id = '@application_id@'
+rdnn_name = '@rdnn_name@'
+pkgdatadir = '@pkgdatadir@'
+localedir = '@localedir@'
+pythondir = '@pythondir@'
+schemasdir = '@schemasdir@'
+version = '@version@'
+local_build = '@local_build@'
+
+if local_build == 'True':
+    pkgdatadir = os.path.join(os.path.dirname(__file__), 'data')
+    schemasdir = pkgdatadir
+
+sys.path.insert(1, pythondir)
+sys.path.insert(1, os.path.join(pythondir, 'soundsgood'))
+
+os.environ['APPLICATION_ID'] = application_id
+os.environ['RDNN_NAME'] = rdnn_name
+os.environ['PKGDATADIR'] = pkgdatadir
+os.environ['LOCALEDIR'] = localedir
+os.environ['SCHEMASDIR'] = schemasdir
+os.environ['GSETTINGS_SCHEMA_DIR'] = schemasdir
+os.environ['VERSION'] = version
+
+from soundsgood.application import main
+
+main()

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=SoundsGood
+Name[pt_BR]=SoundsGood
+Comment=Play and organize your music collection
+Comment[pt_BR]=Reproduza e organize sua coleção de música
+Exec=soundsgood
+Icon=io.github.irving.soundsgood
+Terminal=false
+Type=Application
+Categories=AudioVideo;Audio;Music;Player;
+StartupNotify=true
+MimeType=audio/mpeg;audio/flac;audio/ogg;audio/wav;audio/x-mpegurl;

@@ -1,0 +1,2 @@
+option('profile', type: 'string', value: 'default',
+    description: 'Build profile')

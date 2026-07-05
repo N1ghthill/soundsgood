@@ -1,0 +1,6 @@
+/.flatpak-builder/
+/.deepcode/
+/build-flatpak/
+/builddir/
+__pycache__/
+*.py[cod]

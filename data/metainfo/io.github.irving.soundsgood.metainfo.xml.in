@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.irving.soundsgood</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-2.0-or-later</project_license>
+  <name>SoundsGood</name>
+  <developer id="io.github.irving">
+    <name>SoundsGood Developers</name>
+  </developer>
+  <summary>Play and organize your music collection</summary>
+  <description>
+    <p>A simple and fast music player for Linux. Browse your music by album or artist, play songs, and manage your playlist.</p>
+  </description>
+  <categories>
+    <category>AudioVideo</category>
+    <category>Audio</category>
+    <category>Music</category>
+    <category>Player</category>
+  </categories>
+  <url type="homepage">https://github.com/irving/soundsgood</url>
+  <url type="bugtracker">https://github.com/irving/soundsgood/issues</url>
+  <launchable type="desktop-id">io.github.irving.soundsgood.desktop</launchable>
+  <releases>
+    <release version="0.1.0" date="2026-07-05"/>
+  </releases>
+  <content_rating type="oars-1.1"/>
+</component>
