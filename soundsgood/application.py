@@ -37,6 +37,7 @@ class MemorySettings:
         "window-height": 800,
         "window-maximized": False,
         "music-dir": "",
+        "color-scheme": "light",
     }
 
     def __init__(self):
@@ -89,6 +90,7 @@ class SoundsGoodApplication(Adw.Application):
         self._version = version
         self._window = None
         self._settings = self._create_settings()
+        self._settings_changed_handler = None
 
         # Initialize GStreamer
         Gst.init(None)
@@ -197,8 +199,22 @@ class SoundsGoodApplication(Adw.Application):
 
         return MemorySettings()
 
+    def apply_color_scheme(self):
+        scheme = self._settings.get_string("color-scheme")
+        style_manager = Adw.StyleManager.get_default()
+        if scheme == "dark":
+            style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
+        else:
+            style_manager.set_color_scheme(Adw.ColorScheme.FORCE_LIGHT)
+
     def do_startup(self):
         Adw.Application.do_startup(self)
+        self.apply_color_scheme()
+        if hasattr(self._settings, "connect"):
+            self._settings_changed_handler = self._settings.connect(
+                "changed::color-scheme",
+                lambda *_args: self.apply_color_scheme(),
+            )
 
         # Load CSS
         css_provider = Gtk.CssProvider()

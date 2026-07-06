@@ -44,6 +44,15 @@
       <summary>Music directory</summary>
       <description>The directory to scan for music files</description>
     </key>
+    <key name="color-scheme" type="s">
+      <choices>
+        <choice value="light"/>
+        <choice value="dark"/>
+      </choices>
+      <default>'light'</default>
+      <summary>Color scheme</summary>
+      <description>The application color scheme selected by the user</description>
+    </key>
   </schema>
 
 </schemalist>

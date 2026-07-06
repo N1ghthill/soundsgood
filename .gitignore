@@ -4,5 +4,6 @@
 /builddir/
 /dist/
 /repo/
+/data/schemas/gschemas.compiled
 __pycache__/
 *.py[cod]
