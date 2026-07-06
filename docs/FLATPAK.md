@@ -31,7 +31,20 @@ flatpak install flathub org.flatpak.Builder
 Build e instalacao local:
 
 ```bash
-flatpak run org.flatpak.Builder --user --install --force-clean build-flatpak io.github.n1ghthill.soundsgood.yml
+flatpak run org.flatpak.Builder --user --install --force-clean --default-branch=stable build-flatpak io.github.n1ghthill.soundsgood.yml
+flatpak run io.github.n1ghthill.soundsgood
+```
+
+Gerar bundle para GitHub Releases:
+
+```bash
+flatpak build-bundle ~/.local/share/flatpak/repo SoundsGood-0.1.0-x86_64.flatpak io.github.n1ghthill.soundsgood stable
+```
+
+Instalar o bundle:
+
+```bash
+flatpak install --user ./SoundsGood-0.1.0-x86_64.flatpak
 flatpak run io.github.n1ghthill.soundsgood
 ```
 

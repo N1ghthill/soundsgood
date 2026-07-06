@@ -2,5 +2,6 @@
 /.deepcode/
 /build-flatpak/
 /builddir/
+/dist/
 __pycache__/
 *.py[cod]

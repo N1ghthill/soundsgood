@@ -122,6 +122,13 @@ No ambiente atual, valide primeiro se `meson` esta instalado. Se nao estiver, in
 
 O formato recomendado para distribuicao e Flatpak/Flathub.
 
+Enquanto o app ainda nao estiver no Flathub, use o bundle publicado em GitHub Releases:
+
+```bash
+flatpak install --user ./SoundsGood-0.1.0-x86_64.flatpak
+flatpak run io.github.n1ghthill.soundsgood
+```
+
 Arquivos relevantes:
 
 - `io.github.n1ghthill.soundsgood.yml`: manifest Flatpak local inicial.
