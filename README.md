@@ -97,7 +97,7 @@ The local Flatpak manifest is `io.github.n1ghthill.soundsgood.yml`.
 Build and install locally:
 
 ```bash
-flatpak install flathub org.gnome.Platform//50 org.gnome.Sdk//50 org.flatpak.Builder
+flatpak install org.gnome.Platform//50 org.gnome.Sdk//50 org.flatpak.Builder
 flatpak run org.flatpak.Builder --user --install --force-clean build-flatpak io.github.n1ghthill.soundsgood.yml
 flatpak run io.github.n1ghthill.soundsgood
 ```

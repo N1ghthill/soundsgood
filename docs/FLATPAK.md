@@ -25,8 +25,8 @@ Esse ID deve permanecer sincronizado entre:
 Dependencias:
 
 ```bash
-flatpak install flathub org.gnome.Platform//50 org.gnome.Sdk//50
-flatpak install flathub org.flatpak.Builder
+flatpak install org.gnome.Platform//50 org.gnome.Sdk//50
+flatpak install org.flatpak.Builder
 ```
 
 Build e instalacao local:
