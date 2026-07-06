@@ -3,5 +3,6 @@
 /build-flatpak/
 /builddir/
 /dist/
+/repo/
 __pycache__/
 *.py[cod]
