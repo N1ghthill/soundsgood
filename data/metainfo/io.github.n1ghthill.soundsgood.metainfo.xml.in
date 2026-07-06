@@ -23,10 +23,11 @@
   <screenshots>
     <screenshot type="default">
       <caption>Main library view</caption>
-      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.1.1/data/screenshots/soundsgood-main.png</image>
+      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.1.2/data/screenshots/soundsgood-main.png</image>
     </screenshot>
   </screenshots>
   <releases>
+    <release version="0.1.2" date="2026-07-06"/>
     <release version="0.1.1" date="2026-07-06"/>
     <release version="0.1.0" date="2026-07-05"/>
   </releases>

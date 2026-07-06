@@ -47,8 +47,8 @@ Until SoundsGood is available on Flathub, install the Flatpak bundle from the
 latest GitHub release:
 
 ```bash
-wget https://github.com/N1ghthill/soundsgood/releases/download/v0.1.1/SoundsGood-0.1.1-x86_64.flatpak
-flatpak install --user ./SoundsGood-0.1.1-x86_64.flatpak
+wget https://github.com/N1ghthill/soundsgood/releases/download/v0.1.2/SoundsGood-0.1.2-x86_64.flatpak
+flatpak install --user ./SoundsGood-0.1.2-x86_64.flatpak
 flatpak run io.github.n1ghthill.soundsgood
 ```
 
