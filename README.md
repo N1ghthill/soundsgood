@@ -1,84 +1,73 @@
 # SoundsGood
 
-SoundsGood e um player de musica local para Linux, inspirado na experiencia do GNOME Music. O foco do projeto e tocar e organizar musicas locais por album, artista e faixas, com uma interface GTK moderna.
+[![License: GPL-2.0-or-later](https://img.shields.io/badge/License-GPL--2.0--or--later-blue.svg)](COPYING)
+[![Release](https://img.shields.io/github/v/release/N1ghthill/soundsgood)](https://github.com/N1ghthill/soundsgood/releases)
+[![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)](#installation)
+[![GTK](https://img.shields.io/badge/GTK-4-green.svg)](https://gtk.org/)
 
-O projeto nao deve incluir radio, podcasts, streaming ou fontes remotas como requisito de produto. Qualquer dependencia ou arquitetura importada do GNOME Music deve ser avaliada pelo valor que traz para biblioteca local, metadados, busca ou reproducao.
+SoundsGood is a local music player for Linux, built with Python,
+GTK4/libadwaita, and GStreamer. It focuses on a clean library experience for
+music stored on your computer: albums, artists, songs, search, playback queue,
+and desktop media controls.
 
-## Objetivos
+The project is inspired by the GNOME Music experience, but keeps a narrower
+scope: local files first, no streaming, no podcasts, and no radio service
+integration.
 
-- Interface grafica em GTK4/libadwaita.
-- Biblioteca local com musicas agrupadas por albums, artistas e faixas.
-- Busca por titulo, artista e album.
-- Reproducao via GStreamer.
-- Controles de player: play/pause, anterior, proxima, progresso, volume, repeticao e aleatorio.
-- Leitura confiavel de metadados reais dos arquivos.
-- Sem radio, podcasts ou streaming.
+## Screenshots
 
-## Estado Atual
+![Albums view](docs/screenshots/albums.png)
 
-O repositorio tem um MVP funcional em Python/GTK4/libadwaita. A aplicacao abre uma janela, escaneia a pasta de musicas configurada pelo XDG, organiza faixas por albums e artistas, oferece busca basica e reproduz audio via GStreamer.
+| Artists | Songs |
+| --- | --- |
+| ![Artists view](docs/screenshots/artists.png) | ![Songs view](docs/screenshots/songs.png) |
 
-Recursos ja implementados:
+![Search view](docs/screenshots/search.png)
 
-- Diretorio padrao de musicas via `xdg-user-dir MUSIC`, incluindo ambientes pt-BR como `~/Musicas` ou `~/Músicas`.
-- Tela de albums com grid, detalhe de album, capa, metadados, botao Play e faixas ordenadas.
-- Tela de artistas com lista lateral, cabecalho do artista, albums agrupados e faixas por album.
-- Tela de musicas com lista global.
-- Busca por titulo, artista, album, album artist, genero e ano, com normalizacao simples de acentos.
-- Resultados de busca separados por artistas, albums e musicas.
-- Reproducao com fila, anterior/proxima, play/pause, seek, volume, repeat e shuffle.
-- Popover de fila atual na toolbar, com selecao de faixa, remocao individual e limpeza da fila.
-- MPRIS em `org.mpris.MediaPlayer2.SoundsGood` com metadata, estado de playback, capacidades de transporte e controles basicos via DBus.
-- Destaque visual da faixa atual nas listas.
-- Troca de faixa corrigida com reinicio seguro do `playbin`.
-- Capas embutidas via GStreamer quando disponiveis e fallback por arquivos como `cover.jpg`, `folder.png`, `front.jpg`, `album.png` e similares.
-- Cache persistente da biblioteca em `$XDG_CACHE_HOME/soundsgood/library.json`.
-- Monitoramento simples da pasta de musicas com debounce para reescanear quando arquivos mudam.
-- Scan aplica diferencas por URI para adicionar, substituir e remover faixas sem limpar todo o modelo de musicas.
-- Agregados de albums/artistas sao atualizados incrementalmente quando faixas entram, saem ou mudam de metadados.
-- Estados explicitos de biblioteca: escaneando, vazio, pronto e erro, com feedback quando a pasta configurada nao existe.
-- UI principal programatica em Python; templates `.ui` antigos foram removidos.
-- Testes unitarios para biblioteca, cache persistente, busca, player e logica MPRIS registrados no Meson.
-- App ID preparado para Flathub: `io.github.n1ghthill.soundsgood`.
-- Manifest Flatpak inicial em `io.github.n1ghthill.soundsgood.yml`.
+The screenshots use sanitized album artwork placeholders to keep the repository
+safe to publish and redistribute.
 
-Pontos conhecidos:
+## Features
 
-- A biblioteca ja tenta ler metadados e capas embutidas com GStreamer Discoverer, mas ainda precisa de mais testes com colecoes reais.
-- Capas por arquivo de pasta como `cover.jpg`, `folder.png` e similares ja sao usadas.
-- O cache evita redescobrir metadados de arquivos inalterados, mas o app ainda percorre a arvore de arquivos a cada abertura.
-- O monitoramento atual agenda um novo scan; faixas e agregados sao aplicados por diff, mas o app ainda nao usa um indice persistente para evitar listar a arvore.
-- Notificacoes e inibicao de suspensao ainda nao foram implementados.
-- O build Meson/Ninja local foi validado com `./builddir/local-soundsgood`.
+- Browse local music by albums, artists, and songs.
+- Search by title, artist, album, album artist, genre, and year.
+- Play local audio through GStreamer.
+- Control playback with play/pause, previous, next, seek, volume, repeat, and
+  shuffle.
+- Manage the current queue from the player toolbar.
+- Read real file metadata and embedded album art when available.
+- Use common folder artwork names such as `cover.jpg`, `folder.png`,
+  `front.jpg`, and `album.png`.
+- Cache the music library in `$XDG_CACHE_HOME/soundsgood/library.json`.
+- Watch the music folder and rescan after file changes.
+- Expose MPRIS controls on `org.mpris.MediaPlayer2.SoundsGood`.
 
-Ultima validacao conhecida:
+## Installation
 
-- `python3 -m unittest discover -s tests`: 27 testes OK.
-- `python3 -m py_compile soundsgood/*.py soundsgood/views/*.py soundsgood/widgets/*.py tests/*.py`: OK.
-- `meson setup builddir --reconfigure`: OK.
-- `meson compile -C builddir`: OK.
-- `meson test -C builddir`: OK.
-- MPRIS via `gdbus`: `Identity=SoundsGood`, `PlaybackStatus=Stopped`, `Metadata=NoTrack` sem faixa atual.
-- MPRIS durante reproducao com WAV sintetico: `PlaybackStatus=Playing`, metadata preenchida, `CanPlay`, `CanPause` e `CanSeek` verdadeiros, `Pause` e `Play` funcionando via DBus.
+### GitHub Release
 
-## Arquitetura Pretendida
+Until SoundsGood is available on Flathub, install the Flatpak bundle from the
+latest GitHub release:
 
-Camadas principais:
+```bash
+wget https://github.com/N1ghthill/soundsgood/releases/download/v0.1.1/SoundsGood-0.1.1-x86_64.flatpak
+flatpak install --user ./SoundsGood-0.1.1-x86_64.flatpak
+flatpak run io.github.n1ghthill.soundsgood
+```
 
-- `Application`: inicializa GTK/libadwaita, configuracoes, biblioteca e player.
-- `Library`: descobre musicas locais, extrai metadados e mantem modelos de faixas, albums e artistas.
-- `Player`: controla GStreamer, fila, estado de reproducao, progresso, volume e modos de repeticao.
-- `Models`: objetos GObject para `Song`, `Album`, `Artist` e enums de player.
-- `Views`: telas de albums, artistas, faixas, busca e detalhes de album/artista.
-- `Widgets`: componentes reutilizaveis como toolbar do player, linhas de musica, busca e dialogs.
+### Flathub
 
-Veja detalhes em [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+The Flathub submission is in progress. After it is accepted, installation will
+use the normal Flathub command:
 
-O roteiro de validacao manual fica em [docs/MANUAL_TESTS.md](docs/MANUAL_TESTS.md).
+```bash
+flatpak install flathub io.github.n1ghthill.soundsgood
+flatpak run io.github.n1ghthill.soundsgood
+```
 
-## Desenvolvimento
+## Development
 
-Dependencias esperadas:
+### Dependencies
 
 - Python 3.10+
 - GTK4
@@ -88,7 +77,7 @@ Dependencias esperadas:
 - Meson
 - Ninja
 
-Comandos pretendidos:
+### Build and Run
 
 ```bash
 meson setup builddir
@@ -96,7 +85,13 @@ meson compile -C builddir
 ./builddir/local-soundsgood
 ```
 
-Validacao rapida:
+You can also run the application directly during development:
+
+```bash
+python3 -m soundsgood.application
+```
+
+### Tests
 
 ```bash
 python3 -m py_compile soundsgood/*.py soundsgood/views/*.py soundsgood/widgets/*.py tests/*.py
@@ -104,46 +99,50 @@ python3 -m unittest discover -s tests
 meson test -C builddir
 ```
 
-Para validar instalacao sem tocar no sistema:
+## Flatpak
+
+The local Flatpak manifest is `io.github.n1ghthill.soundsgood.yml`.
+
+Build and install locally:
 
 ```bash
-DESTDIR="$(mktemp -d)" meson install -C builddir --destdir "$DESTDIR"
-```
-
-Durante desenvolvimento, tambem e possivel iniciar diretamente com:
-
-```bash
-python3 -m soundsgood.application
-```
-
-No ambiente atual, valide primeiro se `meson` esta instalado. Se nao estiver, instale as dependencias do sistema antes de tentar executar o app.
-
-## Distribuicao
-
-O formato recomendado para distribuicao e Flatpak/Flathub.
-
-Enquanto o app ainda nao estiver no Flathub, use o bundle publicado em GitHub Releases:
-
-```bash
-wget https://github.com/N1ghthill/soundsgood/releases/download/v0.1.1/SoundsGood-0.1.1-x86_64.flatpak
-flatpak install --user ./SoundsGood-0.1.1-x86_64.flatpak
+flatpak install flathub org.gnome.Platform//50 org.gnome.Sdk//50 org.flatpak.Builder
+flatpak run org.flatpak.Builder --user --install --force-clean build-flatpak io.github.n1ghthill.soundsgood.yml
 flatpak run io.github.n1ghthill.soundsgood
 ```
 
-Arquivos relevantes:
+More packaging notes are available in [docs/FLATPAK.md](docs/FLATPAK.md).
 
-- `io.github.n1ghthill.soundsgood.yml`: manifest Flatpak local inicial.
-- `data/metainfo/io.github.n1ghthill.soundsgood.metainfo.xml.in`: metainfo AppStream.
-- `data/desktop/io.github.n1ghthill.soundsgood.desktop.in`: desktop entry.
-- `data/icons/io.github.n1ghthill.soundsgood.svg`: icone da aplicacao.
-- `COPYING`: licenca GPL-2.0.
+## Project Status
 
-Veja o roteiro em [docs/FLATPAK.md](docs/FLATPAK.md).
+SoundsGood is an early but functional MVP. It can scan a local music folder,
+build a library, search tracks, and play audio. The current focus is stability,
+metadata quality, Flatpak packaging, and polish for the local library workflow.
 
-## Roadmap
+Known areas still planned:
 
-O plano de desenvolvimento esta em [ROADMAP.md](ROADMAP.md).
+- More testing with real-world music collections.
+- Better persistent indexing to avoid walking the full music tree on every
+  startup.
+- Desktop notifications.
+- Optional session inhibition while music is playing.
 
-## Orientacao Para IA
+See [ROADMAP.md](ROADMAP.md) for the development roadmap.
 
-Agentes de IA devem ler [agent.md](agent.md) antes de modificar o projeto.
+## Architecture
+
+The application is organized around a small set of modules:
+
+- `Application`: startup, settings, library, and player wiring.
+- `Library`: local file discovery, metadata extraction, cache, and models.
+- `Player`: GStreamer playback, queue, progress, volume, repeat, and shuffle.
+- `Models`: GObject models for songs, albums, artists, and player state.
+- `Views`: albums, artists, songs, search, and detail screens.
+- `Widgets`: reusable UI components such as the toolbar, song rows, and dialogs.
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for details.
+
+## License
+
+SoundsGood is released under the GPL-2.0-or-later license. See
+[COPYING](COPYING).
