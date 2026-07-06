@@ -44,6 +44,7 @@ flatpak build-bundle ~/.local/share/flatpak/repo SoundsGood-0.1.0-x86_64.flatpak
 Instalar o bundle:
 
 ```bash
+wget https://github.com/N1ghthill/soundsgood/releases/download/v0.1.0/SoundsGood-0.1.0-x86_64.flatpak
 flatpak install --user ./SoundsGood-0.1.0-x86_64.flatpak
 flatpak run io.github.n1ghthill.soundsgood
 ```
