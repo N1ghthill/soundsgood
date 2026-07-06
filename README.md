@@ -125,8 +125,8 @@ O formato recomendado para distribuicao e Flatpak/Flathub.
 Enquanto o app ainda nao estiver no Flathub, use o bundle publicado em GitHub Releases:
 
 ```bash
-wget https://github.com/N1ghthill/soundsgood/releases/download/v0.1.0/SoundsGood-0.1.0-x86_64.flatpak
-flatpak install --user ./SoundsGood-0.1.0-x86_64.flatpak
+wget https://github.com/N1ghthill/soundsgood/releases/download/v0.1.1/SoundsGood-0.1.1-x86_64.flatpak
+flatpak install --user ./SoundsGood-0.1.1-x86_64.flatpak
 flatpak run io.github.n1ghthill.soundsgood
 ```
 

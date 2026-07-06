@@ -38,14 +38,14 @@ flatpak run io.github.n1ghthill.soundsgood
 Gerar bundle para GitHub Releases:
 
 ```bash
-flatpak build-bundle ~/.local/share/flatpak/repo SoundsGood-0.1.0-x86_64.flatpak io.github.n1ghthill.soundsgood stable
+flatpak build-bundle ~/.local/share/flatpak/repo SoundsGood-0.1.1-x86_64.flatpak io.github.n1ghthill.soundsgood stable
 ```
 
 Instalar o bundle:
 
 ```bash
-wget https://github.com/N1ghthill/soundsgood/releases/download/v0.1.0/SoundsGood-0.1.0-x86_64.flatpak
-flatpak install --user ./SoundsGood-0.1.0-x86_64.flatpak
+wget https://github.com/N1ghthill/soundsgood/releases/download/v0.1.1/SoundsGood-0.1.1-x86_64.flatpak
+flatpak install --user ./SoundsGood-0.1.1-x86_64.flatpak
 flatpak run io.github.n1ghthill.soundsgood
 ```
 
@@ -63,7 +63,7 @@ Para submissao ao Flathub, substitua essa fonte por uma fonte versionada, de pre
 sources:
   - type: git
     url: https://github.com/N1ghthill/soundsgood.git
-    tag: v0.1.0
+    tag: v0.1.1
     commit: COMMIT_DA_TAG
 ```
 
