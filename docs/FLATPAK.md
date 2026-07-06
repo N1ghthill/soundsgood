@@ -1,6 +1,7 @@
-# Flatpak
+# Flatpak Distribution
 
-O formato recomendado para distribuir o SoundsGood e Flatpak, com publicacao final no Flathub.
+O formato de distribuicao atual do SoundsGood e um bundle Flatpak publicado em
+GitHub Releases. O app nao depende de listagem no Flathub para ser instalado.
 
 ## App ID
 
@@ -35,17 +36,24 @@ flatpak run org.flatpak.Builder --user --install --force-clean --default-branch=
 flatpak run io.github.n1ghthill.soundsgood
 ```
 
-Gerar bundle para GitHub Releases:
+Gerar bundle versionado para GitHub Releases:
 
 ```bash
 flatpak build-bundle ~/.local/share/flatpak/repo SoundsGood-0.1.2-x86_64.flatpak io.github.n1ghthill.soundsgood stable
 ```
 
-Instalar o bundle:
+Tambem publique uma copia com nome estavel para permitir o link
+`releases/latest/download`:
 
 ```bash
-wget https://github.com/N1ghthill/soundsgood/releases/download/v0.1.2/SoundsGood-0.1.2-x86_64.flatpak
-flatpak install --user ./SoundsGood-0.1.2-x86_64.flatpak
+cp SoundsGood-0.1.2-x86_64.flatpak SoundsGood-x86_64.flatpak
+```
+
+Instalar a ultima release publicada:
+
+```bash
+wget https://github.com/N1ghthill/soundsgood/releases/latest/download/SoundsGood-x86_64.flatpak
+flatpak install --user ./SoundsGood-x86_64.flatpak
 flatpak run io.github.n1ghthill.soundsgood
 ```
 
@@ -57,7 +65,9 @@ sources:
     path: .
 ```
 
-Para submissao ao Flathub, substitua essa fonte por uma fonte versionada, de preferencia uma tag assinada ou um commit fixo, por exemplo:
+Para um build reproduzivel fora da arvore local, substitua essa fonte por uma
+fonte versionada, de preferencia uma tag assinada ou um commit fixo, por
+exemplo:
 
 ```yaml
 sources:
@@ -104,11 +114,13 @@ O manifest concede:
 
 Se o app passar a depender somente de portal/document portal para pastas escolhidas pelo usuario, a permissao `xdg-music:ro` pode ser reavaliada.
 
-## Antes do Flathub
+## Checklist de Release
 
 - Criar release/tag versionada.
-- Confirmar que `https://github.com/N1ghthill/soundsgood` continua acessivel antes da validacao final sem `--no-net`.
-- Substituir `type: dir` por fonte versionada no manifest.
-- Gerar screenshots reais da janela do app para o metainfo.
+- Buildar e instalar o Flatpak localmente.
+- Gerar o bundle versionado.
+- Gerar ou copiar o bundle com nome estavel `SoundsGood-x86_64.flatpak`.
+- Publicar os dois assets na GitHub Release.
+- Confirmar que `releases/latest/download/SoundsGood-x86_64.flatpak` baixa a versao esperada.
+- Validar os metadados AppStream.
 - Rodar `flatpak-builder-lint`.
-- Revisar a politica atual do Flathub sobre submissao e conteudo assistido por IA antes de abrir qualquer PR.
