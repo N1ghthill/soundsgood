@@ -1,7 +1,35 @@
 # Flatpak Distribution
 
-O formato de distribuicao atual do SoundsGood e um bundle Flatpak publicado em
-GitHub Releases. O app nao depende de listagem no Flathub para ser instalado.
+O formato de distribuicao atual do SoundsGood e um repositorio Flatpak proprio,
+hospedado via GitHub Pages. O app nao depende de listagem no Flathub para ser
+instalado ou atualizado.
+
+## Instalar pelo repositorio
+
+O usuario adiciona o remote uma vez:
+
+```bash
+flatpak remote-add --user --if-not-exists soundsgood https://n1ghthill.github.io/soundsgood/soundsgood.flatpakrepo
+```
+
+Depois instala o app:
+
+```bash
+flatpak install --user soundsgood io.github.n1ghthill.soundsgood
+flatpak run io.github.n1ghthill.soundsgood
+```
+
+Atualizacoes passam a vir pelo Flatpak:
+
+```bash
+flatpak update --user io.github.n1ghthill.soundsgood
+```
+
+Para migrar uma instalacao antiga feita por bundle:
+
+```bash
+flatpak install --user --reinstall soundsgood io.github.n1ghthill.soundsgood//stable
+```
 
 ## App ID
 
@@ -56,6 +84,28 @@ wget https://github.com/N1ghthill/soundsgood/releases/latest/download/SoundsGood
 flatpak install --user ./SoundsGood-x86_64.flatpak
 flatpak run io.github.n1ghthill.soundsgood
 ```
+
+## Publicar o repositorio Flatpak
+
+O repositorio remoto e assinado com a chave GPG local:
+
+```text
+452731C50C39B6D4
+```
+
+Para atualizar o repositorio hospedado no GitHub Pages:
+
+```bash
+scripts/publish-flatpak-repo.sh
+```
+
+O script:
+
+- builda o app com `flatpak-builder`;
+- exporta para um repositorio OSTree assinado;
+- gera static deltas;
+- gera `soundsgood.flatpakrepo` com a chave publica embutida;
+- publica a branch `gh-pages`.
 
 O manifest local usa:
 
@@ -118,6 +168,8 @@ Se o app passar a depender somente de portal/document portal para pastas escolhi
 
 - Criar release/tag versionada.
 - Buildar e instalar o Flatpak localmente.
+- Publicar o repositorio Flatpak com `scripts/publish-flatpak-repo.sh`.
+- Testar `flatpak update --user io.github.n1ghthill.soundsgood`.
 - Gerar o bundle versionado.
 - Gerar ou copiar o bundle com nome estavel `SoundsGood-x86_64.flatpak`.
 - Publicar os dois assets na GitHub Release.

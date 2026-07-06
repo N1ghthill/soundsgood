@@ -1,6 +1,7 @@
 /.flatpak-builder/
 /.deepcode/
 /build-flatpak/
+/build-flatpak-repo/
 /builddir/
 /dist/
 /repo/

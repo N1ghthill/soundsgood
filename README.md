@@ -41,20 +41,23 @@ integration.
 
 ## Installation
 
-SoundsGood is distributed as a Flatpak bundle through GitHub Releases. It does
-not need to be listed on Flathub to be installed.
+SoundsGood is distributed through its own signed Flatpak repository. Add the
+repository once, then install the app:
 
 ```bash
-wget https://github.com/N1ghthill/soundsgood/releases/latest/download/SoundsGood-x86_64.flatpak
-flatpak install --user ./SoundsGood-x86_64.flatpak
+flatpak remote-add --user --if-not-exists soundsgood https://n1ghthill.github.io/soundsgood/soundsgood.flatpakrepo
+flatpak install --user soundsgood io.github.n1ghthill.soundsgood
 flatpak run io.github.n1ghthill.soundsgood
 ```
 
-To update later, download the latest bundle again and reinstall it:
+Updates are handled by Flatpak:
 
 ```bash
-flatpak install --user --reinstall ./SoundsGood-x86_64.flatpak
+flatpak update --user io.github.n1ghthill.soundsgood
 ```
+
+Versioned Flatpak bundles are also available on
+[GitHub Releases](https://github.com/N1ghthill/soundsgood/releases).
 
 ## Development
 
