@@ -24,9 +24,6 @@ integration.
 
 ![Search view](docs/screenshots/search.png)
 
-The screenshots use sanitized album artwork placeholders to keep the repository
-safe to publish and redistribute.
-
 ## Features
 
 - Browse local music by albums, artists, and songs.
