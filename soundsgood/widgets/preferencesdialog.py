@@ -42,6 +42,40 @@ class PreferencesDialog:
         appearance_group.add(theme_row)
         page.add(appearance_group)
 
+        playback_group = Adw.PreferencesGroup(title=_("Playback"))
+
+        self._notifications_switch = Gtk.Switch()
+        self._notifications_switch.set_valign(Gtk.Align.CENTER)
+        self._notifications_switch.set_active(self._settings.get_boolean("enable-notifications"))
+        self._notifications_switch.connect(
+            "notify::active",
+            self._on_notifications_toggled,
+        )
+        notifications_row = Adw.ActionRow(
+            title=_("Track Notifications"),
+            subtitle=_("Show a desktop notification when a new song starts"),
+        )
+        notifications_row.add_suffix(self._notifications_switch)
+        notifications_row.set_activatable_widget(self._notifications_switch)
+        playback_group.add(notifications_row)
+
+        self._inhibit_switch = Gtk.Switch()
+        self._inhibit_switch.set_valign(Gtk.Align.CENTER)
+        self._inhibit_switch.set_active(self._settings.get_boolean("inhibit-suspend"))
+        self._inhibit_switch.connect(
+            "notify::active",
+            self._on_inhibit_toggled,
+        )
+        inhibit_row = Adw.ActionRow(
+            title=_("Prevent Suspend"),
+            subtitle=_("Keep the session awake while music is playing"),
+        )
+        inhibit_row.add_suffix(self._inhibit_switch)
+        inhibit_row.set_activatable_widget(self._inhibit_switch)
+        playback_group.add(inhibit_row)
+
+        page.add(playback_group)
+
         group = Adw.PreferencesGroup(title=_("Music Library"))
 
         self._folder_row = Adw.ActionRow(
@@ -77,9 +111,18 @@ class PreferencesDialog:
 
         self._settings.set_string("music-dir", path)
         self._folder_row.set_subtitle(path)
-        self._app.props.library.scan(path)
+        self._app.props.library.scan(path, force=True)
 
     def _on_theme_selected(self, dropdown, _param):
         scheme = "dark" if dropdown.get_selected() == 1 else "light"
         self._settings.set_string("color-scheme", scheme)
         self._app.apply_color_scheme()
+
+    def _on_notifications_toggled(self, switch, _param):
+        self._settings.set_boolean("enable-notifications", switch.get_active())
+        if not switch.get_active():
+            self._app.withdraw_notification("now-playing")
+
+    def _on_inhibit_toggled(self, switch, _param):
+        self._settings.set_boolean("inhibit-suspend", switch.get_active())
+        self._app.sync_desktop_integration()

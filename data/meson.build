@@ -44,13 +44,3 @@ install_data(
     'icons' / 'io.github.n1ghthill.soundsgood.svg',
     install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', 'scalable', 'apps')
 )
-
-# Resource bundle
-gnome.compile_resources(
-    APPLICATION_ID,
-    'soundsgood.gresource.xml',
-    source_dir: '.',
-    gresource_bundle: true,
-    install: true,
-    install_dir: PKGDATA_DIR
-)

@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            appstream \
+            desktop-file-utils \
+            gettext \
+            libadwaita-1-dev \
+            libgirepository1.0-dev \
+            gir1.2-adw-1 \
+            gir1.2-gst-plugins-base-1.0 \
+            gir1.2-gstreamer-1.0 \
+            gir1.2-gtk-4.0 \
+            gstreamer1.0-plugins-base \
+            gstreamer1.0-plugins-good \
+            meson \
+            ninja-build \
+            python3-gi
+
+      - name: Compile Python sources
+        run: python3 -m py_compile soundsgood/*.py soundsgood/views/*.py soundsgood/widgets/*.py tests/*.py
+
+      - name: Run unit tests
+        run: python3 -m unittest discover -s tests
+
+      - name: Configure Meson
+        run: meson setup builddir
+
+      - name: Build
+        run: meson compile -C builddir
+
+      - name: Run Meson tests
+        run: meson test -C builddir --print-errorlogs
+
+      - name: Validate desktop file
+        run: desktop-file-validate builddir/data/io.github.n1ghthill.soundsgood.desktop
+
+      - name: Validate AppStream metadata
+        run: appstreamcli validate --no-net builddir/data/io.github.n1ghthill.soundsgood.metainfo.xml

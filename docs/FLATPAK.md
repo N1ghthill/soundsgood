@@ -161,6 +161,7 @@ O manifest concede:
 - PulseAudio para reproducao.
 - `xdg-music:ro` para escanear musicas locais.
 - `org.mpris.MediaPlayer2.SoundsGood` para publicar controles MPRIS.
+- Notificacoes e inibicao de suspensao usam as APIs de aplicacao/portais do desktop.
 
 Se o app passar a depender somente de portal/document portal para pastas escolhidas pelo usuario, a permissao `xdg-music:ro` pode ser reavaliada.
 

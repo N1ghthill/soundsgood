@@ -22,6 +22,8 @@ from gi.repository import GObject, GLib, Gio, Gst, GstPbutils
 from soundsgood.models import Song, Album, Artist, LibraryState
 
 
+CACHE_VERSION = 2
+
 # Supported audio formats
 AUDIO_EXTENSIONS = {
     ".mp3", ".flac", ".ogg", ".wav", ".m4a", ".aac",
@@ -75,7 +77,7 @@ class Library(GObject.GObject):
     def artists(self) -> Gio.ListStore:
         return self._artists
 
-    def scan(self, directory: Optional[str] = None):
+    def scan(self, directory: Optional[str] = None, force: bool = False):
         """Scan a directory for music files."""
         if self._is_scanning:
             return
@@ -92,6 +94,18 @@ class Library(GObject.GObject):
             return
 
         self._current_directory = directory
+
+        if not force:
+            cache = self._load_cache(directory)
+            if "songs" in cache and self._cache_matches_filesystem(cache):
+                self._setup_cached_monitors(directory, cache)
+                songs = [
+                    self._song_from_record(record)
+                    for record in cache.get("songs", [])
+                ]
+                self._apply_scan_results(songs)
+                return
+
         self._setup_monitors(directory)
         self._is_scanning = True
         self._set_scan_state(LibraryState.SCANNING, _("Scanning music..."))
@@ -109,11 +123,19 @@ class Library(GObject.GObject):
             if record.get("path")
         }
         next_records = []
+        directory_records = []
         cache_dirty = False
 
         for root, dirs, files in os.walk(directory):
             # Skip hidden directories
             dirs[:] = [d for d in dirs if not d.startswith(".")]
+            root_stat = self._file_stat(root)
+            if root_stat is not None:
+                directory_records.append({
+                    "path": root,
+                    "mtime_ns": root_stat["mtime_ns"],
+                    "size": root_stat["size"],
+                })
 
             for filename in sorted(files):
                 ext = os.path.splitext(filename)[1].lower()
@@ -136,10 +158,14 @@ class Library(GObject.GObject):
             if song:
                 next_records.append(self._record_from_song(song, filepath, stat))
 
+        if cache.get("version") != CACHE_VERSION or "songs" not in cache:
+            cache_dirty = True
+        if cache.get("directories") != directory_records:
+            cache_dirty = True
         if set(cached_records) != set(audio_files):
             cache_dirty = True
         if cache_dirty:
-            self._save_cache(directory, next_records)
+            self._save_cache(directory, next_records, directory_records)
 
         GLib.idle_add(
             self._apply_scan_results,
@@ -167,6 +193,33 @@ class Library(GObject.GObject):
             monitor.cancel()
         self._monitors.clear()
 
+    def _setup_cached_monitors(self, directory: str, cache: dict):
+        self._clear_monitors()
+
+        paths = {directory}
+        for record in cache.get("directories", []):
+            path = record.get("path")
+            if path:
+                paths.add(path)
+        for record in cache.get("songs", []):
+            path = record.get("path")
+            if path:
+                paths.add(os.path.dirname(path))
+
+        for path in sorted(paths):
+            if not os.path.isdir(path):
+                continue
+            try:
+                monitor = Gio.File.new_for_path(path).monitor_directory(
+                    Gio.FileMonitorFlags.NONE,
+                    None,
+                )
+            except GLib.Error:
+                continue
+
+            monitor.connect("changed", self._on_directory_changed)
+            self._monitors.append(monitor)
+
     def _on_directory_changed(self, _monitor, _file, _other_file, event_type):
         ignored_events = {
             Gio.FileMonitorEvent.ATTRIBUTE_CHANGED,
@@ -187,7 +240,7 @@ class Library(GObject.GObject):
 
         self._rescan_source_id = 0
         if self._current_directory:
-            self.scan(self._current_directory)
+            self.scan(self._current_directory, force=True)
 
         return GLib.SOURCE_REMOVE
 
@@ -456,11 +509,17 @@ class Library(GObject.GObject):
 
         return cache
 
-    def _save_cache(self, directory: str, records: list[dict]):
+    def _save_cache(
+        self,
+        directory: str,
+        records: list[dict],
+        directory_records: list[dict] | None = None,
+    ):
         cache_path = self._cache_path()
         data = {
-            "version": 1,
+            "version": CACHE_VERSION,
             "directory": directory,
+            "directories": directory_records or [],
             "songs": records,
         }
 
@@ -489,6 +548,26 @@ class Library(GObject.GObject):
             record.get("mtime_ns") == stat["mtime_ns"]
             and record.get("size") == stat["size"]
         )
+
+    def _cache_matches_filesystem(self, cache: dict) -> bool:
+        if cache.get("version") != CACHE_VERSION:
+            return False
+        if "directories" not in cache:
+            return False
+
+        for record in cache.get("directories", []):
+            path = record.get("path")
+            stat = self._file_stat(path) if path else None
+            if stat is None or not self._record_matches_file(record, stat):
+                return False
+
+        for record in cache.get("songs", []):
+            path = record.get("path")
+            stat = self._file_stat(path) if path else None
+            if stat is None or not self._record_matches_file(record, stat):
+                return False
+
+        return True
 
     def _record_from_song(self, song: Song, filepath: str, stat: dict) -> dict:
         return {

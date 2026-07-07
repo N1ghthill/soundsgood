@@ -23,6 +23,13 @@ def format_duration(seconds: int) -> str:
     return f"{minutes}:{seconds:02d}"
 
 
+def set_accessible_label(widget, label: str):
+    try:
+        widget.update_property([Gtk.AccessibleProperty.LABEL], [label])
+    except (AttributeError, TypeError):
+        pass
+
+
 class SongRow(Gtk.ListBoxRow):
     """Reusable row for a song."""
 
@@ -33,6 +40,7 @@ class SongRow(Gtk.ListBoxRow):
         self._player = player
         self.set_activatable(True)
         self.set_selectable(True)
+        set_accessible_label(self, song.props.title)
 
         gesture = Gtk.GestureClick()
         gesture.set_button(0)
@@ -49,6 +57,7 @@ class SongRow(Gtk.ListBoxRow):
             self._play_button = Gtk.Button(icon_name="media-playback-start-symbolic")
             self._play_button.add_css_class("flat")
             self._play_button.set_tooltip_text("Play")
+            set_accessible_label(self._play_button, "Play")
             self._play_button.connect("clicked", self._on_play_clicked)
             box.append(self._play_button)
         else:
@@ -89,6 +98,7 @@ class SongRow(Gtk.ListBoxRow):
         box.append(text_box)
 
         duration = Gtk.Label(label=format_duration(song.props.duration))
+        duration.set_width_chars(6)
         duration.add_css_class("dim-label")
         box.append(duration)
 
@@ -120,7 +130,10 @@ class SongRow(Gtk.ListBoxRow):
             self.remove_css_class("playing")
 
         if self._play_button:
+            label = "Pause" if is_current and is_playing else "Play"
             self._play_button.set_icon_name(
                 "media-playback-pause-symbolic"
                 if is_current and is_playing else "media-playback-start-symbolic"
             )
+            self._play_button.set_tooltip_text(label)
+            set_accessible_label(self._play_button, label)

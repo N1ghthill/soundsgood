@@ -16,7 +16,7 @@ from gi.repository import Adw, GLib, GObject, Gdk, Gio, Gtk, Gst
 from soundsgood.player import Player
 from soundsgood.library import Library
 from soundsgood.mpris import MprisService
-from soundsgood.models import RepeatMode
+from soundsgood.models import PlayState, RepeatMode
 from soundsgood.views.albumsview import AlbumsView
 from soundsgood.views.artistsview import ArtistsView
 from soundsgood.views.songsview import SongsView
@@ -38,6 +38,8 @@ class MemorySettings:
         "window-maximized": False,
         "music-dir": "",
         "color-scheme": "light",
+        "enable-notifications": True,
+        "inhibit-suspend": True,
     }
 
     def __init__(self):
@@ -91,6 +93,8 @@ class SoundsGoodApplication(Adw.Application):
         self._window = None
         self._settings = self._create_settings()
         self._settings_changed_handler = None
+        self._inhibit_cookie = 0
+        self._last_notification_url = ""
 
         # Initialize GStreamer
         Gst.init(None)
@@ -99,6 +103,8 @@ class SoundsGoodApplication(Adw.Application):
         self._library = Library(self)
         self._player = Player(self)
         self._mpris = MprisService(self)
+        self._player.connect("notify::current-song", self._on_player_activity_changed)
+        self._player.connect("notify::play-state", self._on_player_activity_changed)
 
         # Views
         self._albums_view = None
@@ -207,6 +213,51 @@ class SoundsGoodApplication(Adw.Application):
         else:
             style_manager.set_color_scheme(Adw.ColorScheme.FORCE_LIGHT)
 
+    def sync_desktop_integration(self):
+        self._sync_suspend_inhibition()
+
+    def _on_player_activity_changed(self, *_args):
+        self._sync_suspend_inhibition()
+        self._send_now_playing_notification()
+
+    def _sync_suspend_inhibition(self):
+        should_inhibit = (
+            self._settings.get_boolean("inhibit-suspend")
+            and self._player.props.play_state == int(PlayState.PLAYING)
+            and self._player.props.current_song is not None
+            and self._window is not None
+        )
+
+        if should_inhibit and not self._inhibit_cookie:
+            self._inhibit_cookie = self.inhibit(
+                self._window,
+                Gtk.ApplicationInhibitFlags.SUSPEND,
+                _("Music is playing"),
+            )
+        elif not should_inhibit and self._inhibit_cookie:
+            self.uninhibit(self._inhibit_cookie)
+            self._inhibit_cookie = 0
+
+    def _send_now_playing_notification(self):
+        song = self._player.props.current_song
+        if self._player.props.play_state != int(PlayState.PLAYING):
+            self.withdraw_notification("now-playing")
+            return
+        if song is None or not self._settings.get_boolean("enable-notifications"):
+            return
+        if song.props.url and song.props.url == self._last_notification_url:
+            return
+
+        notification = Gio.Notification.new(song.props.title or _("Now Playing"))
+        body_parts = [part for part in (song.props.artist, song.props.album) if part]
+        if body_parts:
+            notification.set_body(" - ".join(body_parts))
+        if song.props.thumbnail:
+            notification.set_icon(Gio.FileIcon.new(Gio.File.new_for_path(song.props.thumbnail)))
+
+        self._last_notification_url = song.props.url
+        self.send_notification("now-playing", notification)
+
     def do_startup(self):
         Adw.Application.do_startup(self)
         self.apply_color_scheme()
@@ -251,9 +302,14 @@ class SoundsGoodApplication(Adw.Application):
 
         # Start library scan
         self._library.scan()
+        self._sync_suspend_inhibition()
         self._window.present()
 
     def do_shutdown(self):
+        if self._inhibit_cookie:
+            self.uninhibit(self._inhibit_cookie)
+            self._inhibit_cookie = 0
+        self.withdraw_notification("now-playing")
         self._mpris.shutdown()
         Adw.Application.do_shutdown(self)
 

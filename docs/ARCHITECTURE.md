@@ -60,6 +60,7 @@ Implementacao inicial aceitavel:
 - Agrupamento em memoria com `Gio.ListStore`.
 - Capas por tags embutidas e por arquivos comuns na pasta do album.
 - Cache persistente em `$XDG_CACHE_HOME/soundsgood/library.json`, invalidado por `mtime_ns` e tamanho.
+- Reabertura rapida a partir do indice em cache quando arquivos e diretorios indexados continuam inalterados.
 - Monitoramento com `Gio.FileMonitor` e debounce para rescan quando a pasta de musicas muda.
 - Aplicacao de snapshot por diff de URI no modelo de faixas.
 - Atualizacao incremental dos agregados de albums/artistas quando uma faixa e adicionada, removida ou substituida.
@@ -79,7 +80,7 @@ Responsabilidades:
 - Gerenciar fila.
 - Implementar anterior/proxima.
 - Implementar modos de repeticao e aleatorio.
-- Emitir notificacoes de mudanca de faixa, estado e posicao.
+- Emitir sinais de mudanca de faixa, estado e posicao.
 - Reiniciar o `playbin` antes de trocar a URI da faixa atual.
 
 API minima sugerida:
@@ -160,12 +161,12 @@ Busca:
 
 ## Recursos GTK
 
-Estado atual: o MVP usa UI programatica em Python. Os templates `.ui` antigos foram removidos para evitar divergencia entre runtime e recursos instalados.
+Estado atual: o MVP usa UI programatica em Python. Os templates `.ui` antigos foram removidos para evitar divergencia entre runtime e recursos instalados. O bundle `data/soundsgood.gresource.xml` tambem foi removido porque estava vazio.
 
 Se templates `.ui` forem reintroduzidos:
 
 - Atualizar `data/meson.build`.
-- Atualizar `data/soundsgood.gresource.xml`.
+- Recriar/atualizar `data/soundsgood.gresource.xml`.
 - Garantir que o nome do template corresponda ao `__gtype_name__` da classe Python.
 
 ## GSettings
@@ -179,6 +180,9 @@ Configuracoes atuais:
 - `window-height`
 - `window-maximized`
 - `music-dir`
+- `color-scheme`
+- `enable-notifications`
+- `inhibit-suspend`
 
 Use GSettings para preferencias persistentes. Nao use arquivos ad hoc de configuracao enquanto GSettings resolver o caso.
 
@@ -206,4 +210,5 @@ Dependencias a avaliar:
 - A UI deve seguir padroes GNOME/libadwaita.
 - Antes de adicionar features novas, a aplicacao precisa inicializar, listar musicas e tocar uma faixa.
 - MPRIS usa ID de faixa deterministico derivado da URI por SHA-256.
-- O app ainda percorre a arvore de musicas no scan; o cache evita redescoberta de metadados, mas nao substitui um indice persistente completo.
+- O app reabre pelo indice em cache quando os arquivos conhecidos e diretorios indexados nao mudaram; quando ha mudanca detectada, troca de pasta ou cache antigo, faz rescan completo.
+- Notificacoes e inibicao de suspensao ficam em `Application`, reagindo ao estado publico do `Player`.

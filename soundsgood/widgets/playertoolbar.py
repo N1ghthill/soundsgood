@@ -9,17 +9,17 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Pango
 
 from soundsgood.models import PlayState, RepeatMode
-from soundsgood.widgets.songrow import format_duration
+from soundsgood.widgets.songrow import format_duration, set_accessible_label
 
 
 class PlayerToolbar(Gtk.Box):
     """Bottom playback controls."""
 
     def __init__(self, application):
-        super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+        super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self._app = application
         self._player = application.props.player
         self._updating = False
@@ -31,58 +31,75 @@ class PlayerToolbar(Gtk.Box):
         self.set_margin_end(12)
         self.set_visible(False)
 
+        controls_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        controls_row.set_hexpand(True)
+        self.append(controls_row)
+
         self._previous_button = Gtk.Button(icon_name="media-skip-backward-symbolic")
         self._previous_button.set_tooltip_text(_("Previous"))
+        set_accessible_label(self._previous_button, _("Previous"))
         self._previous_button.connect("clicked", lambda *_: self._player.previous())
-        self.append(self._previous_button)
+        controls_row.append(self._previous_button)
 
         self._play_button = Gtk.Button(icon_name="media-playback-start-symbolic")
         self._play_button.add_css_class("suggested-action")
         self._play_button.set_tooltip_text(_("Play/Pause"))
+        set_accessible_label(self._play_button, _("Play/Pause"))
         self._play_button.connect("clicked", lambda *_: self._player.play_pause())
-        self.append(self._play_button)
+        controls_row.append(self._play_button)
 
         self._next_button = Gtk.Button(icon_name="media-skip-forward-symbolic")
         self._next_button.set_tooltip_text(_("Next"))
+        set_accessible_label(self._next_button, _("Next"))
         self._next_button.connect("clicked", lambda *_: self._player.next())
-        self.append(self._next_button)
+        controls_row.append(self._next_button)
 
         self._cover = Gtk.Image(icon_name="audio-x-generic-symbolic")
         self._cover.set_pixel_size(48)
-        self.append(self._cover)
+        controls_row.append(self._cover)
 
         info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        info_box.set_size_request(220, -1)
+        info_box.set_hexpand(True)
+        info_box.set_size_request(140, -1)
         self._title_label = Gtk.Label(label=_("Not playing"), xalign=0)
-        self._title_label.set_ellipsize(3)
+        self._title_label.set_ellipsize(Pango.EllipsizeMode.END)
         self._artist_label = Gtk.Label(xalign=0)
-        self._artist_label.set_ellipsize(3)
+        self._artist_label.set_ellipsize(Pango.EllipsizeMode.END)
         self._artist_label.add_css_class("caption")
         self._artist_label.add_css_class("dim-label")
         info_box.append(self._title_label)
         info_box.append(self._artist_label)
-        self.append(info_box)
+        controls_row.append(info_box)
 
         self._position_label = Gtk.Label(label="0:00")
+        self._position_label.set_width_chars(6)
         self._position_label.add_css_class("caption")
         self._position_label.add_css_class("dim-label")
-        self.append(self._position_label)
+
+        progress_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        progress_row.set_hexpand(True)
+        self.append(progress_row)
+        progress_row.append(self._position_label)
 
         self._progress = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 1, 1)
         self._progress.set_draw_value(False)
         self._progress.set_hexpand(True)
+        self._progress.set_tooltip_text(_("Seek"))
+        set_accessible_label(self._progress, _("Seek"))
         self._progress.connect("change-value", self._on_seek)
-        self.append(self._progress)
+        progress_row.append(self._progress)
 
         self._duration_label = Gtk.Label(label="--:--")
+        self._duration_label.set_width_chars(6)
         self._duration_label.add_css_class("caption")
         self._duration_label.add_css_class("dim-label")
-        self.append(self._duration_label)
+        progress_row.append(self._duration_label)
 
         self._repeat_button = Gtk.Button(icon_name="media-playlist-consecutive-symbolic")
         self._repeat_button.set_tooltip_text(_("Repeat mode"))
+        set_accessible_label(self._repeat_button, _("Repeat mode"))
         self._repeat_button.connect("clicked", self._on_repeat_clicked)
-        self.append(self._repeat_button)
+        controls_row.append(self._repeat_button)
 
         self._queue_popover = Gtk.Popover()
         self._queue_popover.set_size_request(420, 360)
@@ -99,6 +116,7 @@ class PlayerToolbar(Gtk.Box):
         queue_header.append(queue_title)
         clear_button = Gtk.Button(icon_name="edit-clear-symbolic")
         clear_button.set_tooltip_text(_("Clear queue"))
+        set_accessible_label(clear_button, _("Clear queue"))
         clear_button.connect("clicked", self._on_clear_queue)
         queue_header.append(clear_button)
         queue_box.append(queue_header)
@@ -117,15 +135,18 @@ class PlayerToolbar(Gtk.Box):
 
         self._queue_button = Gtk.MenuButton(icon_name="view-list-symbolic")
         self._queue_button.set_tooltip_text(_("Queue"))
+        set_accessible_label(self._queue_button, _("Queue"))
         self._queue_button.set_popover(self._queue_popover)
-        self.append(self._queue_button)
+        controls_row.append(self._queue_button)
 
         self._volume = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 1, 0.01)
         self._volume.set_draw_value(False)
-        self._volume.set_size_request(110, -1)
+        self._volume.set_size_request(96, -1)
+        self._volume.set_tooltip_text(_("Volume"))
+        set_accessible_label(self._volume, _("Volume"))
         self._volume.set_value(self._player.props.volume)
         self._volume.connect("value-changed", self._on_volume_changed)
-        self.append(self._volume)
+        controls_row.append(self._volume)
 
         for prop in (
             "current-song",
@@ -233,20 +254,24 @@ class PlayerToolbar(Gtk.Box):
         labels.set_hexpand(True)
         title = Gtk.Label(label=song.props.title, xalign=0)
         title.add_css_class("song-title")
+        title.set_ellipsize(Pango.EllipsizeMode.END)
         labels.append(title)
         context = Gtk.Label(label=f"{song.props.artist} - {song.props.album}", xalign=0)
         context.add_css_class("caption")
         context.add_css_class("dim-label")
+        context.set_ellipsize(Pango.EllipsizeMode.END)
         labels.append(context)
         box.append(labels)
 
         duration = Gtk.Label(label=format_duration(song.props.duration))
+        duration.set_width_chars(6)
         duration.add_css_class("dim-label")
         box.append(duration)
 
         remove_button = Gtk.Button(icon_name="list-remove-symbolic")
         remove_button.add_css_class("flat")
         remove_button.set_tooltip_text(_("Remove from queue"))
+        set_accessible_label(remove_button, _("Remove from queue"))
         remove_button.queue_index = index
         remove_button.connect("clicked", self._on_remove_queue_item)
         box.append(remove_button)

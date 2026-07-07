@@ -53,6 +53,16 @@
       <summary>Color scheme</summary>
       <description>The application color scheme selected by the user</description>
     </key>
+    <key name="enable-notifications" type="b">
+      <default>true</default>
+      <summary>Track notifications</summary>
+      <description>Whether to show a desktop notification when a new song starts</description>
+    </key>
+    <key name="inhibit-suspend" type="b">
+      <default>true</default>
+      <summary>Prevent suspend while playing</summary>
+      <description>Whether to inhibit session suspend while music is playing</description>
+    </key>
   </schema>
 
 </schemalist>

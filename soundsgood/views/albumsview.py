@@ -10,10 +10,10 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Adw, Gtk
+from gi.repository import Adw, Gtk, Pango
 
 from soundsgood.models import LibraryState
-from soundsgood.widgets.songrow import SongRow
+from soundsgood.widgets.songrow import SongRow, set_accessible_label
 
 
 class AlbumsView(Adw.Bin):
@@ -30,7 +30,7 @@ class AlbumsView(Adw.Bin):
 
         self._flowbox = Gtk.FlowBox()
         self._flowbox.set_selection_mode(Gtk.SelectionMode.NONE)
-        self._flowbox.set_min_children_per_line(2)
+        self._flowbox.set_min_children_per_line(1)
         self._flowbox.set_max_children_per_line(8)
         self._flowbox.set_column_spacing(12)
         self._flowbox.set_row_spacing(18)
@@ -99,6 +99,7 @@ class AlbumsView(Adw.Bin):
         button.add_css_class("flat")
         button.album = album
         button.set_tooltip_text(_("Open album"))
+        set_accessible_label(button, _("Open album"))
         button.connect("clicked", self._on_album_clicked)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
@@ -113,13 +114,14 @@ class AlbumsView(Adw.Bin):
 
         title = Gtk.Label(label=album.props.title)
         title.set_wrap(True)
-        title.set_ellipsize(3)
+        title.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
+        title.set_ellipsize(Pango.EllipsizeMode.END)
         title.set_max_width_chars(22)
         title.add_css_class("heading")
         box.append(title)
 
         artist = Gtk.Label(label=album.props.artist)
-        artist.set_ellipsize(3)
+        artist.set_ellipsize(Pango.EllipsizeMode.END)
         artist.set_max_width_chars(22)
         artist.add_css_class("dim-label")
         box.append(artist)
@@ -152,6 +154,7 @@ class AlbumsView(Adw.Bin):
 
         back_button = Gtk.Button(icon_name="go-previous-symbolic")
         back_button.set_tooltip_text(_("Back to albums"))
+        set_accessible_label(back_button, _("Back to albums"))
         back_button.set_halign(Gtk.Align.START)
         back_button.connect("clicked", lambda *_: self._stack.set_visible_child_name("grid"))
         self._album_page.append(back_button)
@@ -167,12 +170,16 @@ class AlbumsView(Adw.Bin):
 
         metadata = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         metadata.set_valign(Gtk.Align.CENTER)
+        metadata.set_hexpand(True)
         title = Gtk.Label(label=album.props.title, xalign=0)
         title.set_wrap(True)
+        title.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
         title.add_css_class("title-1")
         metadata.append(title)
 
         artist = Gtk.Label(label=album.props.artist, xalign=0)
+        artist.set_wrap(True)
+        artist.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
         artist.add_css_class("heading")
         artist.add_css_class("dim-label")
         metadata.append(artist)
@@ -187,6 +194,7 @@ class AlbumsView(Adw.Bin):
 
         play_button = Gtk.Button(label=_("Play"))
         play_button.set_icon_name("media-playback-start-symbolic")
+        set_accessible_label(play_button, _("Play album"))
         play_button.add_css_class("suggested-action")
         play_button.set_halign(Gtk.Align.START)
         play_button.connect("clicked", lambda *_: self._play_album(album))
@@ -201,20 +209,7 @@ class AlbumsView(Adw.Bin):
         songs_list.connect("row-activated", self._on_album_song_activated)
         songs_list.album = album
 
-        songs_model = album.props.songs
-        for index in range(songs_model.get_n_items()):
-            song = songs_model.get_item(index)
-            songs_list.append(
-                SongRow(
-                    song,
-                    show_context=False,
-                    player=self._player,
-                    on_activate=lambda selected, current_album=album: self._play_album_song(
-                        current_album,
-                        selected,
-                    ),
-                )
-            )
+        self._append_song_rows(songs_list, album)
 
         self._album_page.append(songs_list)
         self._stack.set_visible_child_name("album")
@@ -235,6 +230,50 @@ class AlbumsView(Adw.Bin):
         album = getattr(_listbox, "album", None)
         if song and album:
             self._play_album_song(album, song)
+
+    def _append_song_rows(self, songs_list, album):
+        songs_model = album.props.songs
+        show_disc_headers = self._should_show_disc_headers(songs_model)
+        current_disc = None
+        for index in range(songs_model.get_n_items()):
+            song = songs_model.get_item(index)
+            disc_number = song.props.disc_number or 1
+            if show_disc_headers and disc_number != current_disc:
+                songs_list.append(self._disc_header(disc_number))
+                current_disc = disc_number
+
+            songs_list.append(
+                SongRow(
+                    song,
+                    show_context=False,
+                    player=self._player,
+                    on_activate=lambda selected, current_album=album: self._play_album_song(
+                        current_album,
+                        selected,
+                    ),
+                )
+            )
+
+    def _should_show_disc_headers(self, songs_model) -> bool:
+        discs = {
+            songs_model.get_item(index).props.disc_number or 1
+            for index in range(songs_model.get_n_items())
+        }
+        return len(discs) > 1 or any(disc > 1 for disc in discs)
+
+    def _disc_header(self, disc_number: int):
+        row = Gtk.ListBoxRow()
+        row.set_selectable(False)
+        row.set_activatable(False)
+        label = Gtk.Label(label=_("Disc %d") % disc_number, xalign=0)
+        label.add_css_class("heading")
+        label.add_css_class("dim-label")
+        label.set_margin_top(12)
+        label.set_margin_bottom(6)
+        label.set_margin_start(12)
+        label.set_margin_end(12)
+        row.set_child(label)
+        return row
 
     def _clear_box(self, box):
         child = box.get_first_child()

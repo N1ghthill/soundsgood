@@ -28,11 +28,13 @@ meson test -C builddir
 - Em Preferences, escolher uma pasta inexistente e confirmar toast/estado de erro.
 - Adicionar ou remover um arquivo de musica e aguardar o rescan com debounce.
 - Confirmar que album/artista/contagens mudam sem duplicatas.
+- Fechar e reabrir o app sem alterar a pasta de musicas e confirmar que a biblioteca aparece pelo cache sem espera longa de varredura.
 
 ## Navegacao
 
 - Abrir um album pelo grid.
 - Confirmar capa, artista, ano quando existir, contagem e faixas ordenadas.
+- Confirmar que albums com mais de um disco mostram separadores `Disc N`.
 - Abrir um artista e confirmar albums agrupados.
 - Buscar por titulo, artista e album.
 - Buscar ignorando acentos, por exemplo `musica` para `Música`.
@@ -46,6 +48,9 @@ meson test -C builddir
 - Testar repeat none, repeat all, repeat song e shuffle.
 - Abrir a fila, selecionar uma faixa, remover item individual e limpar fila.
 - Confirmar que a faixa atual fica destacada nas listas.
+- Confirmar que uma notificacao aparece quando uma nova faixa comeca, se a preferencia estiver ativa.
+- Confirmar que a sessao nao entra em suspensao enquanto ha musica tocando, se a preferencia estiver ativa.
+- Alternar as preferencias de notificacao e prevencao de suspensao e confirmar que os comportamentos mudam sem reiniciar o app.
 
 ## MPRIS
 

@@ -10,7 +10,7 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Adw, Gtk
+from gi.repository import Adw, Gtk, Pango
 
 from soundsgood.widgets.songrow import SongRow
 
@@ -118,7 +118,9 @@ class SearchView(Adw.Bin):
         box.append(image)
 
         labels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        labels.set_hexpand(True)
         name = Gtk.Label(label=artist.props.name, xalign=0)
+        name.set_ellipsize(Pango.EllipsizeMode.END)
         labels.append(name)
         summary = Gtk.Label(
             label=_("%d albums, %d songs") % (
@@ -153,9 +155,12 @@ class SearchView(Adw.Bin):
         box.append(image)
 
         labels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        labels.set_hexpand(True)
         title = Gtk.Label(label=album.props.title, xalign=0)
+        title.set_ellipsize(Pango.EllipsizeMode.END)
         labels.append(title)
         summary = Gtk.Label(label=album.props.artist, xalign=0)
+        summary.set_ellipsize(Pango.EllipsizeMode.END)
         summary.add_css_class("caption")
         summary.add_css_class("dim-label")
         labels.append(summary)

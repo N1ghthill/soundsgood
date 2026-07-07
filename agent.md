@@ -29,25 +29,24 @@ Pontos importantes:
 - `soundsgood/window.py` compoe a janela principal.
 - `soundsgood/views` contem telas de albums, artistas e musicas.
 - `soundsgood/widgets` contem toolbar, linhas de musica, busca e dialogs.
-- `data/soundsgood.gresource.xml` existe, mas atualmente nao inclui templates `.ui`.
+- `data/soundsgood.gresource.xml` foi removido porque estava vazio; a UI segue programatica em Python.
 - `docs/MANUAL_TESTS.md` contem o roteiro de validacao manual.
 
 Ultima validacao conhecida:
 
-- 25 testes unitarios passando.
+- 29 testes unitarios passando.
 - `py_compile` passando para app e testes.
 - `meson setup builddir --reconfigure`, `meson compile -C builddir` e `meson test -C builddir` passando.
 - App inicia por `./builddir/local-soundsgood`; pode aparecer o warning local `Unknown key gtk-modules` do GTK.
-- MPRIS respondeu via `gdbus` para `Identity`, `PlaybackStatus` e `Metadata` sem faixa atual.
+- MPRIS respondeu via `gdbus` para `Identity`, `PlaybackStatus` e `Metadata`, e o usuario validou o app em ambiente real.
 
 ## Prioridades
 
-1. Refinar MPRIS com validacao durante reproducao e controles do shell.
-2. Melhorar responsividade e acessibilidade das views.
-3. Implementar notificacoes e inibicao de suspensao durante reproducao.
-4. Avaliar indice persistente para evitar percorrer toda a arvore de musicas a cada abertura.
-5. Agrupar faixas por disco visualmente nos detalhes de album/artista.
-6. Preparar Flatpak manifest inicial.
+1. Validar o workflow de CI no GitHub Actions apos o proximo push.
+2. Testar regressao manual em colecoes maiores e em telas estreitas reais.
+3. Melhorar a selecao de pasta a partir do estado vazio.
+4. Evoluir o indice persistente com acoes manuais de rescan/reindexacao.
+5. Ampliar acessibilidade com auditoria de navegacao por teclado e leitor de tela.
 
 Consulte `ROADMAP.md` antes de escolher a proxima tarefa.
 
@@ -111,7 +110,8 @@ Cache:
 - Metadados da biblioteca ficam em `$XDG_CACHE_HOME/soundsgood/library.json`.
 - O cache deve ser invalidado por `mtime_ns` e tamanho do arquivo.
 - Ao alterar campos de `Song`, atualize `_record_from_song()` e `_song_from_record()`.
-- O monitoramento atual usa `Gio.FileMonitor` nos diretorios encontrados e agenda rescan com debounce.
+- O monitoramento atual usa `Gio.FileMonitor` nos diretorios indexados e agenda rescan com debounce.
+- A abertura normal usa o indice em cache quando a versao do cache, os arquivos conhecidos e os diretorios indexados continuam validos.
 - O rescan aplica diff por URI no modelo de faixas.
 - Albums e artistas sao atualizados incrementalmente no diff de faixas. Ao mexer nisso, cubra remocao, troca de album e troca de artista.
 - A biblioteca expoe `scan_state` e `status_message`; use isso para UI de escaneando, vazio, erro e pronto.
@@ -131,7 +131,7 @@ Se uma classe Python baseada em template GTK for reintroduzida:
 
 - Defina `__gtype_name__`.
 - Use `Gtk.Template(resource_path=...)`.
-- Garanta que o caminho exista em `data/soundsgood.gresource.xml`.
+- Recrie `data/soundsgood.gresource.xml` e garanta que o caminho exista nele.
 - Garanta que o arquivo esteja listado em `data/meson.build`.
 - Garanta que o `class` no `.ui` corresponda ao `__gtype_name__`.
 
@@ -139,8 +139,10 @@ Ao remover um template:
 
 - Remova o arquivo.
 - Remova de `data/meson.build`.
-- Remova de `data/soundsgood.gresource.xml`.
+- Remova de `data/soundsgood.gresource.xml`, se esse bundle existir.
 - Remova imports e referencias Python.
+
+Nao reintroduza um bundle `.gresource` vazio; ele so deve voltar se houver recursos reais para instalar.
 
 ## Player
 

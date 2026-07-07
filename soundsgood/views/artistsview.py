@@ -10,10 +10,10 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Adw, Gtk
+from gi.repository import Adw, Gtk, Pango
 
 from soundsgood.models import LibraryState
-from soundsgood.widgets.songrow import SongRow
+from soundsgood.widgets.songrow import SongRow, set_accessible_label
 
 
 class ArtistsView(Adw.Bin):
@@ -110,7 +110,9 @@ class ArtistsView(Adw.Bin):
         box.append(image)
 
         labels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        labels.set_hexpand(True)
         name = Gtk.Label(label=artist.props.name, xalign=0)
+        name.set_ellipsize(Pango.EllipsizeMode.END)
         name.add_css_class("heading")
         labels.append(name)
         summary = Gtk.Label(
@@ -141,7 +143,10 @@ class ArtistsView(Adw.Bin):
 
         metadata = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         metadata.set_valign(Gtk.Align.CENTER)
+        metadata.set_hexpand(True)
         name = Gtk.Label(label=artist.props.name, xalign=0)
+        name.set_wrap(True)
+        name.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
         name.add_css_class("title-1")
         metadata.append(name)
 
@@ -157,6 +162,7 @@ class ArtistsView(Adw.Bin):
 
         play_button = Gtk.Button(label=_("Play"))
         play_button.set_icon_name("media-playback-start-symbolic")
+        set_accessible_label(play_button, _("Play artist"))
         play_button.add_css_class("suggested-action")
         play_button.set_halign(Gtk.Align.START)
         play_button.connect("clicked", lambda *_: self._play_artist())
@@ -186,7 +192,10 @@ class ArtistsView(Adw.Bin):
         header.append(cover)
 
         labels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        labels.set_hexpand(True)
         title = Gtk.Label(label=album.props.title, xalign=0)
+        title.set_wrap(True)
+        title.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
         title.add_css_class("title-4")
         labels.append(title)
 
@@ -202,6 +211,7 @@ class ArtistsView(Adw.Bin):
 
         play_button = Gtk.Button(icon_name="media-playback-start-symbolic")
         play_button.set_tooltip_text(_("Play album"))
+        set_accessible_label(play_button, _("Play album"))
         play_button.set_halign(Gtk.Align.END)
         play_button.set_hexpand(True)
         play_button.connect("clicked", lambda *_: self._play_album(album))
@@ -215,11 +225,24 @@ class ArtistsView(Adw.Bin):
         songs_list.album = album
         songs_list.connect("row-activated", self._on_album_song_activated)
 
+        self._append_song_rows(songs_list, album, artist_name)
+
+        section.append(songs_list)
+        return section
+
+    def _append_song_rows(self, songs_list, album, artist_name):
         songs_model = album.props.songs
+        show_disc_headers = self._should_show_disc_headers(songs_model, album, artist_name)
+        current_disc = None
         for index in range(songs_model.get_n_items()):
             song = songs_model.get_item(index)
             if song.props.artist != artist_name and album.props.artist != artist_name:
                 continue
+
+            disc_number = song.props.disc_number or 1
+            if show_disc_headers and disc_number != current_disc:
+                songs_list.append(self._disc_header(disc_number))
+                current_disc = disc_number
 
             songs_list.append(
                 SongRow(
@@ -233,8 +256,28 @@ class ArtistsView(Adw.Bin):
                 )
             )
 
-        section.append(songs_list)
-        return section
+    def _should_show_disc_headers(self, songs_model, album, artist_name) -> bool:
+        discs = set()
+        for index in range(songs_model.get_n_items()):
+            song = songs_model.get_item(index)
+            if song.props.artist != artist_name and album.props.artist != artist_name:
+                continue
+            discs.add(song.props.disc_number or 1)
+        return len(discs) > 1 or any(disc > 1 for disc in discs)
+
+    def _disc_header(self, disc_number: int):
+        row = Gtk.ListBoxRow()
+        row.set_selectable(False)
+        row.set_activatable(False)
+        label = Gtk.Label(label=_("Disc %d") % disc_number, xalign=0)
+        label.add_css_class("heading")
+        label.add_css_class("dim-label")
+        label.set_margin_top(12)
+        label.set_margin_bottom(6)
+        label.set_margin_start(12)
+        label.set_margin_end(12)
+        row.set_child(label)
+        return row
 
     def _placeholder(self, text):
         label = Gtk.Label(label=text)

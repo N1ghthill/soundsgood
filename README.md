@@ -36,8 +36,12 @@ integration.
 - Use common folder artwork names such as `cover.jpg`, `folder.png`,
   `front.jpg`, and `album.png`.
 - Cache the music library in `$XDG_CACHE_HOME/soundsgood/library.json`.
+- Reopen from the cached library index when the indexed files and folders have
+  not changed.
 - Watch the music folder and rescan after file changes.
 - Expose MPRIS controls on `org.mpris.MediaPlayer2.SoundsGood`.
+- Show optional desktop notifications for the current track.
+- Prevent session suspend while music is playing.
 
 ## Installation
 
@@ -109,17 +113,18 @@ More packaging notes are available in [docs/FLATPAK.md](docs/FLATPAK.md).
 
 ## Project Status
 
-SoundsGood is an early but functional MVP. It can scan a local music folder,
-build a library, search tracks, and play audio. The current focus is stability,
-metadata quality, Flatpak packaging, and polish for the local library workflow.
+SoundsGood is a functional local-first MVP moving toward beta quality. It can
+scan a local music folder, reopen quickly from a persistent library index,
+search tracks, play audio, expose media controls, and run from Flatpak. The
+current focus is regression testing with larger collections, CI validation, and
+polish for narrow screens and accessibility.
 
 Known areas still planned:
 
-- More testing with real-world music collections.
-- Better persistent indexing to avoid walking the full music tree on every
-  startup.
-- Desktop notifications.
-- Optional session inhibition while music is playing.
+- More regression testing with large real-world music collections.
+- Folder selection directly from the empty library state.
+- Manual reindex/rescan controls.
+- Deeper keyboard and screen-reader accessibility review.
 
 See [ROADMAP.md](ROADMAP.md) for the development roadmap.
 

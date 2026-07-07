@@ -3,7 +3,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
-from soundsgood.library import Library
+from soundsgood.library import CACHE_VERSION, Library
 from soundsgood.models import LibraryState, Song
 
 
@@ -194,6 +194,68 @@ class LibraryTest(unittest.TestCase):
             self.assertEqual(cached_song.props.artist, "Árvore")
             self.assertEqual(cached_song.props.track_number, 7)
             self.assertEqual(cached_song.props.thumbnail, "/tmp/cover.jpg")
+
+    def test_scan_uses_current_cache_without_full_tree_scan(self):
+        with TemporaryDirectory() as temp_dir, TemporaryDirectory() as cache_dir:
+            cache_path = Path(cache_dir) / "library.json"
+            song_path = Path(temp_dir) / "one.mp3"
+            song_path.write_bytes(b"cached audio")
+            self.library._cache_path = lambda: cache_path
+            song_stat = self.library._file_stat(str(song_path))
+            directory_stat = self.library._file_stat(temp_dir)
+            record = self.library._record_from_song(
+                Song(
+                    title="Cached",
+                    artist="Artist",
+                    album="Album",
+                    album_artist="Artist",
+                    url=song_path.resolve().as_uri(),
+                ),
+                str(song_path),
+                song_stat,
+            )
+            directory_record = {
+                "path": temp_dir,
+                "mtime_ns": directory_stat["mtime_ns"],
+                "size": directory_stat["size"],
+            }
+            self.library._save_cache(temp_dir, [record], [directory_record])
+            self.library._setup_cached_monitors = lambda *_args: None
+            self.library._setup_monitors = lambda *_args: self.fail("full scan was started")
+
+            self.library.scan(temp_dir)
+
+            self.assertEqual(self.library.props.scan_state, int(LibraryState.READY))
+            self.assertEqual(
+                [song.props.title for song in self.library.get_all_songs()],
+                ["Cached"],
+            )
+
+    def test_cache_validation_rejects_old_or_changed_index(self):
+        cache = {
+            "version": CACHE_VERSION - 1,
+            "directory": "/tmp/music",
+            "directories": [],
+            "songs": [],
+        }
+        self.assertFalse(self.library._cache_matches_filesystem(cache))
+
+        with TemporaryDirectory() as temp_dir:
+            directory_stat = self.library._file_stat(temp_dir)
+            cache = {
+                "version": CACHE_VERSION,
+                "directory": temp_dir,
+                "directories": [
+                    {
+                        "path": temp_dir,
+                        "mtime_ns": directory_stat["mtime_ns"] - 1,
+                        "size": directory_stat["size"],
+                    }
+                ],
+                "songs": [],
+            }
+
+            self.assertFalse(self.library._cache_matches_filesystem(cache))
 
     def test_cache_ignores_other_library_directory(self):
         with TemporaryDirectory() as temp_dir:
