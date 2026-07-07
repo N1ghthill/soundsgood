@@ -304,6 +304,29 @@ class Library(GObject.GObject):
             url=uri,
         )
 
+    def create_song_for_file(self, file: Gio.File) -> Optional[Song]:
+        """Create a Song for an external file opened by the desktop."""
+        path = file.get_path()
+        if path:
+            ext = os.path.splitext(path)[1].lower()
+            if ext not in AUDIO_EXTENSIONS:
+                return None
+            return self._create_song_from_file(path)
+
+        uri = file.get_uri()
+        if not uri:
+            return None
+
+        basename = file.get_basename() or uri.rsplit("/", 1)[-1]
+        title, _ext = os.path.splitext(basename)
+        return Song(
+            title=title or basename,
+            artist=_("Unknown Artist"),
+            album=_("Unknown Album"),
+            album_artist=_("Unknown Artist"),
+            url=uri,
+        )
+
     def _discover_metadata(self, uri: str) -> Optional[dict]:
         """Read tags and duration with GStreamer Discoverer."""
         try:
@@ -489,7 +512,12 @@ class Library(GObject.GObject):
                     if candidate.is_file():
                         return str(candidate)
 
-        for candidate in sorted(directory.iterdir()):
+        try:
+            candidates = sorted(directory.iterdir())
+        except OSError:
+            return ""
+
+        for candidate in candidates:
             if candidate.is_file() and candidate.suffix.lower() in extensions:
                 return str(candidate)
 

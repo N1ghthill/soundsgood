@@ -82,7 +82,7 @@ class SoundsGoodApplication(Adw.Application):
     def __init__(self, application_id, version):
         super().__init__(
             application_id=application_id,
-            flags=Gio.ApplicationFlags.FLAGS_NONE,
+            flags=Gio.ApplicationFlags.HANDLES_OPEN,
         )
         self.props.resource_base_path = "/io/github/n1ghthill/soundsgood"
         GLib.set_application_name(_("SoundsGood"))
@@ -334,14 +334,39 @@ class SoundsGoodApplication(Adw.Application):
         )
 
     def do_activate(self):
-        if not self._window:
-            from soundsgood.window import Window
-            self._window = Window(self)
+        self._ensure_window()
 
         # Start library scan
         self._library.scan()
         self._sync_suspend_inhibition()
         self._window.present()
+
+    def do_open(self, files, n_files, hint):
+        self._ensure_window()
+
+        # Keep the library available while treating opened files as a temporary queue.
+        self._library.scan()
+        self._open_files(files)
+        self._window.present()
+
+    def _ensure_window(self):
+        if not self._window:
+            from soundsgood.window import Window
+            self._window = Window(self)
+
+    def _open_files(self, files):
+        songs = []
+        for file in files:
+            song = self._library.create_song_for_file(file)
+            if song is not None:
+                songs.append(song)
+
+        if not songs:
+            if self._window:
+                self._window.show_message(_("No playable audio files"))
+            return
+
+        self._player.play_song(songs[0], songs)
 
     def do_shutdown(self):
         if self._inhibit_cookie:
@@ -354,7 +379,7 @@ class SoundsGoodApplication(Adw.Application):
 
 def main():
     application_id = os.environ.get("APPLICATION_ID", "io.github.n1ghthill.soundsgood")
-    version = os.environ.get("VERSION", "0.1.4")
+    version = os.environ.get("VERSION", "0.1.5")
 
     app = SoundsGoodApplication(application_id, version)
     app.run(sys.argv)

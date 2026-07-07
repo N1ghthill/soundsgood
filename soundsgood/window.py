@@ -96,9 +96,11 @@ class Window(Adw.ApplicationWindow):
         return False
 
     def _on_player_error(self, _player, message):
-        toast = Adw.Toast.new(message)
-        self._toast_overlay.add_toast(toast)
+        self.show_message(message)
 
     def _on_library_error(self, _library, message):
+        self.show_message(message)
+
+    def show_message(self, message):
         toast = Adw.Toast.new(message)
         self._toast_overlay.add_toast(toast)

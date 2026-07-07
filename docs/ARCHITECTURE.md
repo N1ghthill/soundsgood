@@ -21,6 +21,7 @@ Responsabilidades:
 - Inicializar GTK, libadwaita e GStreamer.
 - Criar `Library`, `Player` e `Window`.
 - Registrar acoes globais e atalhos.
+- Receber arquivos de audio abertos pelo desktop/default app e iniciar uma fila temporaria.
 - Expor propriedades compartilhadas por `GObject.Property`.
 
 Nao deve:

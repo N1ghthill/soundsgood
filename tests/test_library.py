@@ -3,7 +3,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
-from gi.repository import GLib
+from gi.repository import Gio, GLib
 
 from soundsgood.library import CACHE_VERSION, Library
 from soundsgood.models import LibraryState, Song
@@ -61,6 +61,36 @@ class LibraryTest(unittest.TestCase):
             [artist.props.name for artist in self.library.search_artists("artist")],
             ["Artist"],
         )
+
+    def test_create_song_for_external_audio_file(self):
+        with TemporaryDirectory() as temp_dir:
+            song_path = Path(temp_dir) / "Artist - Track.mp3"
+            song_path.write_bytes(b"not real audio")
+
+            song = self.library.create_song_for_file(Gio.File.new_for_path(str(song_path)))
+
+            self.assertIsNotNone(song)
+            self.assertEqual(song.props.title, "Track")
+            self.assertEqual(song.props.artist, "Artist")
+            self.assertEqual(song.props.url, song_path.resolve().as_uri())
+
+    def test_create_song_for_external_file_rejects_unsupported_extension(self):
+        with TemporaryDirectory() as temp_dir:
+            text_path = Path(temp_dir) / "notes.txt"
+            text_path.write_text("not audio", encoding="utf-8")
+
+            song = self.library.create_song_for_file(Gio.File.new_for_path(str(text_path)))
+
+            self.assertIsNone(song)
+
+    def test_create_song_for_external_audio_handles_unlistable_parent(self):
+        song = self.library.create_song_for_file(
+            Gio.File.new_for_path("/tmp/soundsgood-missing/Artist - Track.mp3")
+        )
+
+        self.assertIsNotNone(song)
+        self.assertEqual(song.props.title, "Track")
+        self.assertEqual(song.props.thumbnail, "")
 
     def test_scan_snapshot_applies_diff_by_uri(self):
         first = Song(

@@ -34,10 +34,11 @@ Pontos importantes:
 
 Ultima validacao conhecida:
 
-- 30 testes unitarios passando.
+- 33 testes unitarios passando.
 - `py_compile` passando para app e testes.
 - `meson setup builddir --reconfigure`, `meson compile -C builddir` e `meson test -C builddir` passando.
 - App inicia por `./builddir/local-soundsgood`; pode aparecer o warning local `Unknown key gtk-modules` do GTK.
+- App tambem aceita arquivos de audio abertos pelo gerenciador de arquivos/default app via `GApplication.open`.
 - MPRIS respondeu via `gdbus` para `Identity`, `PlaybackStatus` e `Metadata`, e o usuario validou o app em ambiente real.
 
 ## Prioridades

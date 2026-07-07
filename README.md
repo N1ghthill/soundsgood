@@ -28,6 +28,8 @@ integration.
 
 - Browse local music by albums, artists, and songs.
 - Search by title, artist, album, album artist, genre, and year.
+- Open local audio files from the file manager when SoundsGood is the default
+  music app.
 - Play local audio through GStreamer.
 - Control playback with play/pause, previous, next, seek, volume, repeat, and
   shuffle.
@@ -133,7 +135,7 @@ See [ROADMAP.md](ROADMAP.md) for the development roadmap.
 
 The application is organized around a small set of modules:
 
-- `Application`: startup, settings, library, and player wiring.
+- `Application`: startup, settings, library, player wiring, and opened files.
 - `Library`: local file discovery, metadata extraction, cache, and models.
 - `Player`: GStreamer playback, queue, progress, volume, repeat, and shuffle.
 - `Models`: GObject models for songs, albums, artists, and player state.
