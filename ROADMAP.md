@@ -24,6 +24,7 @@ Status: MVP inicial implementado.
 - [x] Garantir que o app inicialize sem `ImportError`.
 - [x] Validar build com Meson e execucao via `local-soundsgood`.
 - [x] Abrir arquivos de audio pelo gerenciador de arquivos quando definido como app padrao.
+- [x] Abrir playlists `.m3u`, `.m3u8` e `.pls` como fila temporaria.
 
 Entregavel: aplicacao abre, lista musicas encontradas e reproduz uma faixa.
 

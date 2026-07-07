@@ -92,6 +92,53 @@ class LibraryTest(unittest.TestCase):
         self.assertEqual(song.props.title, "Track")
         self.assertEqual(song.props.thumbnail, "")
 
+    def test_create_songs_for_m3u_playlist(self):
+        with TemporaryDirectory() as temp_dir:
+            directory = Path(temp_dir)
+            first = directory / "First.mp3"
+            second = directory / "nested" / "Second.flac"
+            second.parent.mkdir()
+            first.write_bytes(b"audio")
+            second.write_bytes(b"audio")
+            playlist = directory / "mix.m3u"
+            playlist.write_text(
+                "#EXTM3U\n"
+                "#EXTINF:1,First\n"
+                "First.mp3\n"
+                "nested/Second.flac\n"
+                "https://example.com/stream.mp3\n",
+                encoding="utf-8",
+            )
+
+            songs = self.library.create_songs_for_file(Gio.File.new_for_path(str(playlist)))
+
+            self.assertEqual([song.props.title for song in songs], ["First", "Second"])
+            self.assertEqual([song.props.url for song in songs], [
+                first.resolve().as_uri(),
+                second.resolve().as_uri(),
+            ])
+
+    def test_create_songs_for_pls_playlist(self):
+        with TemporaryDirectory() as temp_dir:
+            directory = Path(temp_dir)
+            first = directory / "First.mp3"
+            second = directory / "Second.ogg"
+            first.write_bytes(b"audio")
+            second.write_bytes(b"audio")
+            playlist = directory / "mix.pls"
+            playlist.write_text(
+                "[playlist]\n"
+                "File2=Second.ogg\n"
+                "Title2=Second\n"
+                f"File1={first.resolve().as_uri()}\n"
+                "NumberOfEntries=2\n",
+                encoding="utf-8",
+            )
+
+            songs = self.library.create_songs_for_file(Gio.File.new_for_path(str(playlist)))
+
+            self.assertEqual([song.props.title for song in songs], ["First", "Second"])
+
     def test_scan_snapshot_applies_diff_by_uri(self):
         first = Song(
             title="One",

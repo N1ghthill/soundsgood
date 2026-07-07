@@ -29,6 +29,7 @@ AUDIO_EXTENSIONS = {
     ".mp3", ".flac", ".ogg", ".wav", ".m4a", ".aac",
     ".wma", ".opus", ".ape", ".aiff", ".dsf", ".dff",
 }
+PLAYLIST_EXTENSIONS = {".m3u", ".m3u8", ".pls"}
 
 
 class Library(GObject.GObject):
@@ -306,26 +307,97 @@ class Library(GObject.GObject):
 
     def create_song_for_file(self, file: Gio.File) -> Optional[Song]:
         """Create a Song for an external file opened by the desktop."""
+        songs = self.create_songs_for_file(file)
+        return songs[0] if songs else None
+
+    def create_songs_for_file(self, file: Gio.File) -> list[Song]:
+        """Create Songs for an external audio file or playlist."""
         path = file.get_path()
         if path:
             ext = os.path.splitext(path)[1].lower()
+            if ext in PLAYLIST_EXTENSIONS:
+                return self._songs_from_playlist_path(path)
             if ext not in AUDIO_EXTENSIONS:
-                return None
-            return self._create_song_from_file(path)
+                return []
+            song = self._create_song_from_file(path)
+            return [song] if song is not None else []
 
         uri = file.get_uri()
         if not uri:
-            return None
+            return []
 
         basename = file.get_basename() or uri.rsplit("/", 1)[-1]
         title, _ext = os.path.splitext(basename)
-        return Song(
-            title=title or basename,
-            artist=_("Unknown Artist"),
-            album=_("Unknown Album"),
-            album_artist=_("Unknown Artist"),
-            url=uri,
-        )
+        if _ext.lower() in PLAYLIST_EXTENSIONS:
+            return []
+
+        return [
+            Song(
+                title=title or basename,
+                artist=_("Unknown Artist"),
+                album=_("Unknown Album"),
+                album_artist=_("Unknown Artist"),
+                url=uri,
+            )
+        ]
+
+    def _songs_from_playlist_path(self, path: str) -> list[Song]:
+        extension = os.path.splitext(path)[1].lower()
+        try:
+            text = Path(path).read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            return []
+
+        if extension == ".pls":
+            entries = self._pls_entries(text)
+        else:
+            entries = self._m3u_entries(text)
+
+        songs = []
+        playlist_dir = Path(path).parent
+        for entry in entries:
+            file = self._playlist_entry_file(entry, playlist_dir)
+            if file is None:
+                continue
+            song = self.create_song_for_file(file)
+            if song is not None:
+                songs.append(song)
+
+        return songs
+
+    def _m3u_entries(self, text: str) -> list[str]:
+        entries = []
+        for line in text.splitlines():
+            entry = line.strip()
+            if not entry or entry.startswith("#"):
+                continue
+            entries.append(entry)
+        return entries
+
+    def _pls_entries(self, text: str) -> list[str]:
+        entries = {}
+        for line in text.splitlines():
+            key, separator, value = line.partition("=")
+            if not separator or not key.casefold().startswith("file"):
+                continue
+            suffix = key[4:]
+            if not suffix.isdigit():
+                continue
+            value = value.strip()
+            if value:
+                entries[int(suffix)] = value
+        return [entries[index] for index in sorted(entries)]
+
+    def _playlist_entry_file(self, entry: str, playlist_dir: Path) -> Gio.File | None:
+        if "://" in entry:
+            if entry.startswith("file://"):
+                return Gio.File.new_for_uri(entry)
+            return None
+
+        path = Path(entry).expanduser()
+        if not path.is_absolute():
+            path = playlist_dir / path
+        return Gio.File.new_for_path(str(path))
 
     def _discover_metadata(self, uri: str) -> Optional[dict]:
         """Read tags and duration with GStreamer Discoverer."""

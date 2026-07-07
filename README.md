@@ -30,6 +30,7 @@ integration.
 - Search by title, artist, album, album artist, genre, and year.
 - Open local audio files from the file manager when SoundsGood is the default
   music app.
+- Open `.m3u`, `.m3u8`, and `.pls` playlists as temporary playback queues.
 - Play local audio through GStreamer.
 - Control playback with play/pause, previous, next, seek, volume, repeat, and
   shuffle.
@@ -66,6 +67,26 @@ flatpak update --user io.github.n1ghthill.soundsgood
 
 Versioned Flatpak bundles are also available on
 [GitHub Releases](https://github.com/N1ghthill/soundsgood/releases).
+
+## Latest Release
+
+SoundsGood 0.1.6 adds playlist opening for `.m3u`, `.m3u8`, and `.pls` files.
+The previous 0.1.5 release fixed opening audio files from the file manager when
+SoundsGood is configured as the default music app.
+
+## Command Line
+
+For Flatpak installations, run SoundsGood from a terminal with:
+
+```bash
+flatpak run io.github.n1ghthill.soundsgood
+```
+
+You can also pass local audio files or supported playlists:
+
+```bash
+flatpak run io.github.n1ghthill.soundsgood ~/Music/song.mp3 ~/Music/mix.m3u
+```
 
 ## Development
 

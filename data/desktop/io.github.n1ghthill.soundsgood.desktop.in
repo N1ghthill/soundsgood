@@ -9,4 +9,4 @@ Terminal=false
 Type=Application
 Categories=AudioVideo;Audio;Music;Player;
 StartupNotify=true
-MimeType=audio/mpeg;audio/flac;audio/ogg;audio/wav;audio/mp4;audio/aac;audio/x-ms-wma;audio/opus;audio/x-aiff;
+MimeType=audio/mpeg;audio/flac;audio/ogg;audio/wav;audio/mp4;audio/aac;audio/x-ms-wma;audio/opus;audio/x-aiff;audio/x-mpegurl;audio/x-scpls;

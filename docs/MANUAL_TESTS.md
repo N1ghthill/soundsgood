@@ -46,6 +46,7 @@ meson test -C builddir
 
 - Definir SoundsGood como app padrao para arquivos `.mp3` e abrir uma faixa pelo gerenciador de arquivos.
 - Abrir uma faixa pelo terminal com `soundsgood caminho/para/faixa.mp3` e confirmar que o app inicia a reproducao.
+- Abrir playlists `.m3u` e `.pls` e confirmar que as faixas entram como fila temporaria.
 - Dar duplo clique em faixas diferentes e confirmar que o audio real muda junto com a UI.
 - Testar Play/Pause, Previous, Next e Seek.
 - Testar volume e mute.

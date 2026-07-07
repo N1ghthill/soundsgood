@@ -34,7 +34,7 @@ Pontos importantes:
 
 Ultima validacao conhecida:
 
-- 33 testes unitarios passando.
+- 37 testes unitarios passando.
 - `py_compile` passando para app e testes.
 - `meson setup builddir --reconfigure`, `meson compile -C builddir` e `meson test -C builddir` passando.
 - App inicia por `./builddir/local-soundsgood`; pode aparecer o warning local `Unknown key gtk-modules` do GTK.

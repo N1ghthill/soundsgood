@@ -357,9 +357,7 @@ class SoundsGoodApplication(Adw.Application):
     def _open_files(self, files):
         songs = []
         for file in files:
-            song = self._library.create_song_for_file(file)
-            if song is not None:
-                songs.append(song)
+            songs.extend(self._library.create_songs_for_file(file))
 
         if not songs:
             if self._window:
@@ -379,7 +377,7 @@ class SoundsGoodApplication(Adw.Application):
 
 def main():
     application_id = os.environ.get("APPLICATION_ID", "io.github.n1ghthill.soundsgood")
-    version = os.environ.get("VERSION", "0.1.5")
+    version = os.environ.get("VERSION", "0.1.6")
 
     app = SoundsGoodApplication(application_id, version)
     app.run(sys.argv)

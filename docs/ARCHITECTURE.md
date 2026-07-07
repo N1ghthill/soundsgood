@@ -22,6 +22,7 @@ Responsabilidades:
 - Criar `Library`, `Player` e `Window`.
 - Registrar acoes globais e atalhos.
 - Receber arquivos de audio abertos pelo desktop/default app e iniciar uma fila temporaria.
+- Receber playlists abertas externamente e expandi-las para uma fila temporaria.
 - Expor propriedades compartilhadas por `GObject.Property`.
 
 Nao deve:
@@ -214,4 +215,5 @@ Dependencias a avaliar:
 - MPRIS usa ID de faixa deterministico derivado da URI por SHA-256.
 - O app reabre pelo indice em cache quando os arquivos conhecidos e diretorios indexados nao mudaram; quando ha mudanca detectada, troca de pasta ou cache antigo, faz rescan completo.
 - A acao manual de reindexacao força rescan e releitura de metadados.
+- Playlists `.m3u`, `.m3u8` e `.pls` sao aceitas no fluxo externo de abertura, mas nao sao indexadas como parte da biblioteca.
 - Notificacoes e inibicao de suspensao ficam em `Application`, reagindo ao estado publico do `Player`.
