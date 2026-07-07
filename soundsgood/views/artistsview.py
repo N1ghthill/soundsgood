@@ -73,7 +73,12 @@ class ArtistsView(Adw.Bin):
             message = _("Scanning music...")
         elif not message:
             message = _("No artists found")
-        self._artists_list.append(self._placeholder(message))
+        self._artists_list.append(
+            self._placeholder(
+                message,
+                show_button=self._library.props.scan_state != int(LibraryState.SCANNING),
+            )
+        )
 
     def _rebuild(self):
         self._clear(self._artists_list)
@@ -173,7 +178,7 @@ class ArtistsView(Adw.Bin):
 
         albums = self._library.get_albums_for_artist(artist.props.name)
         if not albums:
-            self._artist_detail.append(self._placeholder(_("No songs found")))
+            self._artist_detail.append(self._placeholder(_("No songs found"), show_button=False))
             return
 
         for album in albums:
@@ -279,11 +284,25 @@ class ArtistsView(Adw.Bin):
         row.set_child(label)
         return row
 
-    def _placeholder(self, text):
+    def _placeholder(self, text, show_button: bool = True):
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        box.set_margin_top(24)
+        box.set_margin_bottom(24)
+        box.set_halign(Gtk.Align.CENTER)
+
         label = Gtk.Label(label=text)
-        label.set_margin_top(24)
         label.add_css_class("dim-label")
-        return label
+        box.append(label)
+
+        if show_button:
+            button = Gtk.Button(label=_("Choose Music Folder"))
+            button.set_icon_name("folder-music-symbolic")
+            button.add_css_class("suggested-action")
+            button.connect("clicked", self._on_choose_folder_clicked)
+            set_accessible_label(button, _("Choose Music Folder"))
+            box.append(button)
+
+        return box
 
     def _clear(self, listbox):
         child = listbox.get_first_child()
@@ -338,3 +357,6 @@ class ArtistsView(Adw.Bin):
         album = getattr(listbox, "album", None)
         if song and album:
             self._play_album_song(album, song)
+
+    def _on_choose_folder_clicked(self, _button):
+        self._app.select_music_folder(self.get_root())

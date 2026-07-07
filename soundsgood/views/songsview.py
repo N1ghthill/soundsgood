@@ -13,7 +13,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, Gtk
 
 from soundsgood.models import LibraryState, Song
-from soundsgood.widgets.songrow import SongRow
+from soundsgood.widgets.songrow import SongRow, set_accessible_label
 
 
 class SongsView(Adw.Bin):
@@ -56,7 +56,12 @@ class SongsView(Adw.Bin):
             message = _("Scanning music...")
         elif not message:
             message = _("No songs found")
-        self._listbox.append(self._placeholder(message))
+        self._listbox.append(
+            self._placeholder(
+                message,
+                show_button=self._library.props.scan_state != int(LibraryState.SCANNING),
+            )
+        )
 
     def _rebuild(self):
         self._clear()
@@ -79,10 +84,24 @@ class SongsView(Adw.Bin):
                 )
             )
 
-    def _placeholder(self, text):
-        placeholder = Gtk.Label(label=text)
+    def _placeholder(self, text, show_button: bool = True):
+        placeholder = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         placeholder.set_margin_top(48)
-        placeholder.add_css_class("dim-label")
+        placeholder.set_margin_bottom(24)
+        placeholder.set_halign(Gtk.Align.CENTER)
+
+        label = Gtk.Label(label=text)
+        label.add_css_class("dim-label")
+        placeholder.append(label)
+
+        if show_button:
+            button = Gtk.Button(label=_("Choose Music Folder"))
+            button.set_icon_name("folder-music-symbolic")
+            button.add_css_class("suggested-action")
+            button.connect("clicked", self._on_choose_folder_clicked)
+            set_accessible_label(button, _("Choose Music Folder"))
+            placeholder.append(button)
+
         return placeholder
 
     def _clear(self):
@@ -98,3 +117,6 @@ class SongsView(Adw.Bin):
 
     def _play_song(self, song):
         self._player.play_song(song, self._library.get_all_songs())
+
+    def _on_choose_folder_clicked(self, _button):
+        self._app.select_music_folder(self.get_root())

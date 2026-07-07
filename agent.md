@@ -34,7 +34,7 @@ Pontos importantes:
 
 Ultima validacao conhecida:
 
-- 29 testes unitarios passando.
+- 30 testes unitarios passando.
 - `py_compile` passando para app e testes.
 - `meson setup builddir --reconfigure`, `meson compile -C builddir` e `meson test -C builddir` passando.
 - App inicia por `./builddir/local-soundsgood`; pode aparecer o warning local `Unknown key gtk-modules` do GTK.
@@ -44,8 +44,8 @@ Ultima validacao conhecida:
 
 1. Validar o workflow de CI no GitHub Actions apos o proximo push.
 2. Testar regressao manual em colecoes maiores e em telas estreitas reais.
-3. Melhorar a selecao de pasta a partir do estado vazio.
-4. Evoluir o indice persistente com acoes manuais de rescan/reindexacao.
+3. Avaliar controles avancados de biblioteca, como limpar cache e mostrar data do ultimo indice.
+4. Planejar uma opcao de diagnostico para relatar erros de metadados por arquivo.
 5. Ampliar acessibilidade com auditoria de navegacao por teclado e leitor de tela.
 
 Consulte `ROADMAP.md` antes de escolher a proxima tarefa.
@@ -112,6 +112,7 @@ Cache:
 - Ao alterar campos de `Song`, atualize `_record_from_song()` e `_song_from_record()`.
 - O monitoramento atual usa `Gio.FileMonitor` nos diretorios indexados e agenda rescan com debounce.
 - A abertura normal usa o indice em cache quando a versao do cache, os arquivos conhecidos e os diretorios indexados continuam validos.
+- A acao manual de reindexacao usa scan forcado e reler metadados, mesmo quando arquivos parecem inalterados.
 - O rescan aplica diff por URI no modelo de faixas.
 - Albums e artistas sao atualizados incrementalmente no diff de faixas. Ao mexer nisso, cubra remocao, troca de album e troca de artista.
 - A biblioteca expoe `scan_state` e `status_message`; use isso para UI de escaneando, vazio, erro e pronto.

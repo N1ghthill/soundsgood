@@ -3,6 +3,8 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
+from gi.repository import GLib
+
 from soundsgood.library import CACHE_VERSION, Library
 from soundsgood.models import LibraryState, Song
 
@@ -256,6 +258,52 @@ class LibraryTest(unittest.TestCase):
             }
 
             self.assertFalse(self.library._cache_matches_filesystem(cache))
+
+    def test_refresh_metadata_scan_ignores_cached_song_record(self):
+        with TemporaryDirectory() as temp_dir, TemporaryDirectory() as cache_dir:
+            cache_path = Path(cache_dir) / "library.json"
+            song_path = Path(temp_dir) / "one.mp3"
+            song_path.write_bytes(b"audio")
+            self.library._cache_path = lambda: cache_path
+            song_stat = self.library._file_stat(str(song_path))
+            directory_stat = self.library._file_stat(temp_dir)
+            cached_record = self.library._record_from_song(
+                Song(
+                    title="Cached",
+                    artist="Artist",
+                    album="Album",
+                    album_artist="Artist",
+                    url=song_path.resolve().as_uri(),
+                ),
+                str(song_path),
+                song_stat,
+            )
+            directory_record = {
+                "path": temp_dir,
+                "mtime_ns": directory_stat["mtime_ns"],
+                "size": directory_stat["size"],
+            }
+            self.library._save_cache(temp_dir, [cached_record], [directory_record])
+            self.library._refresh_metadata_scan = True
+            self.library._create_song_from_file = lambda path: Song(
+                title="Fresh",
+                artist="Artist",
+                album="Album",
+                album_artist="Artist",
+                url=Path(path).resolve().as_uri(),
+            )
+            original_idle_add = GLib.idle_add
+            GLib.idle_add = lambda callback, *args: callback(*args)
+
+            try:
+                self.library._scan_directory(temp_dir)
+            finally:
+                GLib.idle_add = original_idle_add
+
+            self.assertEqual(
+                [song.props.title for song in self.library.get_all_songs()],
+                ["Fresh"],
+            )
 
     def test_cache_ignores_other_library_directory(self):
         with TemporaryDirectory() as temp_dir:

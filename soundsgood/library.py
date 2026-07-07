@@ -53,6 +53,7 @@ class Library(GObject.GObject):
         self._current_directory = ""
         self._monitors = []
         self._rescan_source_id = 0
+        self._refresh_metadata_scan = False
 
         # Data stores
         self._songs = Gio.ListStore.new(Song)
@@ -77,7 +78,12 @@ class Library(GObject.GObject):
     def artists(self) -> Gio.ListStore:
         return self._artists
 
-    def scan(self, directory: Optional[str] = None, force: bool = False):
+    def scan(
+        self,
+        directory: Optional[str] = None,
+        force: bool = False,
+        refresh_metadata: bool = False,
+    ):
         """Scan a directory for music files."""
         if self._is_scanning:
             return
@@ -108,6 +114,7 @@ class Library(GObject.GObject):
 
         self._setup_monitors(directory)
         self._is_scanning = True
+        self._refresh_metadata_scan = refresh_metadata
         self._set_scan_state(LibraryState.SCANNING, _("Scanning music..."))
         self.emit("scan-started")
 
@@ -124,7 +131,7 @@ class Library(GObject.GObject):
         }
         next_records = []
         directory_records = []
-        cache_dirty = False
+        cache_dirty = refresh_metadata = self._refresh_metadata_scan
 
         for root, dirs, files in os.walk(directory):
             # Skip hidden directories
@@ -149,7 +156,7 @@ class Library(GObject.GObject):
                 continue
 
             cached_record = cached_records.get(filepath)
-            if self._record_matches_file(cached_record, stat):
+            if not refresh_metadata and self._record_matches_file(cached_record, stat):
                 song = self._song_from_record(cached_record)
             else:
                 song = self._create_song_from_file(filepath)
@@ -670,6 +677,7 @@ class Library(GObject.GObject):
         self._sort_models()
         self.props.songs_available = self._songs.get_n_items() > 0
         self._is_scanning = False
+        self._refresh_metadata_scan = False
         if self.props.songs_available:
             self._set_scan_state(LibraryState.READY, "")
         else:

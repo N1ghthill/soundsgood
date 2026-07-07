@@ -88,6 +88,16 @@ class PreferencesDialog:
         self._folder_row.set_activatable_widget(button)
         group.add(self._folder_row)
 
+        rescan_row = Adw.ActionRow(
+            title=_("Reindex Library"),
+            subtitle=_("Rescan the music folder and refresh file metadata"),
+        )
+        rescan_button = Gtk.Button(label=_("Rescan Now"))
+        rescan_button.connect("clicked", self._on_rescan_library)
+        rescan_row.add_suffix(rescan_button)
+        rescan_row.set_activatable_widget(rescan_button)
+        group.add(rescan_row)
+
         page.add(group)
         self._dialog.add(page)
 
@@ -96,22 +106,13 @@ class PreferencesDialog:
         self._dialog.present(parent)
 
     def _on_select_folder(self, _button):
-        dialog = Gtk.FileDialog(title=_("Select Music Folder"))
-        dialog.select_folder(self._parent, None, self._on_folder_selected)
+        self._app.select_music_folder(
+            self._parent,
+            on_selected=lambda path: self._folder_row.set_subtitle(path),
+        )
 
-    def _on_folder_selected(self, dialog, result):
-        try:
-            folder = dialog.select_folder_finish(result)
-        except Exception:
-            return
-
-        path = folder.get_path()
-        if not path:
-            return
-
-        self._settings.set_string("music-dir", path)
-        self._folder_row.set_subtitle(path)
-        self._app.props.library.scan(path, force=True)
+    def _on_rescan_library(self, _button):
+        self._app.reindex_library()
 
     def _on_theme_selected(self, dropdown, _param):
         scheme = "dark" if dropdown.get_selected() == 1 else "light"

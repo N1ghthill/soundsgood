@@ -92,7 +92,12 @@ class AlbumsView(Adw.Bin):
             message = _("Scanning music...")
         elif not message:
             message = _("No albums found")
-        self._flowbox.append(self._placeholder(message))
+        self._flowbox.append(
+            self._placeholder(
+                message,
+                show_button=self._library.props.scan_state != int(LibraryState.SCANNING),
+            )
+        )
 
     def _album_button(self, album):
         button = Gtk.Button()
@@ -134,11 +139,24 @@ class AlbumsView(Adw.Bin):
         button.set_child(box)
         return button
 
-    def _placeholder(self, text: str):
+    def _placeholder(self, text: str, show_button: bool = True):
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        box.set_margin_top(48)
+        box.set_halign(Gtk.Align.CENTER)
+
         label = Gtk.Label(label=text)
         label.add_css_class("dim-label")
-        label.set_margin_top(48)
-        return label
+        box.append(label)
+
+        if show_button:
+            button = Gtk.Button(label=_("Choose Music Folder"))
+            button.set_icon_name("folder-music-symbolic")
+            button.add_css_class("suggested-action")
+            button.connect("clicked", self._on_choose_folder_clicked)
+            set_accessible_label(button, _("Choose Music Folder"))
+            box.append(button)
+
+        return box
 
     def _clear(self):
         child = self._flowbox.get_first_child()
@@ -148,6 +166,9 @@ class AlbumsView(Adw.Bin):
 
     def _on_album_clicked(self, button):
         self._show_album(button.album)
+
+    def _on_choose_folder_clicked(self, _button):
+        self._app.select_music_folder(self.get_root())
 
     def _show_album(self, album):
         self._clear_box(self._album_page)

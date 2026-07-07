@@ -25,7 +25,9 @@ meson test -C builddir
 - Abrir o app com musicas em `xdg-user-dir MUSIC`.
 - Confirmar que Albums, Artists e Songs deixam o estado de escaneamento.
 - Confirmar que uma pasta vazia mostra estado vazio sem traceback.
+- No estado vazio, clicar em `Choose Music Folder`, escolher uma pasta com musicas e confirmar que o scan inicia.
 - Em Preferences, escolher uma pasta inexistente e confirmar toast/estado de erro.
+- Em Preferences ou no menu, acionar `Rescan Library`/`Rescan Now` e confirmar que a biblioteca volta ao estado de scan sem duplicatas.
 - Adicionar ou remover um arquivo de musica e aguardar o rescan com debounce.
 - Confirmar que album/artista/contagens mudam sem duplicatas.
 - Fechar e reabrir o app sem alterar a pasta de musicas e confirmar que a biblioteca aparece pelo cache sem espera longa de varredura.

@@ -61,6 +61,7 @@ Implementacao inicial aceitavel:
 - Capas por tags embutidas e por arquivos comuns na pasta do album.
 - Cache persistente em `$XDG_CACHE_HOME/soundsgood/library.json`, invalidado por `mtime_ns` e tamanho.
 - Reabertura rapida a partir do indice em cache quando arquivos e diretorios indexados continuam inalterados.
+- Reindexacao manual para reler metadados quando o usuario solicita.
 - Monitoramento com `Gio.FileMonitor` e debounce para rescan quando a pasta de musicas muda.
 - Aplicacao de snapshot por diff de URI no modelo de faixas.
 - Atualizacao incremental dos agregados de albums/artistas quando uma faixa e adicionada, removida ou substituida.
@@ -211,4 +212,5 @@ Dependencias a avaliar:
 - Antes de adicionar features novas, a aplicacao precisa inicializar, listar musicas e tocar uma faixa.
 - MPRIS usa ID de faixa deterministico derivado da URI por SHA-256.
 - O app reabre pelo indice em cache quando os arquivos conhecidos e diretorios indexados nao mudaram; quando ha mudanca detectada, troca de pasta ou cache antigo, faz rescan completo.
+- A acao manual de reindexacao força rescan e releitura de metadados.
 - Notificacoes e inibicao de suspensao ficam em `Application`, reagindo ao estado publico do `Player`.

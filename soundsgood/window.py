@@ -54,6 +54,7 @@ class Window(Adw.ApplicationWindow):
         self._headerbar.pack_end(self._search_button)
 
         menu = Gio.Menu()
+        menu.append(_("Rescan Library"), "app.reindex_library")
         menu.append(_("Preferences"), "app.preferences")
         menu.append(_("About SoundsGood"), "app.about")
         self._menu_button = Gtk.MenuButton(icon_name="open-menu-symbolic")

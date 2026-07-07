@@ -39,6 +39,8 @@ integration.
 - Reopen from the cached library index when the indexed files and folders have
   not changed.
 - Watch the music folder and rescan after file changes.
+- Choose a music folder directly from empty library states.
+- Reindex the library manually when metadata needs to be refreshed.
 - Expose MPRIS controls on `org.mpris.MediaPlayer2.SoundsGood`.
 - Show optional desktop notifications for the current track.
 - Prevent session suspend while music is playing.
@@ -122,9 +124,8 @@ polish for narrow screens and accessibility.
 Known areas still planned:
 
 - More regression testing with large real-world music collections.
-- Folder selection directly from the empty library state.
-- Manual reindex/rescan controls.
 - Deeper keyboard and screen-reader accessibility review.
+- Diagnostics for files with unreadable or incomplete metadata.
 
 See [ROADMAP.md](ROADMAP.md) for the development roadmap.
 

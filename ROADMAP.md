@@ -43,6 +43,7 @@ Objetivo: organizar musicas usando metadados reais, nao nomes de arquivo.
 - [x] Atualizar contagens de albums e musicas de forma incremental.
 - [x] Adicionar sinalizacao de estado: escaneando, vazio, erro e pronto.
 - [x] Evitar percurso completo da arvore de arquivos a cada abertura quando o indice em cache ainda esta valido.
+- [x] Adicionar acao manual para reindexar a biblioteca e reler metadados.
 - [x] Atualizar faixas por diff de URI sem limpar todo o modelo de musicas.
 - [x] Atualizar agregados de albums/artistas sem recalculo completo.
 
@@ -67,7 +68,7 @@ Objetivo: reproduzir a experiencia central de biblioteca do GNOME Music.
 - [x] Acionamento de item: tocar faixa, album ou artista.
 - [x] Estado vazio basico.
 - [x] Agrupar faixas por disco visualmente nos detalhes de album/artista.
-- [ ] Adicionar selecao de pasta pelo estado vazio.
+- [x] Adicionar selecao de pasta pelo estado vazio.
 - [x] Melhorar responsividade basica em telas estreitas.
 
 Entregavel: usuario consegue navegar, procurar e iniciar reproducao pela biblioteca.
@@ -136,15 +137,14 @@ Entregavel: app empacotavel e sustentavel.
 
 ## Prioridade Atual
 
-1. Validar o workflow de CI no GitHub Actions apos o proximo push.
-2. Testar regressao manual em colecoes maiores e em telas estreitas reais.
-3. Melhorar a selecao de pasta a partir do estado vazio.
-4. Evoluir o indice persistente com acoes manuais de rescan/reindexacao.
-5. Ampliar acessibilidade com auditoria de navegacao por teclado e leitor de tela.
+1. Testar regressao manual em colecoes maiores e em telas estreitas reais.
+2. Ampliar acessibilidade com auditoria de navegacao por teclado e leitor de tela.
+3. Avaliar controles avancados de biblioteca, como limpar cache e mostrar data do ultimo indice.
+4. Planejar uma opcao de diagnostico para relatar erros de metadados por arquivo.
 
 ## Como Retomar
 
 - Comece lendo `agent.md`, este roadmap e `docs/ARCHITECTURE.md`.
 - Rode `python3 -m unittest discover -s tests` antes de mexer em comportamento existente.
 - Para mudancas de UI/playback, use `docs/MANUAL_TESTS.md`.
-- O proximo trabalho recomendado e validar o CI remoto apos o push e fazer uma rodada de regressao manual focada em colecoes grandes, telas estreitas e preferencias novas.
+- O proximo trabalho recomendado e fazer uma rodada de regressao manual focada em colecoes grandes, telas estreitas, preferencias novas e fluxo de primeiro uso.

@@ -6,5 +6,6 @@
 /dist/
 /repo/
 /data/schemas/gschemas.compiled
+*.flatpak
 __pycache__/
 *.py[cod]

@@ -135,6 +135,8 @@ class SoundsGoodApplication(Adw.Application):
             ("about", self._on_about, ("app.about", ["F1"])),
             ("preferences", self._on_preferences, ("app.preferences", ["<Ctrl>comma"])),
             ("quit", self._on_quit, ("app.quit", ["<Ctrl>Q"])),
+            ("select_music_folder", self._on_select_music_folder, None),
+            ("reindex_library", self._on_reindex_library, ("app.reindex_library", ["<Ctrl><Shift>R"])),
             ("play_pause", self._on_play_pause, ("app.play_pause", ["<Ctrl>space", "AudioPlay", "AudioPause"])),
             ("song_next", self._on_song_next, ("app.song_next", ["<Ctrl>N", "AudioNext"])),
             ("song_previous", self._on_song_previous, ("app.song_previous", ["<Ctrl>B", "AudioPrev"])),
@@ -163,6 +165,12 @@ class SoundsGoodApplication(Adw.Application):
     def _on_quit(self, action, param):
         if self._window:
             self._window.destroy()
+
+    def _on_select_music_folder(self, action, param):
+        self.select_music_folder(self._window)
+
+    def _on_reindex_library(self, action, param):
+        self.reindex_library()
 
     def _on_play_pause(self, action, param):
         self._player.play_pause()
@@ -204,6 +212,36 @@ class SoundsGoodApplication(Adw.Application):
             return Gio.Settings.new(schema_id)
 
         return MemorySettings()
+
+    def select_music_folder(self, parent=None, on_selected=None):
+        dialog = Gtk.FileDialog(title=_("Select Music Folder"))
+        dialog.select_folder(
+            parent or self._window,
+            None,
+            lambda file_dialog, result: self._on_music_folder_selected(
+                file_dialog,
+                result,
+                on_selected,
+            ),
+        )
+
+    def _on_music_folder_selected(self, dialog, result, on_selected=None):
+        try:
+            folder = dialog.select_folder_finish(result)
+        except Exception:
+            return
+
+        path = folder.get_path()
+        if not path:
+            return
+
+        self._settings.set_string("music-dir", path)
+        self._library.scan(path, force=True, refresh_metadata=True)
+        if on_selected:
+            on_selected(path)
+
+    def reindex_library(self):
+        self._library.scan(force=True, refresh_metadata=True)
 
     def apply_color_scheme(self):
         scheme = self._settings.get_string("color-scheme")
@@ -316,7 +354,7 @@ class SoundsGoodApplication(Adw.Application):
 
 def main():
     application_id = os.environ.get("APPLICATION_ID", "io.github.n1ghthill.soundsgood")
-    version = os.environ.get("VERSION", "0.1.0")
+    version = os.environ.get("VERSION", "0.1.4")
 
     app = SoundsGoodApplication(application_id, version)
     app.run(sys.argv)
