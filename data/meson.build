@@ -40,6 +40,14 @@ configure_file(
 )
 
 # Install icons
+foreach icon_size : ['16', '24', '32', '48', '64', '128']
+    install_data(
+        'icons' / 'io.github.n1ghthill.soundsgood-@0@.png'.format(icon_size),
+        rename: 'io.github.n1ghthill.soundsgood.png',
+        install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', '@0@x@0@'.format(icon_size), 'apps')
+    )
+endforeach
+
 install_data(
     'icons' / 'io.github.n1ghthill.soundsgood.png',
     install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', '256x256', 'apps')

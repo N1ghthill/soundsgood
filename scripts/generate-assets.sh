@@ -20,6 +20,8 @@ require_command inkscape
 
 if [ -f "$SOURCE_DIR/brand-icon.png" ]; then
   magick "$SOURCE_DIR/brand-icon.png" \
+    -alpha set \
+    -trim +repage \
     -resize 256x256 \
     -background none \
     -gravity center \
@@ -27,6 +29,8 @@ if [ -f "$SOURCE_DIR/brand-icon.png" ]; then
     "$SOURCE_DIR/icon-256.png"
 else
   magick "$ROOT_DIR/data/icons/io.github.n1ghthill.soundsgood.png" \
+    -alpha set \
+    -trim +repage \
     -resize 256x256 \
     -background none \
     -gravity center \
