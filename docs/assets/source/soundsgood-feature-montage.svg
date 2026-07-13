@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="0.5" stop-color="#f0f8f3"/>
+      <stop offset="1" stop-color="#fff4d7"/>
+    </linearGradient>
+    <clipPath id="clip"><rect x="0" y="0" width="640" height="300" rx="18"/></clipPath>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <text x="98" y="94" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="52" font-weight="700" fill="#202124">SoundsGood library views</text>
+  <text x="100" y="140" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="25" fill="#5d6468">Albums, artists, songs and search built around local music.</text>
+
+  <text x="100" y="170" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="30" font-weight="700" fill="#202124">Albums</text>
+  <g transform="translate(100 190)">
+    <rect width="640" height="300" rx="18" fill="#ffffff"/>
+    <image xlink:href="file:///home/irving/ruas/repositorios/soundsgood/docs/screenshots/albums.png" width="640" height="300" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+
+  <text x="860" y="170" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="30" font-weight="700" fill="#202124">Artists</text>
+  <g transform="translate(860 190)">
+    <rect width="640" height="300" rx="18" fill="#ffffff"/>
+    <image xlink:href="file:///home/irving/ruas/repositorios/soundsgood/docs/screenshots/artists.png" width="640" height="300" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+  <text x="100" y="560" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="30" font-weight="700" fill="#202124">Songs</text>
+  <g transform="translate(100 585)">
+    <rect width="640" height="300" rx="18" fill="#ffffff"/>
+    <image xlink:href="file:///home/irving/ruas/repositorios/soundsgood/docs/screenshots/songs.png" width="640" height="300" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+
+  <text x="860" y="560" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="30" font-weight="700" fill="#202124">Search</text>
+  <g transform="translate(860 585)">
+    <rect width="640" height="300" rx="18" fill="#ffffff"/>
+    <image xlink:href="file:///home/irving/ruas/repositorios/soundsgood/docs/screenshots/search.png" width="640" height="300" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+</svg>

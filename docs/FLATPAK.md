@@ -168,6 +168,8 @@ Se o app passar a depender somente de portal/document portal para pastas escolhi
 ## Checklist de Release
 
 - Criar release/tag versionada.
+- Atualizar screenshots, se a UI mudou.
+- Rodar `scripts/generate-assets.sh` se screenshots, marca ou versao mudaram.
 - Buildar e instalar o Flatpak localmente.
 - Publicar o repositorio Flatpak com `scripts/publish-flatpak-repo.sh`.
 - Testar `flatpak update --user io.github.n1ghthill.soundsgood`.

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fbfcfd"/>
+      <stop offset="0.52" stop-color="#eef7f2"/>
+      <stop offset="1" stop-color="#fff5dc"/>
+    </linearGradient>
+    <clipPath id="shotClip"><rect x="0" y="0" width="660" height="356" rx="22"/></clipPath>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1200" height="12" fill="#3584e4"/>
+  <rect x="400" y="0" width="400" height="12" fill="#2ec27e"/>
+  <rect x="800" y="0" width="400" height="12" fill="#e5a50a"/>
+  <circle cx="1060" cy="92" r="132" fill="#3584e4" opacity="0.08"/>
+  <circle cx="1028" cy="562" r="190" fill="#2ec27e" opacity="0.08"/>
+
+  <g transform="translate(72 96)">
+    <image href="icon-256.png" width="104" height="104"/>
+    <text x="0" y="186" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="64" font-weight="700" fill="#202124">SoundsGood</text>
+    <text x="2" y="236" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="27" font-weight="500" fill="#3d4446">Local music player for Linux</text>
+    <text x="2" y="304" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="22" fill="#5d6468">Albums, artists, songs and search.</text>
+    <text x="2" y="340" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="22" fill="#5d6468">GStreamer playback and media keys.</text>
+  </g>
+
+  <g transform="translate(610 176)">
+    <rect width="532" height="287" rx="22" fill="#ffffff"/>
+    <image xlink:href="file:///home/irving/ruas/repositorios/soundsgood/docs/screenshots/albums.png" width="532" height="287" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+</svg>

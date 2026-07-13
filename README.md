@@ -1,5 +1,7 @@
 # SoundsGood
 
+![SoundsGood project banner](docs/assets/soundsgood-hero.png)
+
 [![License: GPL-2.0-or-later](https://img.shields.io/badge/License-GPL--2.0--or--later-blue.svg)](COPYING)
 [![Release](https://img.shields.io/github/v/release/N1ghthill/soundsgood)](https://github.com/N1ghthill/soundsgood/releases)
 [![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)](#installation)
@@ -135,6 +137,21 @@ flatpak run io.github.n1ghthill.soundsgood
 ```
 
 More packaging notes are available in [docs/FLATPAK.md](docs/FLATPAK.md).
+
+## Media Kit
+
+Generated presentation assets are available in [docs/assets](docs/assets):
+
+- [Project banner](docs/assets/soundsgood-hero.png)
+- [Social preview card](docs/assets/soundsgood-social-card.png)
+- [Release card](docs/assets/soundsgood-release-card.png)
+- [Feature montage](docs/assets/soundsgood-feature-montage.png)
+
+Regenerate them after updating screenshots, branding, or the project version:
+
+```bash
+scripts/generate-assets.sh
+```
 
 ## Project Status
 
