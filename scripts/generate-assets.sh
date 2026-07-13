@@ -21,14 +21,17 @@ require_command inkscape
 if [ -f "$SOURCE_DIR/brand-icon.png" ]; then
   magick "$SOURCE_DIR/brand-icon.png" \
     -resize 256x256 \
+    -background none \
+    -gravity center \
+    -extent 256x256 \
     "$SOURCE_DIR/icon-256.png"
 else
-  inkscape "$ROOT_DIR/data/icons/io.github.n1ghthill.soundsgood.svg" \
-    --export-type=png \
-    --export-filename="$SOURCE_DIR/icon-256.png" \
-    --export-width=256 \
-    --export-height=256 \
-    >/dev/null 2>&1
+  magick "$ROOT_DIR/data/icons/io.github.n1ghthill.soundsgood.png" \
+    -resize 256x256 \
+    -background none \
+    -gravity center \
+    -extent 256x256 \
+    "$SOURCE_DIR/icon-256.png"
 fi
 
 if [ -f "$SOURCE_DIR/brand-logo.png" ]; then

@@ -41,6 +41,11 @@ configure_file(
 
 # Install icons
 install_data(
+    'icons' / 'io.github.n1ghthill.soundsgood.png',
+    install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', '256x256', 'apps')
+)
+
+install_data(
     'icons' / 'io.github.n1ghthill.soundsgood.svg',
     install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', 'scalable', 'apps')
 )

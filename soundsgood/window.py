@@ -27,6 +27,7 @@ class Window(Adw.ApplicationWindow):
         self._app = application
         self._settings = application.props.settings
         self.set_title(_("SoundsGood"))
+        self.set_icon_name(application.get_application_id())
         self.set_default_size(
             self._settings.get_int("window-width"),
             self._settings.get_int("window-height"),

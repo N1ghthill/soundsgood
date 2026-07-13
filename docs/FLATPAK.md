@@ -46,6 +46,7 @@ Esse ID deve permanecer sincronizado entre:
 - `data/metainfo/io.github.n1ghthill.soundsgood.metainfo.xml.in`
 - `data/desktop/io.github.n1ghthill.soundsgood.desktop.in`
 - `data/schemas/io.github.n1ghthill.soundsgood.gschema.xml`
+- `data/icons/io.github.n1ghthill.soundsgood.png`
 - `data/icons/io.github.n1ghthill.soundsgood.svg`
 
 ## Build Local

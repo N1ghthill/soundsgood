@@ -298,6 +298,7 @@ class SoundsGoodApplication(Adw.Application):
 
     def do_startup(self):
         Adw.Application.do_startup(self)
+        Gtk.Window.set_default_icon_name(self.get_application_id())
         self.apply_color_scheme()
         if hasattr(self._settings, "connect"):
             self._settings_changed_handler = self._settings.connect(
