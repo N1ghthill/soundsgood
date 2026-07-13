@@ -18,93 +18,81 @@ require_command() {
 require_command magick
 require_command inkscape
 
-inkscape "$ROOT_DIR/data/icons/io.github.n1ghthill.soundsgood.svg" \
-  --export-type=png \
-  --export-filename="$SOURCE_DIR/icon-256.png" \
-  --export-width=256 \
-  --export-height=256 \
-  >/dev/null 2>&1
+if [ -f "$SOURCE_DIR/brand-icon.png" ]; then
+  magick "$SOURCE_DIR/brand-icon.png" \
+    -resize 256x256 \
+    "$SOURCE_DIR/icon-256.png"
+else
+  inkscape "$ROOT_DIR/data/icons/io.github.n1ghthill.soundsgood.svg" \
+    --export-type=png \
+    --export-filename="$SOURCE_DIR/icon-256.png" \
+    --export-width=256 \
+    --export-height=256 \
+    >/dev/null 2>&1
+fi
+
+if [ -f "$SOURCE_DIR/brand-logo.png" ]; then
+  LOGO_IMAGE="brand-logo.png"
+else
+  LOGO_IMAGE="icon-256.png"
+fi
 
 cat > "$SOURCE_DIR/soundsgood-hero.svg" <<SVG
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1600" height="900" viewBox="0 0 1600 900">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#f7f9fb"/>
-      <stop offset="0.45" stop-color="#eef6f0"/>
-      <stop offset="1" stop-color="#f8f0d9"/>
+      <stop offset="0" stop-color="#050812"/>
+      <stop offset="0.55" stop-color="#09162d"/>
+      <stop offset="1" stop-color="#12061f"/>
     </linearGradient>
-    <linearGradient id="bar" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#3584e4"/>
-      <stop offset="0.55" stop-color="#2ec27e"/>
-      <stop offset="1" stop-color="#e5a50a"/>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#16d9ff"/>
+      <stop offset="1" stop-color="#9b4dff"/>
     </linearGradient>
-    <clipPath id="shotClip"><rect x="0" y="0" width="900" height="486" rx="24"/></clipPath>
-    <clipPath id="smallClip"><rect x="0" y="0" width="292" height="158" rx="16"/></clipPath>
   </defs>
   <rect width="1600" height="900" fill="url(#bg)"/>
-  <rect x="0" y="0" width="1600" height="14" fill="url(#bar)"/>
-  <circle cx="1380" cy="120" r="170" fill="#3584e4" opacity="0.08"/>
-  <circle cx="1240" cy="770" r="220" fill="#2ec27e" opacity="0.09"/>
-  <circle cx="240" cy="810" r="190" fill="#e5a50a" opacity="0.08"/>
+  <circle cx="1360" cy="120" r="260" fill="#2857ff" opacity="0.18"/>
+  <circle cx="690" cy="760" r="360" fill="#00b7ff" opacity="0.10"/>
+  <circle cx="1180" cy="770" r="300" fill="#8b2cff" opacity="0.16"/>
+  <path d="M530 622 C650 560 720 680 820 600 S1000 510 1110 580 S1310 680 1490 540" fill="none" stroke="#16d9ff" stroke-width="6" opacity="0.33"/>
+  <path d="M530 650 C650 588 720 708 820 628 S1000 538 1110 608 S1310 708 1490 568" fill="none" stroke="#9b4dff" stroke-width="5" opacity="0.25"/>
 
-  <g transform="translate(110 118)">
-    <image href="icon-256.png" x="0" y="0" width="116" height="116"/>
-    <text x="0" y="190" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="86" font-weight="700" fill="#202124">SoundsGood</text>
-    <text x="4" y="252" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="34" font-weight="500" fill="#3b4144">Local-first music player for GNOME</text>
-    <text x="4" y="326" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="25" fill="#596064">Albums • Artists • Songs • Search</text>
-    <text x="4" y="372" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="25" fill="#596064">GStreamer playback • MPRIS controls • Flatpak</text>
-    <rect x="4" y="430" width="428" height="62" rx="31" fill="#241f31"/>
-    <text x="38" y="471" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="24" font-weight="700" fill="#ffffff">Built for local music libraries</text>
+  <g transform="translate(76 96)">
+    <image href="$LOGO_IMAGE" x="0" y="0" width="570" height="154" preserveAspectRatio="xMinYMid meet"/>
+    <rect x="4" y="232" width="70" height="5" rx="2.5" fill="url(#accent)"/>
+    <text x="4" y="304" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="36" fill="#f5f7ff">Local-first music player</text>
+    <text x="4" y="352" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="36" fill="#f5f7ff">for GNOME desktops.</text>
+    <text x="4" y="430" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="24" fill="#a8b5d4">Albums • Artists • Songs • Search</text>
+    <text x="4" y="470" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="24" fill="#a8b5d4">GStreamer playback • MPRIS controls • Flatpak</text>
   </g>
 
-  <g transform="translate(720 150)">
-    <rect width="820" height="443" rx="24" fill="#ffffff"/>
-    <image xlink:href="file://$ROOT_DIR/docs/screenshots/albums.png" width="820" height="443" preserveAspectRatio="xMidYMid slice"/>
+  <g transform="translate(800 138)">
+    <rect x="-10" y="-10" width="740" height="493" rx="28" fill="#4d7dff" opacity="0.38"/>
+    <rect width="720" height="480" rx="22" fill="#111827"/>
+    <image xlink:href="file://$ROOT_DIR/docs/screenshots/albums.png" width="720" height="480" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g transform="translate(740 668)">
-    <rect width="255" height="138" rx="16" fill="#ffffff"/>
-    <image xlink:href="file://$ROOT_DIR/docs/screenshots/artists.png" width="255" height="138" preserveAspectRatio="xMidYMid slice"/>
+  <g transform="translate(820 704)">
+    <rect width="228" height="152" rx="14" fill="#111827"/>
+    <image xlink:href="file://$ROOT_DIR/docs/screenshots/artists.png" width="228" height="152" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g transform="translate(1022 668)">
-    <rect width="255" height="138" rx="16" fill="#ffffff"/>
-    <image xlink:href="file://$ROOT_DIR/docs/screenshots/songs.png" width="255" height="138" preserveAspectRatio="xMidYMid slice"/>
+  <g transform="translate(1082 704)">
+    <rect width="228" height="152" rx="14" fill="#111827"/>
+    <image xlink:href="file://$ROOT_DIR/docs/screenshots/songs.png" width="228" height="152" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g transform="translate(1304 668)">
-    <rect width="255" height="138" rx="16" fill="#ffffff"/>
-    <image xlink:href="file://$ROOT_DIR/docs/screenshots/search.png" width="255" height="138" preserveAspectRatio="xMidYMid slice"/>
+  <g transform="translate(1344 704)">
+    <rect width="228" height="152" rx="14" fill="#111827"/>
+    <image xlink:href="file://$ROOT_DIR/docs/screenshots/search.png" width="228" height="152" preserveAspectRatio="xMidYMid slice"/>
   </g>
 </svg>
 SVG
 
 cat > "$SOURCE_DIR/soundsgood-social-card.svg" <<SVG
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="630" viewBox="0 0 1200 630">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#fbfcfd"/>
-      <stop offset="0.52" stop-color="#eef7f2"/>
-      <stop offset="1" stop-color="#fff5dc"/>
-    </linearGradient>
-    <clipPath id="shotClip"><rect x="0" y="0" width="660" height="356" rx="22"/></clipPath>
-  </defs>
-  <rect width="1200" height="630" fill="url(#bg)"/>
-  <rect x="0" y="0" width="1200" height="12" fill="#3584e4"/>
-  <rect x="400" y="0" width="400" height="12" fill="#2ec27e"/>
-  <rect x="800" y="0" width="400" height="12" fill="#e5a50a"/>
-  <circle cx="1060" cy="92" r="132" fill="#3584e4" opacity="0.08"/>
-  <circle cx="1028" cy="562" r="190" fill="#2ec27e" opacity="0.08"/>
-
-  <g transform="translate(72 96)">
-    <image href="icon-256.png" width="104" height="104"/>
-    <text x="0" y="186" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="64" font-weight="700" fill="#202124">SoundsGood</text>
-    <text x="2" y="236" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="27" font-weight="500" fill="#3d4446">Local music player for Linux</text>
-    <text x="2" y="304" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="22" fill="#5d6468">Albums, artists, songs and search.</text>
-    <text x="2" y="340" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="22" fill="#5d6468">GStreamer playback and media keys.</text>
-  </g>
-
-  <g transform="translate(610 176)">
-    <rect width="532" height="287" rx="22" fill="#ffffff"/>
-    <image xlink:href="file://$ROOT_DIR/docs/screenshots/albums.png" width="532" height="287" preserveAspectRatio="xMidYMid slice"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#050812"/>
+  <image href="$LOGO_IMAGE" x="80" y="90" width="560" height="152" preserveAspectRatio="xMinYMid meet"/>
+  <text x="84" y="322" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="34" fill="#f5f7ff">A modern local music player</text>
+  <text x="84" y="370" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="34" fill="#f5f7ff">for Linux desktops.</text>
+  <rect x="84" y="430" width="70" height="5" rx="2.5" fill="#16d9ff"/>
 </svg>
 SVG
 
@@ -112,29 +100,28 @@ cat > "$SOURCE_DIR/soundsgood-release-card.svg" <<SVG
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="675" viewBox="0 0 1200 675">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#f6f8fb"/>
-      <stop offset="0.58" stop-color="#edf8f1"/>
-      <stop offset="1" stop-color="#fff0ca"/>
+      <stop offset="0" stop-color="#050812"/>
+      <stop offset="0.6" stop-color="#09162d"/>
+      <stop offset="1" stop-color="#160927"/>
     </linearGradient>
-    <clipPath id="shotClip"><rect x="0" y="0" width="760" height="410" rx="20"/></clipPath>
   </defs>
   <rect width="1200" height="675" fill="url(#bg)"/>
-  <circle cx="172" cy="585" r="180" fill="#e5a50a" opacity="0.09"/>
-  <circle cx="1100" cy="150" r="210" fill="#3584e4" opacity="0.08"/>
-  <g transform="translate(72 70)">
-    <image href="icon-256.png" width="86" height="86"/>
-    <text x="0" y="164" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="48" font-weight="700" fill="#202124">SoundsGood</text>
-    <text x="0" y="216" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="25" font-weight="500" fill="#3e4547">Release $VERSION</text>
-    <rect x="0" y="280" width="370" height="54" rx="27" fill="#3584e4"/>
-    <text x="28" y="315" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Playlist opening</text>
-    <rect x="0" y="354" width="370" height="54" rx="27" fill="#2ec27e"/>
-    <text x="28" y="389" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Persistent library cache</text>
-    <rect x="0" y="428" width="370" height="54" rx="27" fill="#241f31"/>
-    <text x="28" y="463" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">MPRIS media controls</text>
+  <circle cx="1040" cy="92" r="180" fill="#2857ff" opacity="0.20"/>
+  <circle cx="1040" cy="600" r="250" fill="#8b2cff" opacity="0.15"/>
+  <g transform="translate(58 70)">
+    <image href="$LOGO_IMAGE" x="0" y="0" width="390" height="106" preserveAspectRatio="xMinYMid meet"/>
+    <text x="4" y="176" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="28" font-weight="700" fill="#f5f7ff">Release $VERSION</text>
+    <rect x="4" y="238" width="350" height="54" rx="27" fill="#246bfe"/>
+    <text x="32" y="273" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Playlist opening</text>
+    <rect x="4" y="316" width="350" height="54" rx="27" fill="#7738ff"/>
+    <text x="32" y="351" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Persistent library cache</text>
+    <rect x="4" y="394" width="350" height="54" rx="27" fill="#101b35"/>
+    <text x="32" y="429" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">MPRIS media controls</text>
   </g>
-  <g transform="translate(530 132)">
-    <rect width="600" height="324" rx="20" fill="#ffffff"/>
-    <image xlink:href="file://$ROOT_DIR/docs/screenshots/search.png" width="600" height="324" preserveAspectRatio="xMidYMid slice"/>
+  <g transform="translate(464 118)">
+    <rect x="-8" y="-8" width="692" height="477" rx="22" fill="#4d7dff" opacity="0.35"/>
+    <rect width="676" height="451" rx="18" fill="#111827"/>
+    <image xlink:href="file://$ROOT_DIR/docs/screenshots/search.png" width="676" height="451" preserveAspectRatio="xMidYMid slice"/>
   </g>
 </svg>
 SVG
@@ -143,42 +130,46 @@ cat > "$SOURCE_DIR/soundsgood-feature-montage.svg" <<SVG
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1600" height="900" viewBox="0 0 1600 900">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#f8fafc"/>
-      <stop offset="0.5" stop-color="#f0f8f3"/>
-      <stop offset="1" stop-color="#fff4d7"/>
+      <stop offset="0" stop-color="#050812"/>
+      <stop offset="0.54" stop-color="#09162d"/>
+      <stop offset="1" stop-color="#160927"/>
     </linearGradient>
-    <clipPath id="clip"><rect x="0" y="0" width="640" height="300" rx="18"/></clipPath>
   </defs>
   <rect width="1600" height="900" fill="url(#bg)"/>
-  <text x="98" y="94" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="52" font-weight="700" fill="#202124">SoundsGood library views</text>
-  <text x="100" y="140" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="25" fill="#5d6468">Albums, artists, songs and search built around local music.</text>
+  <image href="$LOGO_IMAGE" x="90" y="62" width="470" height="127" preserveAspectRatio="xMinYMid meet"/>
+  <text x="96" y="218" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="27" fill="#a8b5d4">Dark library views for local music collections.</text>
 
-  <text x="100" y="170" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="30" font-weight="700" fill="#202124">Albums</text>
-  <g transform="translate(100 190)">
-    <rect width="640" height="300" rx="18" fill="#ffffff"/>
-    <image xlink:href="file://$ROOT_DIR/docs/screenshots/albums.png" width="640" height="300" preserveAspectRatio="xMidYMid slice"/>
+  <text x="100" y="276" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="30" font-weight="700" fill="#f5f7ff">Albums</text>
+  <g transform="translate(100 300)">
+    <rect width="640" height="250" rx="16" fill="#111827"/>
+    <image xlink:href="file://$ROOT_DIR/docs/screenshots/albums.png" width="640" height="250" preserveAspectRatio="xMidYMin slice"/>
   </g>
 
-  <text x="860" y="170" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="30" font-weight="700" fill="#202124">Artists</text>
-  <g transform="translate(860 190)">
-    <rect width="640" height="300" rx="18" fill="#ffffff"/>
-    <image xlink:href="file://$ROOT_DIR/docs/screenshots/artists.png" width="640" height="300" preserveAspectRatio="xMidYMid slice"/>
-  </g>
-  <text x="100" y="560" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="30" font-weight="700" fill="#202124">Songs</text>
-  <g transform="translate(100 585)">
-    <rect width="640" height="300" rx="18" fill="#ffffff"/>
-    <image xlink:href="file://$ROOT_DIR/docs/screenshots/songs.png" width="640" height="300" preserveAspectRatio="xMidYMid slice"/>
+  <text x="860" y="276" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="30" font-weight="700" fill="#f5f7ff">Artists</text>
+  <g transform="translate(860 300)">
+    <rect width="640" height="250" rx="16" fill="#111827"/>
+    <image xlink:href="file://$ROOT_DIR/docs/screenshots/artists.png" width="640" height="250" preserveAspectRatio="xMidYMin slice"/>
   </g>
 
-  <text x="860" y="560" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="30" font-weight="700" fill="#202124">Search</text>
-  <g transform="translate(860 585)">
-    <rect width="640" height="300" rx="18" fill="#ffffff"/>
-    <image xlink:href="file://$ROOT_DIR/docs/screenshots/search.png" width="640" height="300" preserveAspectRatio="xMidYMid slice"/>
+  <text x="100" y="624" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="30" font-weight="700" fill="#f5f7ff">Songs</text>
+  <g transform="translate(100 648)">
+    <rect width="640" height="220" rx="16" fill="#111827"/>
+    <image xlink:href="file://$ROOT_DIR/docs/screenshots/songs.png" width="640" height="220" preserveAspectRatio="xMidYMin slice"/>
+  </g>
+
+  <text x="860" y="624" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="30" font-weight="700" fill="#f5f7ff">Search</text>
+  <g transform="translate(860 648)">
+    <rect width="640" height="220" rx="16" fill="#111827"/>
+    <image xlink:href="file://$ROOT_DIR/docs/screenshots/search.png" width="640" height="220" preserveAspectRatio="xMidYMin slice"/>
   </g>
 </svg>
 SVG
 
-inkscape "$SOURCE_DIR/soundsgood-hero.svg" --export-type=png --export-filename="$ASSET_DIR/soundsgood-hero.png" >/dev/null
+inkscape "$SOURCE_DIR/soundsgood-hero.svg" \
+  --export-type=png \
+  --export-filename="$ASSET_DIR/soundsgood-hero.png" \
+  >/dev/null
+
 if [ -f "$SOURCE_DIR/social-preview-custom.png" ]; then
   magick "$SOURCE_DIR/social-preview-custom.png" \
     -resize 1200x630^ \
@@ -191,8 +182,16 @@ else
     --export-filename="$ASSET_DIR/soundsgood-social-card.png" \
     >/dev/null
 fi
-inkscape "$SOURCE_DIR/soundsgood-release-card.svg" --export-type=png --export-filename="$ASSET_DIR/soundsgood-release-card.png" >/dev/null
-inkscape "$SOURCE_DIR/soundsgood-feature-montage.svg" --export-type=png --export-filename="$ASSET_DIR/soundsgood-feature-montage.png" >/dev/null
+
+inkscape "$SOURCE_DIR/soundsgood-release-card.svg" \
+  --export-type=png \
+  --export-filename="$ASSET_DIR/soundsgood-release-card.png" \
+  >/dev/null
+
+inkscape "$SOURCE_DIR/soundsgood-feature-montage.svg" \
+  --export-type=png \
+  --export-filename="$ASSET_DIR/soundsgood-feature-montage.png" \
+  >/dev/null
 
 magick "$ASSET_DIR/soundsgood-social-card.png" \
   -resize 640x336 \

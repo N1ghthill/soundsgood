@@ -19,9 +19,9 @@ Generated PNGs:
 - `soundsgood-release-card.png`: release announcement card.
 - `soundsgood-feature-montage.png`: overview card with the main library views.
 
-The SVG sources, intermediate icon render, and custom social preview source live
-in `source/`. Most assets are composed from the real app icon and screenshots
-already stored in the repository.
+The SVG sources, custom brand images, intermediate icon render, and custom
+social preview source live in `source/`. The generated assets use the dark-mode
+screenshots stored in `docs/screenshots`.
 
 ## Recommended Use
 

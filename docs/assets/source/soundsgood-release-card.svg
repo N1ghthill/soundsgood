@@ -1,28 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="675" viewBox="0 0 1200 675">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#f6f8fb"/>
-      <stop offset="0.58" stop-color="#edf8f1"/>
-      <stop offset="1" stop-color="#fff0ca"/>
+      <stop offset="0" stop-color="#050812"/>
+      <stop offset="0.6" stop-color="#09162d"/>
+      <stop offset="1" stop-color="#160927"/>
     </linearGradient>
-    <clipPath id="shotClip"><rect x="0" y="0" width="760" height="410" rx="20"/></clipPath>
   </defs>
   <rect width="1200" height="675" fill="url(#bg)"/>
-  <circle cx="172" cy="585" r="180" fill="#e5a50a" opacity="0.09"/>
-  <circle cx="1100" cy="150" r="210" fill="#3584e4" opacity="0.08"/>
-  <g transform="translate(72 70)">
-    <image href="icon-256.png" width="86" height="86"/>
-    <text x="0" y="164" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="48" font-weight="700" fill="#202124">SoundsGood</text>
-    <text x="0" y="216" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="25" font-weight="500" fill="#3e4547">Release 0.1.6</text>
-    <rect x="0" y="280" width="370" height="54" rx="27" fill="#3584e4"/>
-    <text x="28" y="315" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Playlist opening</text>
-    <rect x="0" y="354" width="370" height="54" rx="27" fill="#2ec27e"/>
-    <text x="28" y="389" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Persistent library cache</text>
-    <rect x="0" y="428" width="370" height="54" rx="27" fill="#241f31"/>
-    <text x="28" y="463" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">MPRIS media controls</text>
+  <circle cx="1040" cy="92" r="180" fill="#2857ff" opacity="0.20"/>
+  <circle cx="1040" cy="600" r="250" fill="#8b2cff" opacity="0.15"/>
+  <g transform="translate(58 70)">
+    <image href="brand-logo.png" x="0" y="0" width="390" height="106" preserveAspectRatio="xMinYMid meet"/>
+    <text x="4" y="176" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="28" font-weight="700" fill="#f5f7ff">Release 0.1.6</text>
+    <rect x="4" y="238" width="350" height="54" rx="27" fill="#246bfe"/>
+    <text x="32" y="273" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Playlist opening</text>
+    <rect x="4" y="316" width="350" height="54" rx="27" fill="#7738ff"/>
+    <text x="32" y="351" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Persistent library cache</text>
+    <rect x="4" y="394" width="350" height="54" rx="27" fill="#101b35"/>
+    <text x="32" y="429" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">MPRIS media controls</text>
   </g>
-  <g transform="translate(530 132)">
-    <rect width="600" height="324" rx="20" fill="#ffffff"/>
-    <image xlink:href="file:///home/irving/ruas/repositorios/soundsgood/docs/screenshots/search.png" width="600" height="324" preserveAspectRatio="xMidYMid slice"/>
+  <g transform="translate(464 118)">
+    <rect x="-8" y="-8" width="692" height="477" rx="22" fill="#4d7dff" opacity="0.35"/>
+    <rect width="676" height="451" rx="18" fill="#111827"/>
+    <image xlink:href="file:///home/irving/ruas/repositorios/soundsgood/docs/screenshots/search.png" width="676" height="451" preserveAspectRatio="xMidYMid slice"/>
   </g>
 </svg>

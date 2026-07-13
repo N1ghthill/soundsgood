@@ -1,48 +1,46 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1600" height="900" viewBox="0 0 1600 900">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#f7f9fb"/>
-      <stop offset="0.45" stop-color="#eef6f0"/>
-      <stop offset="1" stop-color="#f8f0d9"/>
+      <stop offset="0" stop-color="#050812"/>
+      <stop offset="0.55" stop-color="#09162d"/>
+      <stop offset="1" stop-color="#12061f"/>
     </linearGradient>
-    <linearGradient id="bar" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#3584e4"/>
-      <stop offset="0.55" stop-color="#2ec27e"/>
-      <stop offset="1" stop-color="#e5a50a"/>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#16d9ff"/>
+      <stop offset="1" stop-color="#9b4dff"/>
     </linearGradient>
-    <clipPath id="shotClip"><rect x="0" y="0" width="900" height="486" rx="24"/></clipPath>
-    <clipPath id="smallClip"><rect x="0" y="0" width="292" height="158" rx="16"/></clipPath>
   </defs>
   <rect width="1600" height="900" fill="url(#bg)"/>
-  <rect x="0" y="0" width="1600" height="14" fill="url(#bar)"/>
-  <circle cx="1380" cy="120" r="170" fill="#3584e4" opacity="0.08"/>
-  <circle cx="1240" cy="770" r="220" fill="#2ec27e" opacity="0.09"/>
-  <circle cx="240" cy="810" r="190" fill="#e5a50a" opacity="0.08"/>
+  <circle cx="1360" cy="120" r="260" fill="#2857ff" opacity="0.18"/>
+  <circle cx="690" cy="760" r="360" fill="#00b7ff" opacity="0.10"/>
+  <circle cx="1180" cy="770" r="300" fill="#8b2cff" opacity="0.16"/>
+  <path d="M530 622 C650 560 720 680 820 600 S1000 510 1110 580 S1310 680 1490 540" fill="none" stroke="#16d9ff" stroke-width="6" opacity="0.33"/>
+  <path d="M530 650 C650 588 720 708 820 628 S1000 538 1110 608 S1310 708 1490 568" fill="none" stroke="#9b4dff" stroke-width="5" opacity="0.25"/>
 
-  <g transform="translate(110 118)">
-    <image href="icon-256.png" x="0" y="0" width="116" height="116"/>
-    <text x="0" y="190" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="86" font-weight="700" fill="#202124">SoundsGood</text>
-    <text x="4" y="252" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="34" font-weight="500" fill="#3b4144">Local-first music player for GNOME</text>
-    <text x="4" y="326" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="25" fill="#596064">Albums • Artists • Songs • Search</text>
-    <text x="4" y="372" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="25" fill="#596064">GStreamer playback • MPRIS controls • Flatpak</text>
-    <rect x="4" y="430" width="428" height="62" rx="31" fill="#241f31"/>
-    <text x="38" y="471" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="24" font-weight="700" fill="#ffffff">Built for local music libraries</text>
+  <g transform="translate(76 96)">
+    <image href="brand-logo.png" x="0" y="0" width="570" height="154" preserveAspectRatio="xMinYMid meet"/>
+    <rect x="4" y="232" width="70" height="5" rx="2.5" fill="url(#accent)"/>
+    <text x="4" y="304" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="36" fill="#f5f7ff">Local-first music player</text>
+    <text x="4" y="352" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="36" fill="#f5f7ff">for GNOME desktops.</text>
+    <text x="4" y="430" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="24" fill="#a8b5d4">Albums • Artists • Songs • Search</text>
+    <text x="4" y="470" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="24" fill="#a8b5d4">GStreamer playback • MPRIS controls • Flatpak</text>
   </g>
 
-  <g transform="translate(720 150)">
-    <rect width="820" height="443" rx="24" fill="#ffffff"/>
-    <image xlink:href="file:///home/irving/ruas/repositorios/soundsgood/docs/screenshots/albums.png" width="820" height="443" preserveAspectRatio="xMidYMid slice"/>
+  <g transform="translate(800 138)">
+    <rect x="-10" y="-10" width="740" height="493" rx="28" fill="#4d7dff" opacity="0.38"/>
+    <rect width="720" height="480" rx="22" fill="#111827"/>
+    <image xlink:href="file:///home/irving/ruas/repositorios/soundsgood/docs/screenshots/albums.png" width="720" height="480" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g transform="translate(740 668)">
-    <rect width="255" height="138" rx="16" fill="#ffffff"/>
-    <image xlink:href="file:///home/irving/ruas/repositorios/soundsgood/docs/screenshots/artists.png" width="255" height="138" preserveAspectRatio="xMidYMid slice"/>
+  <g transform="translate(820 704)">
+    <rect width="228" height="152" rx="14" fill="#111827"/>
+    <image xlink:href="file:///home/irving/ruas/repositorios/soundsgood/docs/screenshots/artists.png" width="228" height="152" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g transform="translate(1022 668)">
-    <rect width="255" height="138" rx="16" fill="#ffffff"/>
-    <image xlink:href="file:///home/irving/ruas/repositorios/soundsgood/docs/screenshots/songs.png" width="255" height="138" preserveAspectRatio="xMidYMid slice"/>
+  <g transform="translate(1082 704)">
+    <rect width="228" height="152" rx="14" fill="#111827"/>
+    <image xlink:href="file:///home/irving/ruas/repositorios/soundsgood/docs/screenshots/songs.png" width="228" height="152" preserveAspectRatio="xMidYMid slice"/>
   </g>
-  <g transform="translate(1304 668)">
-    <rect width="255" height="138" rx="16" fill="#ffffff"/>
-    <image xlink:href="file:///home/irving/ruas/repositorios/soundsgood/docs/screenshots/search.png" width="255" height="138" preserveAspectRatio="xMidYMid slice"/>
+  <g transform="translate(1344 704)">
+    <rect width="228" height="152" rx="14" fill="#111827"/>
+    <image xlink:href="file:///home/irving/ruas/repositorios/soundsgood/docs/screenshots/search.png" width="228" height="152" preserveAspectRatio="xMidYMid slice"/>
   </g>
 </svg>
