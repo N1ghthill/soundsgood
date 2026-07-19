@@ -14,7 +14,10 @@ from soundsgood.models import Album, Artist, Song
 from soundsgood.views.albumsview import AlbumTile
 from soundsgood.views.artistsview import ArtistListItem
 from soundsgood.widgets.songrow import SongListItem
-from soundsgood.widgets.playlistchooser import PlaylistChooserDialog
+from soundsgood.widgets.playlistchooser import (
+    PlaylistChooserDialog,
+    PlaylistSongChooserDialog,
+)
 from soundsgood.widgets.playlistcontextmenu import PlaylistContextMenu
 
 
@@ -146,7 +149,35 @@ class WindowSmokeTest(unittest.TestCase):
                 )
                 chooser.present(window)
                 self.assertIsNotNone(chooser._list.get_first_child())
+                self.assertEqual(len(chooser._manager_handlers), 1)
                 chooser.close()
+
+                library_song = Song(
+                    title="Café da manhã",
+                    artist="Local artist",
+                    album="Daily",
+                    url="file:///tmp/library-picker.wav",
+                )
+                app.props.library.props.songs.append(library_song)
+                song_chooser = PlaylistSongChooserDialog(app, saved)
+                song_chooser.present(window)
+                song_chooser._search.set_text("cafe")
+                self.assertEqual(song_chooser._filtered.get_n_items(), 1)
+                song_chooser._selection.select_item(0, False)
+                song_chooser._add_selected(None)
+                self.assertEqual(saved.props.entry_count, 3)
+
+                replacement = app.props.playlist_manager.create("Keep this one")
+                window._playlists_view._selection.set_selected(0)
+                window._playlists_view._delete_confirmed(saved)
+                self.assertEqual(
+                    app.props.playlist_manager.props.playlists.get_n_items(),
+                    1,
+                )
+                self.assertIs(
+                    window._playlists_view._selected_playlist,
+                    replacement,
+                )
 
                 album_tile = AlbumTile(app)
                 album = Album(title="Reactive album", song_count=0)

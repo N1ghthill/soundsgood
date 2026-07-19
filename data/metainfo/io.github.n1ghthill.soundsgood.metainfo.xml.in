@@ -9,7 +9,7 @@
   </developer>
   <summary>Play and organize your music collection</summary>
   <description>
-    <p>A simple and fast music player for Linux. Browse your music by album or artist, play songs, manage the current playback queue, and create persistent playlists.</p>
+    <p>A simple and fast music player for Linux. Browse your music by album or artist, play songs, manage the current playback queue, and create persistent playlists with searchable library selection.</p>
   </description>
   <categories>
     <category>AudioVideo</category>
@@ -43,6 +43,11 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="0.2.3" date="2026-07-19">
+      <description>
+        <p>Makes persistent playlists reliable for daily use with searchable multi-song selection, direct deletion, stable in-place editing, coalesced atomic saves, and stress-tested recovery.</p>
+      </description>
+    </release>
     <release version="0.2.2" date="2026-07-19">
       <description>
         <p>Restores album thumbnails and song rows in artist details and adds a regression check for translation aliases used by GTK factories.</p>

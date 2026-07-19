@@ -16,6 +16,8 @@ from gi.repository import Gio, GLib, GObject
 
 from soundsgood.catalog.playlist_storage import (
     FORMAT_VERSION,
+    MAX_ENTRIES,
+    MAX_PLAYLISTS,
     PlaylistStorageError,
     export_m3u8,
     load_document,
@@ -27,6 +29,7 @@ from soundsgood.models import Playlist, PlaylistEntry, Song
 
 
 LOGGER = get_logger("playlists")
+SAVE_DEBOUNCE_MS = 250
 
 
 class PlaylistManager(GObject.GObject):
@@ -52,7 +55,9 @@ class PlaylistManager(GObject.GObject):
             thread_name_prefix="soundsgood-playlists",
         )
         self._lock = Lock()
+        self._idle_source_ids = set()
         self._save_generation = 0
+        self._save_source_id = 0
         self._dirty = False
         self._closed = False
         self._load_future = None
@@ -71,9 +76,9 @@ class PlaylistManager(GObject.GObject):
             document = future.result()
         except Exception as error:
             LOGGER.warning("Could not load saved playlists", exc_info=True)
-            GLib.idle_add(self._load_failed, str(error))
+            self._idle_add(self._load_failed, str(error))
             return
-        GLib.idle_add(self._apply_document, document)
+        self._idle_add(self._apply_document, document)
 
     def _load_failed(self, message: str):
         if self._closed:
@@ -106,6 +111,8 @@ class PlaylistManager(GObject.GObject):
 
     def create(self, name: str, songs: list[Song] | None = None) -> Playlist:
         self._require_loaded()
+        if self._playlists.get_n_items() >= MAX_PLAYLISTS:
+            raise PlaylistStorageError("The saved playlist limit has been reached")
         normalized_name = self._available_name(normalize_name(name))
         entries = Gio.ListStore(item_type=PlaylistEntry)
         playlist = Playlist(
@@ -146,21 +153,23 @@ class PlaylistManager(GObject.GObject):
     def add_songs(self, playlist: Playlist, songs: list[Song]) -> int:
         self._require_loaded()
         self._ensure_member(playlist)
-        added = 0
         existing_urls = {
             playlist.props.entries.get_item(index).props.url
             for index in range(playlist.props.entries.get_n_items())
         }
+        candidates = []
         for song in songs:
-            if (
-                not isinstance(song, Song)
-                or not song.props.url.startswith("file://")
-                or song.props.url in existing_urls
-            ):
+            if not isinstance(song, Song) or not song.props.url.startswith("file://"):
                 continue
-            playlist.props.entries.append(self._entry_from_song(song))
+            if song.props.url in existing_urls:
+                continue
+            candidates.append(song)
             existing_urls.add(song.props.url)
-            added += 1
+        if playlist.props.entry_count + len(candidates) > MAX_ENTRIES:
+            raise PlaylistStorageError("The playlist song limit has been reached")
+        for song in candidates:
+            playlist.props.entries.append(self._entry_from_song(song))
+        added = len(candidates)
         if added:
             playlist.props.entry_count = playlist.props.entries.get_n_items()
             self._record_change(playlist)
@@ -227,12 +236,18 @@ class PlaylistManager(GObject.GObject):
             return results
 
         future = self._executor.submit(check)
-        future.add_done_callback(
-            lambda completed: GLib.idle_add(
-                self._apply_availability,
-                completed.result(),
-            )
-        )
+        future.add_done_callback(self._availability_finished)
+
+    def _availability_finished(self, future):
+        if future.cancelled():
+            return
+        try:
+            results = future.result()
+        except Exception as error:
+            LOGGER.warning("Could not refresh playlist availability", exc_info=True)
+            self._idle_add(self._emit_save_error, str(error))
+            return
+        self._idle_add(self._apply_availability, results)
 
     def _apply_availability(self, results):
         if self._closed:
@@ -250,8 +265,13 @@ class PlaylistManager(GObject.GObject):
         future = self._executor.submit(export_m3u8, path, entries, True)
         if callback:
             future.add_done_callback(
-                lambda completed: GLib.idle_add(callback, completed.exception())
+                lambda completed: self._async_error_finished(completed, callback)
             )
+
+    def _async_error_finished(self, future, callback):
+        if future.cancelled():
+            return
+        self._idle_add(callback, future.exception())
 
     def import_async(self, file: Gio.File, library, callback=None):
         """Read one external playlist off the GTK loop and save it by name."""
@@ -260,9 +280,11 @@ class PlaylistManager(GObject.GObject):
             return library.create_songs_for_file(file)
 
         def finished(future):
+            if future.cancelled():
+                return
             error = future.exception()
             songs = [] if error else future.result()
-            GLib.idle_add(self._finish_import, file, songs, error, callback)
+            self._idle_add(self._finish_import, file, songs, error, callback)
 
         self._executor.submit(read).add_done_callback(finished)
 
@@ -293,9 +315,11 @@ class PlaylistManager(GObject.GObject):
             return songs
 
         def finished(future):
+            if future.cancelled():
+                return
             error = future.exception()
             songs = [] if error else future.result()
-            GLib.idle_add(
+            self._idle_add(
                 self._finish_add_files,
                 playlist,
                 songs,
@@ -325,9 +349,21 @@ class PlaylistManager(GObject.GObject):
     def _schedule_save(self):
         if self._closed:
             return
-        document = self._document()
         with self._lock:
             self._save_generation += 1
+        if self._save_source_id:
+            return
+        self._save_source_id = GLib.timeout_add(
+            SAVE_DEBOUNCE_MS,
+            self._queue_scheduled_save,
+        )
+
+    def _queue_scheduled_save(self):
+        self._save_source_id = 0
+        if self._closed or not self._dirty:
+            return GLib.SOURCE_REMOVE
+        document = self._document()
+        with self._lock:
             generation = self._save_generation
 
         def save_latest():
@@ -337,13 +373,44 @@ class PlaylistManager(GObject.GObject):
             save_document(self._path, document)
 
         future = self._executor.submit(save_latest)
-        future.add_done_callback(self._save_finished)
+        future.add_done_callback(
+            lambda completed: self._save_finished(completed, generation)
+        )
+        return GLib.SOURCE_REMOVE
 
-    def _save_finished(self, future):
+    def _save_finished(self, future, generation):
+        if future.cancelled():
+            return
         error = future.exception()
         if error is not None:
             LOGGER.error("Could not save playlists: %s", error)
-            GLib.idle_add(self.emit, "error", str(error))
+            self._idle_add(self._emit_save_error, str(error))
+            return
+        with self._lock:
+            if generation == self._save_generation:
+                self._dirty = False
+
+    def _emit_save_error(self, message):
+        if not self._closed:
+            self.emit("error", message)
+        return GLib.SOURCE_REMOVE
+
+    def _idle_add(self, callback, *args):
+        source_id = 0
+
+        def dispatch():
+            with self._lock:
+                self._idle_source_ids.discard(source_id)
+            if self._closed:
+                return GLib.SOURCE_REMOVE
+            return callback(*args)
+
+        with self._lock:
+            if self._closed:
+                return 0
+            source_id = GLib.idle_add(dispatch)
+            self._idle_source_ids.add(source_id)
+        return source_id
 
     def flush(self):
         if self._closed:
@@ -354,8 +421,12 @@ class PlaylistManager(GObject.GObject):
             return
         if not self._dirty:
             return
+        if self._save_source_id:
+            GLib.source_remove(self._save_source_id)
+            self._save_source_id = 0
         document = self._document()
         self._executor.submit(save_document, self._path, document).result()
+        self._dirty = False
 
     def shutdown(self):
         if self._closed:
@@ -364,7 +435,15 @@ class PlaylistManager(GObject.GObject):
             self.flush()
         except PlaylistStorageError:
             LOGGER.warning("Could not flush playlists during shutdown", exc_info=True)
-        self._closed = True
+        with self._lock:
+            self._closed = True
+            idle_source_ids = tuple(self._idle_source_ids)
+            self._idle_source_ids.clear()
+        if self._save_source_id:
+            GLib.source_remove(self._save_source_id)
+            self._save_source_id = 0
+        for source_id in idle_source_ids:
+            GLib.source_remove(source_id)
         self._executor.shutdown(wait=True, cancel_futures=True)
 
     def _document(self):

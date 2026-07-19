@@ -16,7 +16,8 @@ Nao implementar:
 
 ## Estado do Projeto
 
-O projeto tem um MVP funcional; a ultima release publica e a 0.2.2. Ele inicia pelo lancador,
+O projeto tem um MVP funcional; a ultima release publica e a 0.2.2 e a 0.2.3
+esta em preparacao. Ele inicia pelo lancador,
 Flatpak ou ambiente de desenvolvimento, escaneia o diretorio XDG de musicas,
 mostra albums/artistas/faixas, reproduz via GStreamer e pode continuar em
 segundo plano quando a janela e fechada.
@@ -43,18 +44,17 @@ Pontos importantes:
 - `data/soundsgood.gresource.xml` foi removido porque estava vazio; a UI segue programatica em Python.
 - `docs/MANUAL_TESTS.md` contem o roteiro de validacao manual.
 
-Ultima validacao conhecida, em 19 de julho de 2026 para a release 0.2.2:
+Ultima validacao local conhecida, em 19 de julho de 2026 para a 0.2.3:
 
-- 61 testes automatizados passando, incluindo a verificacao estatica dos
-  aliases de traducao usados por factories GTK.
+- 66 testes automatizados passando, incluindo resistencia de playlists e a
+  verificacao estatica dos aliases de traducao usados por factories GTK.
 - O smoke grafico passou no display real dentro de uma sessao D-Bus isolada do
   GNOME SDK 50; warnings de portal, EGL e accessibility bus do sandbox nao
   impediram as assercoes de UI.
 - `py_compile` passando para app e testes.
 - `meson setup builddir --reconfigure`, `meson compile -C builddir` e `meson test -C builddir` passando.
-- O CI publico da release 0.2.2 passou no commit
-  `e62551bd21fc8f2a0ae0ba474a63d80dfc817c87` antes da criacao da tag
-  assinada `v0.2.2`.
+- O CI publico, a tag e os artefatos da 0.2.3 devem ser registrados somente
+  depois que os respectivos resultados forem verificados.
 - App inicia pelo lancador, `flatpak run io.github.n1ghthill.soundsgood` ou
   `./builddir/local-soundsgood`; pode aparecer o warning local
   `Unknown key gtk-modules` do GTK.
@@ -62,6 +62,14 @@ Ultima validacao conhecida, em 19 de julho de 2026 para a release 0.2.2:
 - MPRIS respondeu via `gdbus` para `Identity`, `PlaybackStatus` e `Metadata`, e o usuario validou o app em ambiente real.
 - StatusNotifier foi validado em KDE, incluindo a acao `Quit`; em desktops sem
   host de bandeja, lancador e MPRIS continuam funcionando.
+
+A candidata 0.2.3 endurece o uso diario de playlists com
+selecao multipla pesquisavel da biblioteca, escolha de destino virtualizada,
+exclusao visivel, atualizacoes de detalhe no lugar, persistencia consolidada em
+rajadas e limites validados antes da mutacao. A regressao isolada de
+desenvolvimento cobre 50 playlists, 5.000 entradas, reaberturas e falha de
+gravacao simulada. A regressao manual com bibliotecas reais maiores continua
+como trabalho de beta e nao deve ser declarada concluida sem execucao humana.
 
 Terminologia: o `Player` ainda usa nomes internos como `_playlist`, mas esse
 estado e a fila temporaria. Playlists nomeadas pertencem a `PlaylistManager` e

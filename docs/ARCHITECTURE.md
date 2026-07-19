@@ -95,6 +95,11 @@ Responsabilidades:
 - Coordenar importacao e exportacao sem bloquear a interface.
 - Persistir `$XDG_DATA_HOME/soundsgood/playlists.json` com formato versionado e
   substituicao atomica.
+- Consolidar rajadas curtas de mutacoes antes de capturar o documento, evitando
+  reconstruir toda a representacao persistente a cada clique. O `flush` de
+  encerramento continua sendo sincrono e grava o estado mais recente.
+- Aplicar os limites do formato antes de alterar os modelos, para que uma
+  operacao nunca pareca concluida se o documento resultante for invalido.
 
 Nao deve controlar GStreamer nem reutilizar a lista mutavel do `Player` como
 armazenamento. A fila so muda quando o usuario manda tocar uma playlist.
@@ -171,7 +176,12 @@ Estrutura sugerida:
 - `SongsView`: lista de faixas.
 - `SearchView`: busca global com secoes de artistas, albums e musicas.
 - `PlaylistsView`: navegacao adaptativa, CRUD, ordenacao, importacao e
-  exportacao de colecoes salvas.
+  exportacao de colecoes salvas. O editor permite selecionar varias faixas da
+  biblioteca por busca local, sem abrir um seletor de arquivos para o caso
+  comum, e filtra entradas que ja pertencem a colecao.
+- `PlaylistChooserDialog`: usa `Gtk.ListView` sobre o modelo de playlists e
+  mantem linhas reativas; uma alteracao de contagem nao reconstrói a colecao
+  durante o clique que a originou.
 - `PlaylistContextMenu`: constroi sob demanda um submenu nativo a partir do
   `Gio.ListModel` de playlists. O conteudo alvo e capturado ao abrir o menu para
   que a reciclagem de uma linha virtualizada nunca altere a operacao pendente.
@@ -226,6 +236,12 @@ Implementacao da Fase 6:
 - Persistencia fica em `$XDG_DATA_HOME/soundsgood/playlists.json`, com formato
   versionado e substituicao atomica. Como a versao 1 e o primeiro formato,
   versoes desconhecidas sao recusadas em vez de convertidas silenciosamente.
+- Salvamentos acionados pela UI usam um debounce curto e sao serializados em um
+  unico worker. Encerramento, erro ou nova geracao preservam o ultimo documento
+  atomico completo e permitem tentar novamente quando o armazenamento voltar.
+- O `PlaylistManager` possui tanto o source de debounce quanto os retornos
+  `idle` dos workers e os remove explicitamente durante `shutdown`; callbacks
+  cancelados nao voltam a tocar modelos depois do encerramento.
 - Importacao e exportacao ficam em helpers puros do catalogo; widgets nao fazem
   I/O direto.
 - Carregar uma playlist cria ou altera a fila somente por metodos publicos do
@@ -236,6 +252,9 @@ Implementacao da Fase 6:
   nao possuem persistencia propria nem alteram a fila temporaria.
 - Falhas parciais e arquivos ausentes sao estados recuperaveis e aparecem nos
   diagnosticos.
+- Nome, contagem e modelo de entradas do detalhe sao atualizados no lugar para
+  preservar foco e rolagem. Excluir uma playlist seleciona uma vizinha quando
+  houver, sem deixar uma referencia visual para o objeto removido.
 
 Quando um arquivo e movido, a entrada permanece na playlist e aparece como
 indisponivel. O usuario pode remover a entrada ou reimportar/adicionar a faixa

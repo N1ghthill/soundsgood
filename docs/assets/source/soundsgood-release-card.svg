@@ -11,13 +11,13 @@
   <circle cx="1040" cy="600" r="250" fill="#8b2cff" opacity="0.15"/>
   <g transform="translate(58 70)">
     <image href="brand-logo.png" x="0" y="0" width="390" height="106" preserveAspectRatio="xMinYMid meet"/>
-    <text x="4" y="176" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="28" font-weight="700" fill="#f5f7ff">Release 0.2.2</text>
+    <text x="4" y="176" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="28" font-weight="700" fill="#f5f7ff">Release 0.2.3</text>
     <rect x="4" y="238" width="350" height="54" rx="27" fill="#246bfe"/>
-    <text x="32" y="273" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Artist details restored</text>
+    <text x="32" y="273" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Playlist editor</text>
     <rect x="4" y="316" width="350" height="54" rx="27" fill="#7738ff"/>
-    <text x="32" y="351" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Album thumbnails</text>
+    <text x="32" y="351" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Searchable multi-add</text>
     <rect x="4" y="394" width="350" height="54" rx="27" fill="#101b35"/>
-    <text x="32" y="429" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Factory regression test</text>
+    <text x="32" y="429" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Reliable atomic saves</text>
   </g>
   <g transform="translate(464 118)">
     <rect x="-8" y="-8" width="692" height="477" rx="22" fill="#4d7dff" opacity="0.35"/>

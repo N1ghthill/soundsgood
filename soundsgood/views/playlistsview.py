@@ -33,6 +33,7 @@ class PlaylistsView(Adw.Bin):
         self._player = application.props.player
         self._manager = application.props.playlist_manager
         self._selected_playlist = None
+        self._detail_handlers = []
         self._compact = False
 
         self._split_view = Adw.NavigationSplitView()
@@ -104,6 +105,7 @@ class PlaylistsView(Adw.Bin):
         self._update_sidebar_status()
 
     def do_unroot(self):
+        self._disconnect_detail_handlers()
         for handler_id in self._manager_handlers:
             if self._manager.handler_is_connected(handler_id):
                 self._manager.disconnect(handler_id)
@@ -125,10 +127,8 @@ class PlaylistsView(Adw.Bin):
         if self._manager.props.playlists.get_n_items() and self._selection.get_selected_item() is None:
             self._selection.set_selected(0)
 
-    def _manager_changed(self, _manager, playlist):
+    def _manager_changed(self, _manager, _playlist):
         self._update_sidebar_status()
-        if playlist is self._selected_playlist:
-            self._show_playlist(playlist)
 
     def _manager_error(self, _manager, message):
         self._notify(message)
@@ -146,11 +146,16 @@ class PlaylistsView(Adw.Bin):
 
     def _selection_changed(self, selection, _pspec):
         playlist = selection.get_selected_item()
-        self._selected_playlist = playlist
-        if playlist is not None:
-            self._show_playlist(playlist)
+        if playlist is None:
+            self._clear_detail()
+            self._selected_playlist = None
+            self._detail.append(self._detail_status)
             if self._compact:
-                self._split_view.set_show_content(True)
+                self._split_view.set_show_content(False)
+            return
+        self._show_playlist(playlist)
+        if self._compact:
+            self._split_view.set_show_content(True)
 
     def _show_playlist(self, playlist: Playlist):
         self._clear_detail()
@@ -169,53 +174,86 @@ class PlaylistsView(Adw.Bin):
         header.add_css_class("detail-header")
         labels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
         labels.set_hexpand(True)
-        title = Gtk.Label(label=playlist.props.name, xalign=0)
-        title.set_wrap(True)
-        title.add_css_class("title-2")
-        labels.append(title)
-        count = Gtk.Label(label=_n_songs(playlist.props.entry_count), xalign=0)
-        count.add_css_class("dim-label")
-        labels.append(count)
+        self._detail_title = Gtk.Label(label=playlist.props.name, xalign=0)
+        self._detail_title.set_wrap(True)
+        self._detail_title.add_css_class("title-2")
+        labels.append(self._detail_title)
+        self._detail_count = Gtk.Label(
+            label=_n_songs(playlist.props.entry_count),
+            xalign=0,
+        )
+        self._detail_count.add_css_class("dim-label")
+        labels.append(self._detail_count)
         header.append(labels)
 
-        play = Gtk.Button(label=_("Play"), icon_name="media-playback-start-symbolic")
-        play.add_css_class("suggested-action")
-        play.add_css_class("compact-pill")
-        play.set_valign(Gtk.Align.CENTER)
-        play.set_sensitive(playlist.props.entry_count > 0)
-        play.connect("clicked", lambda *_args: self._play_playlist())
-        header.append(play)
+        self._play_button = Gtk.Button(
+            label=_("Play"),
+            icon_name="media-playback-start-symbolic",
+        )
+        self._play_button.add_css_class("suggested-action")
+        self._play_button.add_css_class("compact-pill")
+        self._play_button.set_valign(Gtk.Align.CENTER)
+        self._play_button.connect("clicked", lambda *_args: self._play_playlist())
+        header.append(self._play_button)
 
         add = Gtk.Button(icon_name="list-add-symbolic")
         add.add_css_class("flat")
         add.add_css_class("compact-icon")
         add.set_valign(Gtk.Align.CENTER)
-        add.set_tooltip_text(_("Add audio files"))
-        set_accessible_label(add, _("Add audio files"))
-        add.connect("clicked", self._add_files)
+        add.set_tooltip_text(_("Add songs from library"))
+        set_accessible_label(add, _("Add songs from library"))
+        add.connect("clicked", self._add_library_songs)
         header.append(add)
 
-        menu = Gio.Menu()
-        menu.append(_("Rename"), "playlist.rename")
-        menu.append(_("Export M3U8"), "playlist.export")
-        menu.append(_("Delete"), "playlist.delete")
+        delete = Gtk.Button(icon_name="edit-delete-symbolic")
+        delete.add_css_class("flat")
+        delete.add_css_class("compact-icon")
+        delete.add_css_class("destructive-action")
+        delete.set_valign(Gtk.Align.CENTER)
+        delete.set_tooltip_text(_("Delete playlist"))
+        set_accessible_label(delete, _("Delete playlist"))
+        delete.connect("clicked", self._delete_playlist)
+        header.append(delete)
+
         menu_button = Gtk.MenuButton(icon_name="view-more-symbolic")
         menu_button.add_css_class("flat")
         menu_button.add_css_class("compact-icon")
         menu_button.set_valign(Gtk.Align.CENTER)
-        menu_button.set_menu_model(menu)
+        menu_button.set_tooltip_text(_("Playlist actions"))
+        set_accessible_label(menu_button, _("Playlist actions"))
+        menu_button.set_popover(self._create_actions_popover())
         header.append(menu_button)
         self._detail.append(header)
 
-        self._install_actions()
-        if playlist.props.entry_count == 0:
-            empty = Gtk.Label(label=_("This playlist is empty"))
-            empty.set_vexpand(True)
-            empty.set_valign(Gtk.Align.CENTER)
-            empty.add_css_class("dim-label")
-            self._detail.append(empty)
-            return
-
+        self._entries_stack = Gtk.Stack()
+        self._entries_stack.set_vexpand(True)
+        empty = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        empty.set_halign(Gtk.Align.CENTER)
+        empty.set_valign(Gtk.Align.CENTER)
+        empty_icon = Gtk.Image(icon_name="view-list-symbolic")
+        empty_icon.set_pixel_size(48)
+        empty_icon.add_css_class("dim-label")
+        empty.append(empty_icon)
+        empty_label = Gtk.Label(label=_("This playlist is empty"))
+        empty_label.add_css_class("title-3")
+        empty.append(empty_label)
+        empty_hint = Gtk.Label(
+            label=_("Add songs from your library or import local audio files."),
+        )
+        empty_hint.set_wrap(True)
+        empty_hint.set_justify(Gtk.Justification.CENTER)
+        empty_hint.add_css_class("dim-label")
+        empty.append(empty_hint)
+        empty_add = Gtk.Button(
+            label=_("Add Songs"),
+            icon_name="list-add-symbolic",
+        )
+        empty_add.add_css_class("suggested-action")
+        empty_add.add_css_class("compact-pill")
+        empty_add.set_halign(Gtk.Align.CENTER)
+        empty_add.connect("clicked", self._add_library_songs)
+        empty.append(empty_add)
+        self._entries_stack.add_named(empty, "empty")
         selection = Gtk.NoSelection.new(playlist.props.entries)
         self._entries_list = Gtk.ListView.new(
             selection,
@@ -227,19 +265,44 @@ class PlaylistsView(Adw.Bin):
         scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scroller.set_vexpand(True)
         scroller.set_child(self._entries_list)
-        self._detail.append(scroller)
+        self._entries_stack.add_named(scroller, "entries")
+        self._detail.append(self._entries_stack)
+        self._detail_handlers = [
+            playlist.connect("notify::name", self._sync_detail_header),
+            playlist.connect("notify::entry-count", self._sync_detail_header),
+        ]
+        self._sync_detail_header()
 
-    def _install_actions(self):
-        group = Gio.SimpleActionGroup()
-        for name, callback in (
-            ("rename", self._rename_playlist),
-            ("export", self._export_playlist),
-            ("delete", self._delete_playlist),
+    def _create_actions_popover(self):
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        box.set_margin_top(6)
+        box.set_margin_bottom(6)
+        box.set_margin_start(6)
+        box.set_margin_end(6)
+        for label, icon, callback in (
+            (_("Rename"), "document-edit-symbolic", self._rename_playlist),
+            (_("Add Audio Files"), "document-open-symbolic", self._add_files),
+            (_("Export M3U8"), "document-save-symbolic", self._export_playlist),
         ):
-            action = Gio.SimpleAction.new(name, None)
-            action.connect("activate", callback)
-            group.add_action(action)
-        self.insert_action_group("playlist", group)
+            button = Gtk.Button(label=label, icon_name=icon)
+            button.add_css_class("flat")
+            button.set_halign(Gtk.Align.FILL)
+            button.connect("clicked", callback)
+            box.append(button)
+        popover = Gtk.Popover()
+        popover.set_child(box)
+        return popover
+
+    def _sync_detail_header(self, *_args):
+        playlist = self._selected_playlist
+        if playlist is None or not hasattr(self, "_detail_title"):
+            return
+        self._detail_title.set_label(playlist.props.name)
+        self._detail_count.set_label(_n_songs(playlist.props.entry_count))
+        self._play_button.set_sensitive(playlist.props.entry_count > 0)
+        self._entries_stack.set_visible_child_name(
+            "entries" if playlist.props.entry_count else "empty"
+        )
 
     def _create_playlist(self, _widget):
         name = self._name_entry.get_text().strip()
@@ -273,6 +336,18 @@ class PlaylistsView(Adw.Bin):
             return
         self._selection.set_selected(self._manager.props.playlists.get_n_items() - 1)
         self._notify(_("Imported playlist %s") % playlist.props.name)
+
+    def _add_library_songs(self, _button):
+        playlist = self._selected_playlist
+        if playlist is None:
+            return
+        if self._library.props.songs.get_n_items() == 0:
+            self._notify(_("Your music library is empty"))
+            return
+        from soundsgood.widgets.playlistchooser import PlaylistSongChooserDialog
+
+        dialog = PlaylistSongChooserDialog(self._app, playlist)
+        dialog.present(self.get_root())
 
     def _add_files(self, _button):
         if self._selected_playlist is None:
@@ -321,6 +396,8 @@ class PlaylistsView(Adw.Bin):
                 self._manager.rename(playlist, entry.get_text())
             except ValueError as error:
                 self._notify(str(error))
+                return
+            self._notify(_("Renamed playlist to %s") % playlist.props.name)
 
         dialog.choose(self.get_root(), None, chosen)
 
@@ -341,14 +418,40 @@ class PlaylistsView(Adw.Bin):
         def chosen(alert, result):
             if alert.choose_finish(result) != "delete":
                 return
+            self._delete_confirmed(playlist)
+
+        dialog.choose(self.get_root(), None, chosen)
+
+    def _delete_confirmed(self, playlist):
+        model = self._manager.props.playlists
+        position = next(
+            (
+                index
+                for index in range(model.get_n_items())
+                if model.get_item(index) is playlist
+            ),
+            -1,
+        )
+        if position < 0:
+            return
+        self._disconnect_detail_handlers()
+        self._selected_playlist = None
+        try:
             self._manager.delete(playlist)
-            self._selected_playlist = None
+        except ValueError as error:
+            self._notify(str(error))
+            return
+        remaining = model.get_n_items()
+        if remaining:
+            self._selection.set_selected(min(position, remaining - 1))
+        else:
             self._selection.unselect_all()
             self._clear_detail()
             self._detail.append(self._detail_status)
-            self._update_sidebar_status()
-
-        dialog.choose(self.get_root(), None, chosen)
+            if self._compact:
+                self._split_view.set_show_content(False)
+        self._update_sidebar_status()
+        self._notify(_("Deleted playlist %s") % playlist.props.name)
 
     def _export_playlist(self, *_args):
         playlist = self._selected_playlist
@@ -420,10 +523,19 @@ class PlaylistsView(Adw.Bin):
             self._manager.remove_entry(self._selected_playlist, position)
 
     def _clear_detail(self):
+        self._disconnect_detail_handlers()
         child = self._detail.get_first_child()
         while child:
             self._detail.remove(child)
             child = self._detail.get_first_child()
+
+    def _disconnect_detail_handlers(self):
+        playlist = self._selected_playlist
+        if playlist is not None:
+            for handler_id in self._detail_handlers:
+                if playlist.handler_is_connected(handler_id):
+                    playlist.disconnect(handler_id)
+        self._detail_handlers.clear()
 
     def _notify(self, message):
         window = self._app.props.window

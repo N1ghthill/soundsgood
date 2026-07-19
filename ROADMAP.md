@@ -1,6 +1,6 @@
 # Roadmap
 
-Atualizado em 19 de julho de 2026 para a release publica 0.2.2.
+Atualizado em 19 de julho de 2026 para a candidata a release 0.2.3.
 
 O SoundsGood prioriza um player local estavel e integrado ao desktop antes de
 recursos avancados. O produto permanece inspirado no GNOME Music e mantem fora
@@ -9,7 +9,7 @@ do escopo radio, podcasts, streaming, contas e servicos remotos obrigatorios.
 ## Estado Atual
 
 A base do MVP, a biblioteca local, a navegacao, o player, o acabamento visual e
-o empacotamento Flatpak estao implementados. A versao 0.2.2 tambem oferece
+o empacotamento Flatpak estao implementados. A candidata 0.2.3 tambem oferece
 reproducao opcional em segundo plano, indicador de bandeja em desktops
 compativeis e listas de detalhe virtualizadas.
 
@@ -141,6 +141,29 @@ playlist salva com a fila temporaria do player.
 Restricoes arquiteturais: a persistencia pertence a uma camada de catalogo,
 nao aos widgets; a fila continua pertencendo ao `Player`; I/O nao deve bloquear
 a thread GTK; arquivos corrompidos devem gerar diagnostico recuperavel.
+
+## Fase 6.1: Confiabilidade diaria de playlists — implementada na 0.2.3
+
+Objetivo: corrigir as lacunas observadas no uso real sem voltar a misturar
+playlists salvas com a fila temporaria.
+
+- [x] Adicionar um seletor pesquisavel e multi-selecao para incluir musicas da
+  biblioteca diretamente no editor da playlist.
+- [x] Ocultar no seletor as musicas que ja pertencem a playlist e explicar
+  claramente resultados vazios ou duplicados.
+- [x] Virtualizar tambem a escolha da playlist de destino.
+- [x] Tornar a exclusao visivel, confirmada e previsivel, selecionando a
+  colecao vizinha quando existir.
+- [x] Atualizar nome, contagem e entradas no lugar, preservando rolagem e foco
+  em vez de reconstruir todo o detalhe durante cada mutacao.
+- [x] Consolidar rajadas de alteracoes antes de criar o snapshot persistente,
+  mantendo escrita atomica fora da thread GTK.
+- [x] Recusar limites de playlists e entradas antes de qualquer mutacao
+  parcial que nao possa ser salva.
+- [x] Cobrir 50 playlists e 5.000 entradas, tres ciclos de reabertura,
+  reordenacao, disco cheio simulado e recuperacao da gravacao.
+- [ ] Validar manualmente o fluxo completo com a biblioteca principal do
+  mantenedor antes de promover estas mudancas a uma release.
 
 ## Fase 7: Beta e Acessibilidade — planejada
 

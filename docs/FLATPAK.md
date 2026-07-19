@@ -4,7 +4,8 @@ O formato de distribuicao atual do SoundsGood e um repositorio Flatpak proprio,
 hospedado via GitHub Pages. O app nao depende de listagem no Flathub para ser
 instalado ou atualizado.
 
-Os exemplos de bundle abaixo apontam para a ultima release publica, 0.2.2.
+Os exemplos de bundle abaixo apontam para a candidata 0.2.3. A ultima release
+publica permanece 0.2.2 ate a verificacao dos artefatos abaixo.
 
 ## Instalar pelo repositorio
 
@@ -74,14 +75,14 @@ flatpak run io.github.n1ghthill.soundsgood
 Gerar bundle versionado para GitHub Releases:
 
 ```bash
-flatpak build-bundle ~/.local/share/flatpak/repo SoundsGood-0.2.2-x86_64.flatpak io.github.n1ghthill.soundsgood stable
+flatpak build-bundle ~/.local/share/flatpak/repo SoundsGood-0.2.3-x86_64.flatpak io.github.n1ghthill.soundsgood stable
 ```
 
 Tambem publique uma copia com nome estavel para permitir o link
 `releases/latest/download`:
 
 ```bash
-cp SoundsGood-0.2.2-x86_64.flatpak SoundsGood-x86_64.flatpak
+cp SoundsGood-0.2.3-x86_64.flatpak SoundsGood-x86_64.flatpak
 ```
 
 Instalar a ultima release publicada:
@@ -130,8 +131,8 @@ exemplo:
 sources:
   - type: git
     url: https://github.com/N1ghthill/soundsgood.git
-    tag: v0.2.2
-    commit: e62551bd21fc8f2a0ae0ba474a63d80dfc817c87
+    tag: v0.2.3
+    commit: COMMIT_DA_TAG
 ```
 
 ## Validacao
@@ -189,15 +190,8 @@ Se o app passar a depender somente de portal/document portal para pastas escolhi
 - Validar os metadados AppStream.
 - Rodar `flatpak-builder-lint`.
 
-## Estado da Release 0.2.2
+## Estado da Release 0.2.3
 
-- Tag assinada: `v0.2.2`.
-- Commit da tag: `e62551bd21fc8f2a0ae0ba474a63d80dfc817c87`.
-- Commit OSTree publicado: `a8e363b16bdd10c64d6a5da93c98aac41cb6434a51e1877b8dd83aec4f89c26d`.
-- [CI GNOME 50](https://github.com/N1ghthill/soundsgood/actions/runs/29677482974)
-  e [deploy do repositorio Flatpak](https://github.com/N1ghthill/soundsgood/actions/runs/29677567194)
-  concluidos com sucesso.
-- Renderizacao de albums e faixas na tela de artistas validada antes da
-  publicacao.
-- Assets versionado e estavel publicados na GitHub Release.
-- Build, testes e validacao Flatpak executados no GNOME 50.
+- Candidato validado localmente com 66 testes e smoke grafico real.
+- Tag, commit, CI, OSTree e assets devem ser preenchidos depois da verificacao
+  publica; nenhum resultado pendente deve ser declarado como concluido.

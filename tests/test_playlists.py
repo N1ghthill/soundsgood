@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from gi.repository import Gio, GLib
 
@@ -99,6 +100,19 @@ class PlaylistStorageTest(unittest.TestCase):
 
 
 class PlaylistManagerTest(unittest.TestCase):
+    @staticmethod
+    def _songs(root, count, prefix="song"):
+        return [
+            Song(
+                title=f"Song {index}",
+                artist="Stress artist",
+                album="Stress album",
+                duration=index,
+                url=(root / f"{prefix}-{index}.flac").as_uri(),
+            )
+            for index in range(count)
+        ]
+
     def test_crud_reorder_resolve_and_reload(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "playlists.json"
@@ -253,6 +267,139 @@ class PlaylistManagerTest(unittest.TestCase):
             manager.shutdown()
 
             self.assertEqual(path.read_text(encoding="utf-8"), "{broken")
+
+    def test_rapid_mutations_are_coalesced_and_survive_restarts(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / "playlists.json"
+            songs = self._songs(root, 100)
+            manager = PlaylistManager(path=path, load_async=False)
+
+            for index in range(50):
+                manager.create(f"Stress {index:02d}", songs)
+
+            self.assertNotEqual(manager._save_source_id, 0)
+            manager.flush()
+            self.assertEqual(manager._save_source_id, 0)
+            manager.shutdown()
+
+            for cycle in range(3):
+                manager = PlaylistManager(path=path, load_async=False)
+                self.assertEqual(manager.props.playlists.get_n_items(), 50)
+                for index in range(manager.props.playlists.get_n_items()):
+                    playlist = manager.props.playlists.get_item(index)
+                    self.assertEqual(playlist.props.entry_count, 100)
+                    manager.move_entry(playlist, 99, 0)
+                manager.flush()
+                manager.shutdown()
+
+            restored = load_document(path)
+            self.assertEqual(len(restored["playlists"]), 50)
+            self.assertTrue(
+                all(len(playlist["entries"]) == 100 for playlist in restored["playlists"])
+            )
+            self.assertEqual(
+                restored["playlists"][0]["entries"][0]["title"],
+                "Song 97",
+            )
+
+    def test_limits_are_rejected_before_partial_mutation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manager = PlaylistManager(path=root / "playlists.json", load_async=False)
+            playlist = manager.create("Bounded", self._songs(root, 2))
+
+            with patch("soundsgood.playlists.MAX_ENTRIES", 3):
+                with self.assertRaises(PlaylistStorageError):
+                    manager.add_songs(
+                        playlist,
+                        self._songs(root, 2, prefix="additional"),
+                    )
+            self.assertEqual(playlist.props.entry_count, 2)
+
+            with patch("soundsgood.playlists.MAX_PLAYLISTS", 1):
+                with self.assertRaises(PlaylistStorageError):
+                    manager.create("Too many")
+            self.assertEqual(manager.props.playlists.get_n_items(), 1)
+            manager.shutdown()
+
+    def test_failed_flush_preserves_last_document_and_can_retry(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "playlists.json"
+            manager = PlaylistManager(path=path, load_async=False)
+            playlist = manager.create("Before failure")
+            manager.flush()
+            manager.rename(playlist, "After recovery")
+
+            with patch(
+                "soundsgood.playlists.save_document",
+                side_effect=PlaylistStorageError("simulated full disk"),
+            ):
+                with self.assertRaises(PlaylistStorageError):
+                    manager.flush()
+
+            self.assertEqual(load_document(path)["playlists"][0]["name"], "Before failure")
+            self.assertTrue(manager._dirty)
+            manager.flush()
+            manager.shutdown()
+            self.assertEqual(load_document(path)["playlists"][0]["name"], "After recovery")
+
+    def test_debounced_save_persists_automatically(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "playlists.json"
+            manager = PlaylistManager(path=path, load_async=False)
+            manager.create("Automatic save")
+            loop = GLib.MainLoop()
+            timed_out = []
+
+            def poll_saved():
+                if path.exists() and load_document(path)["playlists"]:
+                    loop.quit()
+                    return GLib.SOURCE_REMOVE
+                return GLib.SOURCE_CONTINUE
+
+            def timeout():
+                timed_out.append(True)
+                loop.quit()
+                return GLib.SOURCE_REMOVE
+
+            GLib.timeout_add(20, poll_saved)
+            timeout_id = GLib.timeout_add(2_000, timeout)
+            loop.run()
+            if not timed_out:
+                GLib.source_remove(timeout_id)
+
+            self.assertFalse(timed_out)
+            self.assertEqual(load_document(path)["playlists"][0]["name"], "Automatic save")
+            manager.shutdown()
+
+    def test_debounced_save_error_is_reported_and_remains_retryable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "playlists.json"
+            manager = PlaylistManager(path=path, load_async=False)
+            errors = []
+            loop = GLib.MainLoop()
+            manager.connect(
+                "error",
+                lambda _manager, message: (errors.append(message), loop.quit()),
+            )
+
+            with self.assertLogs("soundsgood.playlists", level="ERROR") as logs:
+                with patch(
+                    "soundsgood.playlists.save_document",
+                    side_effect=PlaylistStorageError("simulated full disk"),
+                ):
+                    manager.create("Retry later")
+                    timeout_id = GLib.timeout_add(2_000, lambda: loop.quit())
+                    loop.run()
+                    GLib.source_remove(timeout_id)
+
+            self.assertEqual(errors, ["simulated full disk"])
+            self.assertIn("simulated full disk", "\n".join(logs.output))
+            self.assertTrue(manager._dirty)
+            manager.flush()
+            manager.shutdown()
+            self.assertEqual(load_document(path)["playlists"][0]["name"], "Retry later")
 
 
 if __name__ == "__main__":

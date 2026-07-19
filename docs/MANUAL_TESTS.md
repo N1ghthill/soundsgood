@@ -79,6 +79,9 @@ meson test -C builddir
 - Criar uma playlist vazia, renomear e confirmar que nomes vazios ou duplicados
   sao recusados com feedback.
 - Adicionar uma faixa pela tela Songs e pelos detalhes de album/artista.
+- Dentro de uma playlist, usar `Add Songs`, buscar ignorando acentos, marcar
+  varias faixas e confirmar uma unica inclusao; reabrir e confirmar que faixas
+  ja presentes nao aparecem como candidatas.
 - Adicionar todas as faixas retornadas por uma busca e confirmar a ordem.
 - Fechar e reabrir o app e confirmar que nome, IDs implicitos e ordem continuam
   em `$XDG_DATA_HOME/soundsgood/playlists.json`.
@@ -92,7 +95,8 @@ meson test -C builddir
 - Mover temporariamente um arquivo, reindexar e confirmar `File unavailable`;
   restaurar o arquivo, reindexar e confirmar a recuperacao.
 - Excluir uma playlist e confirmar o dialogo destrutivo e que nenhum arquivo de
-  audio foi removido.
+  audio foi removido; com outras playlists existentes, confirmar que a vizinha
+  e selecionada e continua editavel.
 - Clicar com o botao direito em uma musica nas telas Songs, album, artista e
   busca; abrir `Add to Playlist`, confirmar que a lista atual de playlists
   aparece e adicionar diretamente a uma delas.
@@ -105,6 +109,11 @@ meson test -C builddir
   por teclado para preservar o caminho sem mouse.
 - Repetir criacao, adicao e reordenacao em 360/600/900/1200 px e confirmar que
   listas usam rolagem/virtualizacao sem corte horizontal.
+- Durante adicao, remocao e reordenacao, confirmar que o detalhe nao salta para
+  o topo e que teclado/foco continuam utilizaveis.
+- Fazer varias inclusoes, renomeacoes e reordenacoes rapidamente, aguardar um
+  segundo, encerrar e reabrir; confirmar que somente o estado final completo
+  foi persistido, sem arquivo `.tmp` residual.
 
 ## Flatpak e Atualizacao
 

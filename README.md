@@ -53,6 +53,8 @@ and [docs/SUBMISSION.md](docs/SUBMISSION.md). The final recording script is in
 - Create, rename, delete, reorder, play, and export saved playlists.
 - Add individual songs, albums, artists, or all song search results to a saved
   playlist.
+- Add multiple songs from a searchable, accent-insensitive library picker
+  inside the playlist editor; songs already present are hidden.
 - Play local audio through GStreamer.
 - Control playback with play/pause, previous, next, seek, volume, repeat, and
   shuffle.
@@ -97,15 +99,19 @@ flatpak update --user io.github.n1ghthill.soundsgood
 Versioned Flatpak bundles are also available on
 [GitHub Releases](https://github.com/N1ghthill/soundsgood/releases).
 
-## Latest Release
+## Release 0.2.3 Candidate
 
-SoundsGood 0.2.2 restores album thumbnails and song rows in artist details and
-adds a source-integrity regression check for GTK factory translation aliases.
-It includes the native right-click menus introduced in 0.2.1, with a live
-“Add to Playlist” submenu and direct access to playlist creation. Visible add
-buttons remain available for touch and keyboard use. It includes the persistent
-playlists, import/export, background playback, optional system tray indicator,
-virtualized detail lists, and compact responsive player from earlier releases.
+SoundsGood 0.2.3 is prepared to make saved playlists suitable for dependable
+daily use. The playlist editor now includes searchable multi-song selection
+from the local library, filters songs already present, exposes deletion
+directly, preserves focus and scrolling during edits, and keeps selection
+predictable after a playlist is removed. Destination selection is virtualized for large
+collections.
+
+Playlist writes are coalesced during rapid edits, remain atomic, report
+recoverable failures, and reject storage limits before partially changing a
+collection. The release regression covers 50 playlists, 5,000 entries,
+repeated restarts, reordering, automatic saves, and simulated disk failure.
 
 ## Command Line
 
@@ -210,7 +216,7 @@ scripts/generate-assets.sh
 ## Project Status
 
 SoundsGood is a functional local-first MVP moving toward beta quality. Version
-0.2.2 can
+0.2.3 can
 scan a local music folder, reopen quickly from a persistent library index,
 search tracks, play audio, remain active in the background, expose media
 controls, manage saved playlists, and update through its signed Flatpak
