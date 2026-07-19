@@ -99,18 +99,11 @@ Versioned Flatpak bundles are also available on
 
 ## Latest Release
 
-SoundsGood 0.2.0 adds persistent playlists with atomic, versioned local
-storage, M3U/PLS import, M3U8 export, missing-file handling, adaptive
-management UI, and add-to-playlist actions throughout the library. It includes
-the background playback, optional system tray indicator, virtualized detail
-lists, and compact responsive player introduced in the 0.1 series.
-
-## Current Development
-
-The `main` branch is version 0.2.1. It adds native right-click menus to songs
-and albums, with a live “Add to Playlist” submenu and direct access to playlist
-creation. Visible add buttons remain available for touch and keyboard use. The
-latest published Flatpak remains 0.2.0 until the next release workflow.
+SoundsGood 0.2.1 adds native right-click menus to songs and albums, with a live
+“Add to Playlist” submenu and direct access to playlist creation. Visible add
+buttons remain available for touch and keyboard use. It includes the persistent
+playlists, import/export, background playback, optional system tray indicator,
+virtualized detail lists, and compact responsive player from earlier releases.
 
 ## Command Line
 
@@ -215,7 +208,7 @@ scripts/generate-assets.sh
 ## Project Status
 
 SoundsGood is a functional local-first MVP moving toward beta quality. Version
-0.2.0 can
+0.2.1 can
 scan a local music folder, reopen quickly from a persistent library index,
 search tracks, play audio, remain active in the background, expose media
 controls, manage saved playlists, and update through its signed Flatpak
