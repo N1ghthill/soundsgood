@@ -16,6 +16,20 @@ The project is inspired by the GNOME Music experience, but keeps a narrower
 scope: local files first, no streaming, no podcasts, and no radio service
 integration.
 
+## OpenAI Build Week 2026
+
+SoundsGood participates in the **Apps for your life** track of OpenAI Build
+Week. Codex helped audit and improve the application lifecycle, asynchronous
+library scan, cache safety, GTK rendering model, adaptive UI, tests, and
+submission workflow. Product scope and key architectural decisions remained
+human-owned: native GNOME technology, local-first playback, no accounts, and no
+streaming dependency.
+
+The implementation record, human decisions, Codex session traceability, and
+submission checklist are documented in [docs/BUILD_WEEK.md](docs/BUILD_WEEK.md)
+and [docs/SUBMISSION.md](docs/SUBMISSION.md). The final recording script is in
+[docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md).
+
 ## Screenshots
 
 ![Albums view](docs/screenshots/albums.png)
@@ -116,13 +130,36 @@ You can also run the application directly during development:
 python3 -m soundsgood.application
 ```
 
+### Reproducible Demo Library
+
+Judges and contributors can generate a small local library without downloading
+copyrighted media:
+
+```bash
+scripts/create-demo-library.sh
+```
+
+Start SoundsGood and select the generated `demo-music` folder. The script uses
+GStreamer to create four short WAV test tracks and requires no account, API key,
+or network access.
+
 ### Tests
 
 ```bash
-python3 -m py_compile soundsgood/*.py soundsgood/views/*.py soundsgood/widgets/*.py tests/*.py
+python3 -m py_compile soundsgood/*.py soundsgood/catalog/*.py soundsgood/views/*.py soundsgood/widgets/*.py tests/*.py
 python3 -m unittest discover -s tests
 meson test -C builddir
 ```
+
+GTK smoke tests can be run in a virtual display and D-Bus session:
+
+```bash
+dbus-run-session -- xvfb-run -a python3 -m unittest tests.test_ui
+```
+
+Runtime diagnostics are written to
+`$XDG_STATE_HOME/soundsgood/soundsgood.log` (or
+`~/.local/state/soundsgood/soundsgood.log`) and can be opened from Preferences.
 
 ## Flatpak
 

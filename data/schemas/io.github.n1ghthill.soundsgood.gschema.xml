@@ -46,10 +46,11 @@
     </key>
     <key name="color-scheme" type="s">
       <choices>
+        <choice value="system"/>
         <choice value="light"/>
         <choice value="dark"/>
       </choices>
-      <default>'light'</default>
+      <default>'system'</default>
       <summary>Color scheme</summary>
       <description>The application color scheme selected by the user</description>
     </key>

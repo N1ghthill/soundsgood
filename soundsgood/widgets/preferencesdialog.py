@@ -10,7 +10,12 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Adw, Gtk
+from gi.repository import Adw, Gio, GLib, Gtk
+
+from soundsgood.diagnostics import diagnostics_file, get_logger
+
+
+LOGGER = get_logger("preferences")
 
 
 class PreferencesDialog:
@@ -27,10 +32,11 @@ class PreferencesDialog:
         page = Adw.PreferencesPage()
         appearance_group = Adw.PreferencesGroup(title=_("Appearance"))
 
-        self._theme_model = Gtk.StringList.new([_("Light"), _("Dark")])
+        self._theme_model = Gtk.StringList.new([_("System"), _("Light"), _("Dark")])
         self._theme_dropdown = Gtk.DropDown(model=self._theme_model)
         current_scheme = self._settings.get_string("color-scheme")
-        self._theme_dropdown.set_selected(1 if current_scheme == "dark" else 0)
+        theme_index = {"system": 0, "light": 1, "dark": 2}.get(current_scheme, 0)
+        self._theme_dropdown.set_selected(theme_index)
         self._theme_dropdown.connect("notify::selected", self._on_theme_selected)
 
         theme_row = Adw.ActionRow(
@@ -99,6 +105,18 @@ class PreferencesDialog:
         group.add(rescan_row)
 
         page.add(group)
+
+        diagnostics_group = Adw.PreferencesGroup(title=_("Diagnostics"))
+        diagnostics_row = Adw.ActionRow(
+            title=_("Application Log"),
+            subtitle=str(diagnostics_file()),
+        )
+        diagnostics_button = Gtk.Button(label=_("Open Folder"))
+        diagnostics_button.connect("clicked", self._on_open_diagnostics)
+        diagnostics_row.add_suffix(diagnostics_button)
+        diagnostics_row.set_activatable_widget(diagnostics_button)
+        diagnostics_group.add(diagnostics_row)
+        page.add(diagnostics_group)
         self._dialog.add(page)
 
     def present(self, parent):
@@ -115,9 +133,18 @@ class PreferencesDialog:
         self._app.reindex_library()
 
     def _on_theme_selected(self, dropdown, _param):
-        scheme = "dark" if dropdown.get_selected() == 1 else "light"
+        scheme = ("system", "light", "dark")[dropdown.get_selected()]
         self._settings.set_string("color-scheme", scheme)
         self._app.apply_color_scheme()
+
+    def _on_open_diagnostics(self, _button):
+        try:
+            Gio.AppInfo.launch_default_for_uri(
+                diagnostics_file().parent.resolve().as_uri(),
+                None,
+            )
+        except GLib.Error:
+            LOGGER.exception("Could not open diagnostics folder")
 
     def _on_notifications_toggled(self, switch, _param):
         self._settings.set_boolean("enable-notifications", switch.get_active())

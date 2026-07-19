@@ -24,7 +24,7 @@ Pontos importantes:
 
 - `soundsgood/application.py` e a entrada principal da aplicacao.
 - `soundsgood/models.py` contem modelos GObject e enums como `RepeatMode`, `PlayState` e `LibraryState`.
-- `soundsgood/library.py` contem scan local, cache persistente, metadados, agrupamento, busca e thumbnails.
+- `soundsgood/library.py` coordena o catalogo GObject e o scan; helpers puros de cache, playlists e busca ficam em `soundsgood/catalog`.
 - `soundsgood/player.py` contem o `playbin`, fila e controles de reproducao.
 - `soundsgood/window.py` compoe a janela principal.
 - `soundsgood/views` contem telas de albums, artistas e musicas.
@@ -34,7 +34,7 @@ Pontos importantes:
 
 Ultima validacao conhecida:
 
-- 37 testes unitarios passando.
+- 41 testes headless e 2 smoke tests graficos passando no GNOME SDK 50.
 - `py_compile` passando para app e testes.
 - `meson setup builddir --reconfigure`, `meson compile -C builddir` e `meson test -C builddir` passando.
 - App inicia por `./builddir/local-soundsgood`; pode aparecer o warning local `Unknown key gtk-modules` do GTK.
@@ -70,6 +70,8 @@ O repositorio pode nao estar inicializado como Git. Nao assuma que `git status` 
 - Nao controle GStreamer diretamente a partir das views.
 - Prefira `Gio.ListStore`/`Gio.ListModel` para dados exibidos em GTK.
 - Use sinais e propriedades GObject para comunicar mudancas.
+- Colecoes sem limite devem usar `Gtk.ListView`/`Gtk.GridView` com factories, nunca uma arvore permanente de widgets por item.
+- Todo sinal, source GLib, monitor ou bus watch deve ter teardown explicito.
 - Preserve o escopo local-first.
 - Mantenha a troca de faixa no `Player` reiniciando o `playbin` antes de aplicar nova URI.
 
@@ -111,7 +113,9 @@ Cache:
 - Metadados da biblioteca ficam em `$XDG_CACHE_HOME/soundsgood/library.json`.
 - O cache deve ser invalidado por `mtime_ns` e tamanho do arquivo.
 - Ao alterar campos de `Song`, atualize `_record_from_song()` e `_song_from_record()`.
-- O monitoramento atual usa `Gio.FileMonitor` nos diretorios indexados e agenda rescan com debounce.
+- O monitoramento usa `Gio.FileMonitor` com limite explicito e agenda rescan com debounce.
+- Scans concorrentes sao consolidados e executados depois do scan ativo.
+- O cache e gravado por substituicao atomica.
 - A abertura normal usa o indice em cache quando a versao do cache, os arquivos conhecidos e os diretorios indexados continuam validos.
 - A acao manual de reindexacao usa scan forcado e reler metadados, mesmo quando arquivos parecem inalterados.
 - O rescan aplica diff por URI no modelo de faixas.
@@ -183,7 +187,7 @@ Regras importantes:
 Sempre que possivel, rode:
 
 ```bash
-python3 -m py_compile soundsgood/*.py soundsgood/views/*.py soundsgood/widgets/*.py tests/*.py
+python3 -m py_compile soundsgood/*.py soundsgood/catalog/*.py soundsgood/views/*.py soundsgood/widgets/*.py tests/*.py
 python3 -m unittest discover -s tests
 meson setup builddir --reconfigure
 meson compile -C builddir

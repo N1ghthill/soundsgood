@@ -54,7 +54,7 @@ class PlayerTest(unittest.TestCase):
         self.player._load_song = lambda _song: True
 
     def tearDown(self):
-        self.player.stop(clear_current=True)
+        self.player.shutdown()
 
     def test_play_song_replaces_playlist_and_sets_index(self):
         first = Song(title="One", url="file:///tmp/one.mp3")
@@ -117,6 +117,16 @@ class PlayerTest(unittest.TestCase):
 
         self.assertEqual(self.player.get_playlist(), [])
         self.assertIsNone(self.player.props.current_song)
+
+    def test_shutdown_releases_periodic_and_bus_resources(self):
+        self.player.shutdown()
+
+        self.assertTrue(self.player._shutdown)
+        self.assertEqual(self.player._tick_source_id, 0)
+        self.assertEqual(self.player._bus_handler_id, 0)
+
+        # Lifecycle methods must remain safe when shutdown is requested twice.
+        self.player.shutdown()
 
 
 if __name__ == "__main__":

@@ -12,6 +12,10 @@ gi.require_version("Gst", "1.0")
 from gi.repository import GLib, GObject, Gst
 
 from soundsgood.models import PlayState, RepeatMode, Song
+from soundsgood.diagnostics import get_logger
+
+
+LOGGER = get_logger("player")
 
 
 class Player(GObject.GObject):
@@ -36,6 +40,7 @@ class Player(GObject.GObject):
         self._settings = application.props.settings
         self._playlist: list[Song] = []
         self._playlist_index = -1
+        self._shutdown = False
 
         self._playbin = Gst.ElementFactory.make("playbin", "soundsgood-player")
         if self._playbin is None:
@@ -43,7 +48,7 @@ class Player(GObject.GObject):
 
         self._bus = self._playbin.get_bus()
         self._bus.add_signal_watch()
-        self._bus.connect("message", self._on_bus_message)
+        self._bus_handler_id = self._bus.connect("message", self._on_bus_message)
 
         self.props.volume = self._settings.get_double("volume")
         self.props.mute = self._settings.get_boolean("mute")
@@ -54,7 +59,7 @@ class Player(GObject.GObject):
         self.connect("notify::repeat-mode", self._on_repeat_mode_changed)
         self._apply_audio_properties()
 
-        GLib.timeout_add(500, self._tick)
+        self._tick_source_id = GLib.timeout_add(500, self._tick)
 
     def play_song(self, song: Song, playlist: list[Song] | None = None):
         """Play a song, optionally replacing the playback queue."""
@@ -185,10 +190,17 @@ class Player(GObject.GObject):
             self.stop(clear_current=True)
             return False
 
-        self._set_state(Gst.State.NULL)
-        self._playbin.get_state(Gst.SECOND)
-        self._playbin.set_property("uri", song.props.url)
-        self._apply_audio_properties()
+        LOGGER.info("Loading track uri=%s", song.props.url)
+        try:
+            self._set_state(Gst.State.NULL)
+            self._playbin.get_state(Gst.SECOND)
+            self._playbin.set_property("uri", song.props.url)
+            self._apply_audio_properties()
+        except (GLib.Error, TypeError, RuntimeError) as error:
+            LOGGER.exception("Could not prepare track")
+            self.emit("error", str(error))
+            self.stop(clear_current=True)
+            return False
 
         return self._set_state(Gst.State.PLAYING)
 
@@ -237,18 +249,45 @@ class Player(GObject.GObject):
                 self.stop()
         elif message.type == Gst.MessageType.ERROR:
             error, debug = message.parse_error()
+            LOGGER.error("GStreamer error: %s; debug=%s", error.message, debug or "")
             self.emit("error", error.message)
-            if debug:
-                print(debug)
             self.stop(clear_current=True)
         elif message.type == Gst.MessageType.DURATION_CHANGED:
             self._update_duration()
 
     def _tick(self):
-        if self.props.play_state == int(PlayState.PLAYING):
-            self._update_position()
-            self._update_duration()
+        if self._shutdown:
+            self._tick_source_id = 0
+            return GLib.SOURCE_REMOVE
+        try:
+            if self.props.play_state == int(PlayState.PLAYING):
+                self._update_position()
+                self._update_duration()
+        except (GLib.Error, RuntimeError):
+            LOGGER.exception("Playback polling failed")
         return GLib.SOURCE_CONTINUE
+
+    def shutdown(self):
+        """Release GStreamer and GLib resources deterministically."""
+        if self._shutdown:
+            return
+
+        self._shutdown = True
+        LOGGER.info("Shutting down player")
+        if self._tick_source_id:
+            GLib.source_remove(self._tick_source_id)
+            self._tick_source_id = 0
+
+        try:
+            self._playbin.set_state(Gst.State.NULL)
+            self._playbin.get_state(Gst.SECOND)
+        except (GLib.Error, RuntimeError):
+            LOGGER.exception("Failed to stop GStreamer during shutdown")
+
+        if self._bus_handler_id:
+            self._bus.disconnect(self._bus_handler_id)
+            self._bus_handler_id = 0
+        self._bus.remove_signal_watch()
 
     def _update_position(self):
         success, position = self._playbin.query_position(Gst.Format.TIME)

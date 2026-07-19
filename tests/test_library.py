@@ -299,16 +299,62 @@ class LibraryTest(unittest.TestCase):
                 "size": directory_stat["size"],
             }
             self.library._save_cache(temp_dir, [record], [directory_record])
-            self.library._setup_cached_monitors = lambda *_args: None
-            self.library._setup_monitors = lambda *_args: self.fail("full scan was started")
-
-            self.library.scan(temp_dir)
+            self.library._setup_monitors_for_paths = lambda *_args: None
+            original_thread_new = GLib.Thread.new
+            original_idle_add = GLib.idle_add
+            GLib.Thread.new = lambda _name, callback, data: callback(data)
+            GLib.idle_add = lambda callback, *args: callback(*args)
+            try:
+                self.library.scan(temp_dir)
+            finally:
+                GLib.Thread.new = original_thread_new
+                GLib.idle_add = original_idle_add
 
             self.assertEqual(self.library.props.scan_state, int(LibraryState.READY))
             self.assertEqual(
                 [song.props.title for song in self.library.get_all_songs()],
                 ["Cached"],
             )
+
+    def test_scan_request_during_active_scan_is_coalesced(self):
+        with TemporaryDirectory() as temp_dir:
+            self.library._is_scanning = True
+            self.library._scan_generation = 3
+
+            self.library.scan(temp_dir, force=True, refresh_metadata=True)
+
+            self.assertEqual(
+                self.library._pending_scan,
+                (temp_dir, True, True),
+            )
+
+    def test_worker_failure_moves_library_to_error_state(self):
+        with TemporaryDirectory() as temp_dir:
+            original_idle_add = GLib.idle_add
+            GLib.idle_add = lambda callback, *args: callback(*args)
+            self.library._is_scanning = True
+            self.library._scan_generation = 1
+            self.library._scan_directory_safe = lambda *_args: (_ for _ in ()).throw(
+                RuntimeError("broken scanner")
+            )
+            try:
+                with self.assertLogs("soundsgood.library", level="ERROR"):
+                    self.library._scan_directory((temp_dir, True, False, 1))
+            finally:
+                GLib.idle_add = original_idle_add
+
+            self.assertEqual(self.library.props.scan_state, int(LibraryState.ERROR))
+            self.assertFalse(self.library._is_scanning)
+
+    def test_cache_save_is_atomic_and_leaves_no_temporary_file(self):
+        with TemporaryDirectory() as temp_dir:
+            cache_path = Path(temp_dir) / "library.json"
+            self.library._cache_path = lambda: cache_path
+
+            self.library._save_cache("/tmp/music", [])
+
+            self.assertTrue(cache_path.exists())
+            self.assertFalse(cache_path.with_suffix(".json.tmp").exists())
 
     def test_cache_validation_rejects_old_or_changed_index(self):
         cache = {
@@ -399,7 +445,8 @@ class LibraryTest(unittest.TestCase):
             cache_path.write_text("{", encoding="utf-8")
             self.library._cache_path = lambda: cache_path
 
-            self.assertEqual(self.library._load_cache("/tmp/music"), {})
+            with self.assertLogs("soundsgood.catalog.cache", level="WARNING"):
+                self.assertEqual(self.library._load_cache("/tmp/music"), {})
 
     def test_record_matches_file_uses_mtime_and_size(self):
         record = {"mtime_ns": 10, "size": 20}

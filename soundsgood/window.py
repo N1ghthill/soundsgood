@@ -41,12 +41,12 @@ class Window(Adw.ApplicationWindow):
         self._headerbar = Adw.HeaderBar()
         self._toolbar_view.add_top_bar(self._headerbar)
 
-        self._stack = Gtk.Stack()
+        self._stack = Adw.ViewStack()
         self._stack.set_vexpand(True)
-        self._stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
 
-        self._switcher = Gtk.StackSwitcher()
+        self._switcher = Adw.ViewSwitcher()
         self._switcher.set_stack(self._stack)
+        self._switcher.set_policy(Adw.ViewSwitcherPolicy.WIDE)
         self._headerbar.set_title_widget(self._switcher)
 
         self._search_button = Gtk.Button(icon_name="system-search-symbolic")
@@ -72,18 +72,40 @@ class Window(Adw.ApplicationWindow):
         self._stack.add_titled(self._songs_view, "songs", _("Songs"))
         self._stack.add_titled(self._search_view, "search", _("Search"))
 
+        self._bottom_switcher = Adw.ViewSwitcherBar()
+        self._bottom_switcher.set_stack(self._stack)
+        self._bottom_switcher.set_reveal(False)
+
         self._player_toolbar = PlayerToolbar(application)
         application.props.player.connect("error", self._on_player_error)
         application.props.library.connect("scan-error", self._on_library_error)
 
         content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         content.append(self._stack)
+        content.append(self._bottom_switcher)
         content.append(self._player_toolbar)
         self._toast_overlay = Adw.ToastOverlay()
         self._toast_overlay.set_child(content)
         self._toolbar_view.set_content(self._toast_overlay)
 
         self.connect("close-request", self._on_close_request)
+
+        compact = Adw.Breakpoint.new(
+            Adw.BreakpointCondition.parse("max-width: 600px")
+        )
+        compact.add_setter(self._switcher, "visible", False)
+        compact.add_setter(self._bottom_switcher, "reveal", True)
+        def apply_compact(*_args):
+            self._artists_view.set_compact(True)
+            self._albums_view.set_compact(True)
+
+        def unapply_compact(*_args):
+            self._artists_view.set_compact(False)
+            self._albums_view.set_compact(False)
+
+        compact.connect("apply", apply_compact)
+        compact.connect("unapply", unapply_compact)
+        self.add_breakpoint(compact)
 
     def _show_search(self, _button):
         self._stack.set_visible_child_name("search")

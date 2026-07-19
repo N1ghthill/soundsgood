@@ -15,7 +15,7 @@ O warning `Unknown key gtk-modules` em `~/.config/gtk-4.0/settings.ini` e uma co
 Antes dos testes manuais, rode a validacao automatica:
 
 ```bash
-python3 -m py_compile soundsgood/*.py soundsgood/views/*.py soundsgood/widgets/*.py tests/*.py
+python3 -m py_compile soundsgood/*.py soundsgood/catalog/*.py soundsgood/views/*.py soundsgood/widgets/*.py tests/*.py
 python3 -m unittest discover -s tests
 meson test -C builddir
 ```
@@ -41,6 +41,9 @@ meson test -C builddir
 - Buscar por titulo, artista e album.
 - Buscar ignorando acentos, por exemplo `musica` para `Música`.
 - Iniciar reproducao por faixa, album, artista e resultado de busca.
+- Redimensionar para 1200, 900, 600 e 360 px e confirmar que nao ha corte ou rolagem horizontal.
+- Em largura estreita, confirmar o switcher inferior, retorno da tela de artista e cabecalho vertical do album.
+- Repetir buscas e reindexacoes e confirmar que memoria/tempo de resposta nao crescem continuamente.
 
 ## Playback
 
@@ -56,6 +59,7 @@ meson test -C builddir
 - Confirmar que uma notificacao aparece quando uma nova faixa comeca, se a preferencia estiver ativa.
 - Confirmar que a sessao nao entra em suspensao enquanto ha musica tocando, se a preferencia estiver ativa.
 - Alternar as preferencias de notificacao e prevencao de suspensao e confirmar que os comportamentos mudam sem reiniciar o app.
+- Abrir Preferences > Diagnostics e confirmar que a pasta do log pode ser acessada.
 
 ## MPRIS
 

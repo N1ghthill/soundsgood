@@ -108,6 +108,8 @@ Objetivo: melhorar integracao com desktop e polimento visual.
 - [x] Notificacoes opcionais para faixa atual.
 - [x] Refinar layout mobile/estreito.
 - [x] Melhorar acessibilidade basica: labels e tooltips em controles principais.
+- [x] Adotar navegacao adaptativa com breakpoints para telas estreitas.
+- [x] Virtualizar as colecoes principais de albums, artistas e musicas.
 
 Entregavel: experiencia consistente com apps GNOME modernos.
 
@@ -124,6 +126,10 @@ Objetivo: estabilizar o projeto para uso e empacotamento.
 - [x] CI para build e testes.
 - [x] Documentacao inicial de empacotamento Flatpak.
 - [x] Remover `data/soundsgood.gresource.xml` vazio, ja que nao ha templates `.ui`.
+- [x] Adicionar diagnostico local, captura de falhas e teardown explicito do player.
+- [x] Tornar scan enfileiravel, cache atomico e falhas por arquivo recuperaveis.
+- [x] Adicionar smoke tests graficos e matriz de larguras.
+- [x] Documentar a participacao e submissao da OpenAI Build Week 2026.
 
 Entregavel: app empacotavel e sustentavel.
 
@@ -139,10 +145,10 @@ Entregavel: app empacotavel e sustentavel.
 
 ## Prioridade Atual
 
-1. Testar regressao manual em colecoes maiores e em telas estreitas reais.
-2. Ampliar acessibilidade com auditoria de navegacao por teclado e leitor de tela.
-3. Avaliar controles avancados de biblioteca, como limpar cache e mostrar data do ultimo indice.
-4. Planejar uma opcao de diagnostico para relatar erros de metadados por arquivo.
+1. Executar regressao manual da Build Week em colecoes maiores e nas larguras 360/600/900/1200.
+2. Gravar o video final de menos de tres minutos e validar o fluxo em clone limpo.
+3. Ampliar acessibilidade com auditoria de navegacao por teclado e leitor de tela.
+4. Evoluir diagnosticos para listar arquivos com metadados incompletos sem expor caminhos por padrao.
 
 ## Como Retomar
 

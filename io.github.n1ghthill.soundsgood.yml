@@ -25,10 +25,16 @@ modules:
         path: .
         skip:
           - .deepcode
+          - .git
+          - .github
           - .flatpak-builder
           - builddir
+          - builddir-sdk
           - build-flatpak
+          - build-flatpak-test
+          - demo-music
           - soundsgood/__pycache__
+          - soundsgood/catalog/__pycache__
           - soundsgood/views/__pycache__
           - soundsgood/widgets/__pycache__
           - tests/__pycache__

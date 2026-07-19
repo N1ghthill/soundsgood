@@ -54,10 +54,11 @@ endif
 
 # Runtime dependencies used through PyGObject.
 dependency('glib-2.0', version: '>= 2.67.1')
-dependency('gtk4', version: '>= 4.16.0', required: false)
-dependency('libadwaita-1', version: '>= 1.8', required: false)
-dependency('gstreamer-1.0', version: '>= 1.20', required: false)
-dependency('gstreamer-pbutils-1.0', version: '>= 1.20', required: false)
+dependency('gtk4', version: '>= 4.16.0')
+dependency('libadwaita-1', version: '>= 1.8')
+dependency('gstreamer-1.0', version: '>= 1.20')
+dependency('gstreamer-pbutils-1.0', version: '>= 1.20')
+dependency('gdk-pixbuf-2.0')
 
 pygi_check = run_command(
   py_installation,
@@ -69,6 +70,7 @@ for namespace, version in (
     ("Adw", "1"),
     ("Gst", "1.0"),
     ("GstPbutils", "1.0"),
+    ("GdkPixbuf", "2.0"),
 ):
     gi.require_version(namespace, version)
     __import__("gi.repository", fromlist=[namespace])
@@ -94,6 +96,7 @@ install_subdir(
     install_dir: py_installation.get_install_dir(),
     exclude_directories: [
         '__pycache__',
+        'catalog/__pycache__',
         'views/__pycache__',
         'widgets/__pycache__',
     ]

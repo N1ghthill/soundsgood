@@ -4,25 +4,37 @@
 from __future__ import annotations
 import gi
 import hashlib
-import json
 import os
 import mimetypes
 import re
 import subprocess
-import unicodedata
 from gettext import gettext as _
 from typing import Optional
 from pathlib import Path
 
 gi.require_version("Gst", "1.0")
 gi.require_version("GstPbutils", "1.0")
+gi.require_version("GdkPixbuf", "2.0")
 
-from gi.repository import GObject, GLib, Gio, Gst, GstPbutils
+from gi.repository import GdkPixbuf, GObject, GLib, Gio, Gst, GstPbutils
 
 from soundsgood.models import Song, Album, Artist, LibraryState
+from soundsgood.diagnostics import get_logger
+from soundsgood.catalog.cache import (
+    file_stat,
+    load_cache,
+    record_matches_file,
+    save_cache,
+)
+from soundsgood.catalog.playlists import m3u_entries, pls_entries
+from soundsgood.catalog.search import normalize, rank_fields
+
+
+LOGGER = get_logger("library")
 
 
 CACHE_VERSION = 2
+MONITOR_LIMIT = 512
 
 # Supported audio formats
 AUDIO_EXTENSIONS = {
@@ -55,6 +67,9 @@ class Library(GObject.GObject):
         self._monitors = []
         self._rescan_source_id = 0
         self._refresh_metadata_scan = False
+        self._shutdown = False
+        self._scan_generation = 0
+        self._pending_scan = None
 
         # Data stores
         self._songs = Gio.ListStore.new(Song)
@@ -86,7 +101,7 @@ class Library(GObject.GObject):
         refresh_metadata: bool = False,
     ):
         """Scan a directory for music files."""
-        if self._is_scanning:
+        if self._shutdown:
             return
 
         if directory is None:
@@ -100,31 +115,81 @@ class Library(GObject.GObject):
             self.emit("scan-error", message)
             return
 
+        if self._is_scanning:
+            # Coalesce repeated monitor events while preserving an explicit
+            # refresh request or a changed directory.
+            pending = self._pending_scan
+            self._pending_scan = (
+                directory,
+                force or bool(pending and pending[1]),
+                refresh_metadata or bool(pending and pending[2]),
+            )
+            LOGGER.info("Queued scan while generation %d is running", self._scan_generation)
+            return
+
         self._current_directory = directory
-
-        if not force:
-            cache = self._load_cache(directory)
-            if "songs" in cache and self._cache_matches_filesystem(cache):
-                self._setup_cached_monitors(directory, cache)
-                songs = [
-                    self._song_from_record(record)
-                    for record in cache.get("songs", [])
-                ]
-                self._apply_scan_results(songs)
-                return
-
-        self._setup_monitors(directory)
         self._is_scanning = True
         self._refresh_metadata_scan = refresh_metadata
+        self._scan_generation += 1
+        generation = self._scan_generation
         self._set_scan_state(LibraryState.SCANNING, _("Scanning music..."))
         self.emit("scan-started")
+        LOGGER.info(
+            "Starting scan generation=%d directory=%s force=%s refresh=%s",
+            generation,
+            directory,
+            force,
+            refresh_metadata,
+        )
 
-        GLib.Thread.new("scanner", self._scan_directory, directory)
+        request = (directory, force, refresh_metadata, generation)
+        GLib.Thread.new("scanner", self._scan_directory, request)
 
-    def _scan_directory(self, directory: str):
+    def _scan_directory(self, request):
         """Scan directory recursively for audio files."""
-        audio_files = []
+        if isinstance(request, str):
+            # Kept for focused component tests and development tools.
+            directory = request
+            force = True
+            refresh_metadata = self._refresh_metadata_scan
+            generation = self._scan_generation
+        else:
+            directory, force, refresh_metadata, generation = request
+
+        try:
+            self._scan_directory_safe(
+                directory,
+                force,
+                refresh_metadata,
+                generation,
+            )
+        except Exception as error:
+            LOGGER.exception("Scan generation %d failed", generation)
+            GLib.idle_add(
+                self._complete_scan_error,
+                generation,
+                _("Could not scan the music library: %s") % error,
+            )
+
+    def _scan_directory_safe(
+        self,
+        directory: str,
+        force: bool,
+        refresh_metadata: bool,
+        generation: int,
+    ):
         cache = self._load_cache(directory)
+        if not force and "songs" in cache and self._cache_matches_filesystem(cache):
+            LOGGER.info("Using validated library cache generation=%d", generation)
+            GLib.idle_add(
+                self._complete_scan,
+                generation,
+                cache.get("songs", []),
+                cache.get("directories", []),
+            )
+            return
+
+        audio_files = []
         cached_records = {
             record.get("path"): record
             for record in cache.get("songs", [])
@@ -132,9 +197,11 @@ class Library(GObject.GObject):
         }
         next_records = []
         directory_records = []
-        cache_dirty = refresh_metadata = self._refresh_metadata_scan
+        cache_dirty = refresh_metadata
 
         for root, dirs, files in os.walk(directory):
+            if self._shutdown:
+                return
             # Skip hidden directories
             dirs[:] = [d for d in dirs if not d.startswith(".")]
             root_stat = self._file_stat(root)
@@ -152,19 +219,27 @@ class Library(GObject.GObject):
                     audio_files.append(filepath)
 
         for filepath in audio_files:
+            if self._shutdown:
+                return
             stat = self._file_stat(filepath)
             if stat is None:
                 continue
 
             cached_record = cached_records.get(filepath)
-            if not refresh_metadata and self._record_matches_file(cached_record, stat):
-                song = self._song_from_record(cached_record)
-            else:
-                song = self._create_song_from_file(filepath)
-                cache_dirty = True
+            try:
+                if not refresh_metadata and self._record_matches_file(cached_record, stat):
+                    record = cached_record
+                else:
+                    song = self._create_song_from_file(filepath)
+                    record = self._record_from_song(song, filepath, stat) if song else None
+                    cache_dirty = True
 
-            if song:
-                next_records.append(self._record_from_song(song, filepath, stat))
+                if record:
+                    next_records.append(record)
+            except Exception:
+                # One malformed file or image must not invalidate the catalog.
+                LOGGER.exception("Skipping unreadable media file path=%s", filepath)
+                cache_dirty = True
 
         if cache.get("version") != CACHE_VERSION or "songs" not in cache:
             cache_dirty = True
@@ -172,21 +247,83 @@ class Library(GObject.GObject):
             cache_dirty = True
         if set(cached_records) != set(audio_files):
             cache_dirty = True
+        if self._shutdown:
+            return
         if cache_dirty:
             self._save_cache(directory, next_records, directory_records)
 
         GLib.idle_add(
-            self._apply_scan_results,
-            [self._song_from_record(record) for record in next_records],
+            self._complete_scan,
+            generation,
+            next_records,
+            directory_records,
         )
 
-    def _setup_monitors(self, directory: str):
-        self._clear_monitors()
+    def _complete_scan(self, generation: int, records: list[dict], directories: list[dict]):
+        if self._shutdown or generation != self._scan_generation:
+            return GLib.SOURCE_REMOVE
 
+        try:
+            paths = [record.get("path") for record in directories if record.get("path")]
+            self._setup_monitors_for_paths(paths or [self._current_directory])
+            songs = [self._song_from_record(record) for record in records]
+            self._apply_scan_results(songs)
+            LOGGER.info(
+                "Completed scan generation=%d songs=%d directories=%d",
+                generation,
+                len(songs),
+                len(paths),
+            )
+        except Exception as error:
+            LOGGER.exception("Could not apply scan generation %d", generation)
+            return self._complete_scan_error(
+                generation,
+                _("Could not update the music library: %s") % error,
+            )
+
+        self._run_pending_scan()
+        return GLib.SOURCE_REMOVE
+
+    def _complete_scan_error(self, generation: int, message: str):
+        if self._shutdown or generation != self._scan_generation:
+            return GLib.SOURCE_REMOVE
+
+        self._is_scanning = False
+        self._refresh_metadata_scan = False
+        self._set_scan_state(LibraryState.ERROR, message)
+        self.emit("scan-error", message)
+        self._run_pending_scan()
+        return GLib.SOURCE_REMOVE
+
+    def _run_pending_scan(self):
+        if not self._pending_scan or self._shutdown:
+            return
+        directory, force, refresh_metadata = self._pending_scan
+        self._pending_scan = None
+        self.scan(directory, force=force, refresh_metadata=refresh_metadata)
+
+    def _setup_monitors(self, directory: str):
+        paths = []
         for root, dirs, _files in os.walk(directory):
             dirs[:] = [d for d in dirs if not d.startswith(".")]
+            paths.append(root)
+        self._setup_monitors_for_paths(paths)
+
+    def _setup_monitors_for_paths(self, paths):
+        self._clear_monitors()
+        unique_paths = list(dict.fromkeys(path for path in paths if path))
+        if len(unique_paths) > MONITOR_LIMIT:
+            LOGGER.warning(
+                "Library has %d directories; limiting active monitors to %d",
+                len(unique_paths),
+                MONITOR_LIMIT,
+            )
+
+        for path in unique_paths[:MONITOR_LIMIT]:
+            if not os.path.isdir(path):
+                continue
             try:
-                monitor = Gio.File.new_for_path(root).monitor_directory(
+                monitor = Gio.File.new_for_path(path).monitor_directory(
                     Gio.FileMonitorFlags.NONE,
                     None,
                 )
@@ -201,9 +338,15 @@ class Library(GObject.GObject):
             monitor.cancel()
         self._monitors.clear()
 
-    def _setup_cached_monitors(self, directory: str, cache: dict):
+    def shutdown(self):
+        """Stop monitor callbacks and invalidate pending library work."""
+        self._shutdown = True
         self._clear_monitors()
+        if self._rescan_source_id:
+            GLib.source_remove(self._rescan_source_id)
+            self._rescan_source_id = 0
 
+    def _setup_cached_monitors(self, directory: str, cache: dict):
         paths = {directory}
         for record in cache.get("directories", []):
             path = record.get("path")
@@ -214,21 +357,11 @@ class Library(GObject.GObject):
             if path:
                 paths.add(os.path.dirname(path))
 
-        for path in sorted(paths):
-            if not os.path.isdir(path):
-                continue
-            try:
-                monitor = Gio.File.new_for_path(path).monitor_directory(
-                    Gio.FileMonitorFlags.NONE,
-                    None,
-                )
-            except GLib.Error:
-                continue
-
-            monitor.connect("changed", self._on_directory_changed)
-            self._monitors.append(monitor)
+        self._setup_monitors_for_paths(sorted(paths))
 
     def _on_directory_changed(self, _monitor, _file, _other_file, event_type):
+        if self._shutdown:
+            return
         ignored_events = {
             Gio.FileMonitorEvent.ATTRIBUTE_CHANGED,
             Gio.FileMonitorEvent.PRE_UNMOUNT,
@@ -244,7 +377,9 @@ class Library(GObject.GObject):
 
     def _rescan_current_directory(self):
         if self._is_scanning:
-            return GLib.SOURCE_CONTINUE
+            self._pending_scan = (self._current_directory, True, False)
+            self._rescan_source_id = 0
+            return GLib.SOURCE_REMOVE
 
         self._rescan_source_id = 0
         if self._current_directory:
@@ -290,6 +425,8 @@ class Library(GObject.GObject):
 
         if not thumbnail:
             thumbnail = self._cover_from_directory(filepath)
+        if thumbnail:
+            thumbnail = self._thumbnail_for_cover(thumbnail, uri)
 
         return Song(
             title=title,
@@ -366,27 +503,10 @@ class Library(GObject.GObject):
         return songs
 
     def _m3u_entries(self, text: str) -> list[str]:
-        entries = []
-        for line in text.splitlines():
-            entry = line.strip()
-            if not entry or entry.startswith("#"):
-                continue
-            entries.append(entry)
-        return entries
+        return m3u_entries(text)
 
     def _pls_entries(self, text: str) -> list[str]:
-        entries = {}
-        for line in text.splitlines():
-            key, separator, value = line.partition("=")
-            if not separator or not key.casefold().startswith("file"):
-                continue
-            suffix = key[4:]
-            if not suffix.isdigit():
-                continue
-            value = value.strip()
-            if value:
-                entries[int(suffix)] = value
-        return [entries[index] for index in sorted(entries)]
+        return pls_entries(text)
 
     def _playlist_entry_file(self, entry: str, playlist_dir: Path) -> Gio.File | None:
         if "://" in entry:
@@ -595,26 +715,37 @@ class Library(GObject.GObject):
 
         return ""
 
+    def _thumbnail_for_cover(self, source: str, uri: str) -> str:
+        """Create a bounded artwork file so views never decode full-size covers."""
+        try:
+            stat = os.stat(source)
+            identity = f"{source}:{stat.st_mtime_ns}:{stat.st_size}:{uri}"
+            digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()
+            directory = Path(GLib.get_user_cache_dir()) / "soundsgood" / "thumbnails"
+            directory.mkdir(parents=True, exist_ok=True)
+            destination = directory / f"{digest}.png"
+            if destination.exists():
+                return str(destination)
+
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                source,
+                256,
+                256,
+                True,
+            )
+            pixbuf.savev(str(destination), "png", [], [])
+            return str(destination)
+        except (GLib.Error, OSError, TypeError):
+            LOGGER.warning("Could not create artwork thumbnail source=%s", source)
+            return source
+
     def _cache_path(self) -> Path:
         cache_dir = Path(GLib.get_user_cache_dir()) / "soundsgood"
         cache_dir.mkdir(parents=True, exist_ok=True)
         return cache_dir / "library.json"
 
     def _load_cache(self, directory: str) -> dict:
-        cache_path = self._cache_path()
-        if not cache_path.exists():
-            return {}
-
-        try:
-            with cache_path.open("r", encoding="utf-8") as cache_file:
-                cache = json.load(cache_file)
-        except (OSError, json.JSONDecodeError):
-            return {}
-
-        if cache.get("directory") != directory:
-            return {}
-
-        return cache
+        return load_cache(self._cache_path(), directory)
 
     def _save_cache(
         self,
@@ -622,39 +753,19 @@ class Library(GObject.GObject):
         records: list[dict],
         directory_records: list[dict] | None = None,
     ):
-        cache_path = self._cache_path()
-        data = {
-            "version": CACHE_VERSION,
-            "directory": directory,
-            "directories": directory_records or [],
-            "songs": records,
-        }
-
-        try:
-            with cache_path.open("w", encoding="utf-8") as cache_file:
-                json.dump(data, cache_file, ensure_ascii=False, indent=2)
-        except OSError:
-            pass
+        save_cache(
+            self._cache_path(),
+            CACHE_VERSION,
+            directory,
+            records,
+            directory_records,
+        )
 
     def _file_stat(self, filepath: str) -> dict | None:
-        try:
-            stat = os.stat(filepath)
-        except OSError:
-            return None
-
-        return {
-            "mtime_ns": stat.st_mtime_ns,
-            "size": stat.st_size,
-        }
+        return file_stat(filepath)
 
     def _record_matches_file(self, record: Optional[dict], stat: dict) -> bool:
-        if not record:
-            return False
-
-        return (
-            record.get("mtime_ns") == stat["mtime_ns"]
-            and record.get("size") == stat["size"]
-        )
+        return record_matches_file(record, stat)
 
     def _cache_matches_filesystem(self, cache: dict) -> bool:
         if cache.get("version") != CACHE_VERSION:
@@ -1063,11 +1174,7 @@ class Library(GObject.GObject):
         return [artist for _rank, _sort_key, artist in matches]
 
     def _normalize_search_text(self, text: str) -> str:
-        normalized = unicodedata.normalize("NFKD", text.casefold())
-        return "".join(
-            char for char in normalized
-            if not unicodedata.combining(char)
-        ).strip()
+        return normalize(text)
 
     def _search_rank(self, song: Song, query: str) -> int | None:
         fields = (
@@ -1078,25 +1185,7 @@ class Library(GObject.GObject):
             song.props.genre,
             song.props.year,
         )
-        normalized_fields = [
-            self._normalize_search_text(field)
-            for field in fields
-            if field
-        ]
-
-        for index, field in enumerate(normalized_fields):
-            if field == query:
-                return index
-
-        for index, field in enumerate(normalized_fields):
-            if field.startswith(query):
-                return 10 + index
-
-        for index, field in enumerate(normalized_fields):
-            if query in field:
-                return 20 + index
-
-        return None
+        return rank_fields(fields, query)
 
     def _search_album_rank(self, album: Album, query: str) -> int | None:
         fields = (
@@ -1104,22 +1193,4 @@ class Library(GObject.GObject):
             album.props.artist,
             album.props.year,
         )
-        normalized_fields = [
-            self._normalize_search_text(field)
-            for field in fields
-            if field
-        ]
-
-        for index, field in enumerate(normalized_fields):
-            if field == query:
-                return index
-
-        for index, field in enumerate(normalized_fields):
-            if field.startswith(query):
-                return 10 + index
-
-        for index, field in enumerate(normalized_fields):
-            if query in field:
-                return 20 + index
-
-        return None
+        return rank_fields(fields, query)

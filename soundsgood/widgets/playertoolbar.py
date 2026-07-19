@@ -9,10 +9,58 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 
-from gi.repository import Gtk, Pango
+from gi.repository import Gio, Gtk, Pango
 
-from soundsgood.models import PlayState, RepeatMode
+from soundsgood.models import PlayState, RepeatMode, Song
 from soundsgood.widgets.songrow import format_duration, set_accessible_label
+
+
+class QueueListItem(Gtk.Box):
+    """Factory-backed queue row; only visible items have widgets."""
+
+    def __init__(self, on_remove):
+        super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        self._index = -1
+        self.set_margin_top(8)
+        self.set_margin_bottom(8)
+        self.set_margin_start(8)
+        self.set_margin_end(8)
+
+        self._number = Gtk.Label(width_chars=3, xalign=1)
+        self._number.add_css_class("dim-label")
+        self.append(self._number)
+
+        labels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        labels.set_hexpand(True)
+        self._title = Gtk.Label(xalign=0)
+        self._title.add_css_class("song-title")
+        self._title.set_ellipsize(Pango.EllipsizeMode.END)
+        labels.append(self._title)
+        self._context = Gtk.Label(xalign=0)
+        self._context.add_css_class("caption")
+        self._context.add_css_class("dim-label")
+        self._context.set_ellipsize(Pango.EllipsizeMode.END)
+        labels.append(self._context)
+        self.append(labels)
+
+        self._duration = Gtk.Label(width_chars=6)
+        self._duration.add_css_class("dim-label")
+        self.append(self._duration)
+
+        remove_button = Gtk.Button(icon_name="list-remove-symbolic")
+        remove_button.add_css_class("flat")
+        remove_button.set_tooltip_text(_("Remove from queue"))
+        set_accessible_label(remove_button, _("Remove from queue"))
+        remove_button.connect("clicked", lambda *_: on_remove(self._index))
+        self.append(remove_button)
+
+    def bind(self, index, song):
+        self._index = index
+        self._number.set_label(str(index + 1))
+        self._title.set_label(song.props.title)
+        self._context.set_label(f"{song.props.artist} — {song.props.album}")
+        self._duration.set_label(format_duration(song.props.duration))
+        set_accessible_label(self, song.props.title)
 
 
 class PlayerToolbar(Gtk.Box):
@@ -60,7 +108,6 @@ class PlayerToolbar(Gtk.Box):
 
         info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
         info_box.set_hexpand(True)
-        info_box.set_size_request(140, -1)
         self._title_label = Gtk.Label(label=_("Not playing"), xalign=0)
         self._title_label.set_ellipsize(Pango.EllipsizeMode.END)
         self._artist_label = Gtk.Label(xalign=0)
@@ -99,11 +146,10 @@ class PlayerToolbar(Gtk.Box):
         self._repeat_button.set_tooltip_text(_("Repeat mode"))
         set_accessible_label(self._repeat_button, _("Repeat mode"))
         self._repeat_button.connect("clicked", self._on_repeat_clicked)
-        controls_row.append(self._repeat_button)
 
         self._queue_popover = Gtk.Popover()
-        self._queue_popover.set_size_request(420, 360)
         queue_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        queue_box.set_size_request(280, 300)
         queue_box.set_margin_top(12)
         queue_box.set_margin_bottom(12)
         queue_box.set_margin_start(12)
@@ -121,16 +167,31 @@ class PlayerToolbar(Gtk.Box):
         queue_header.append(clear_button)
         queue_box.append(queue_header)
 
-        self._queue_list = Gtk.ListBox()
-        self._queue_list.set_selection_mode(Gtk.SelectionMode.SINGLE)
-        self._queue_list.set_activate_on_single_click(False)
-        self._queue_list.connect("row-activated", self._on_queue_row_activated)
+        self._queue_model = Gio.ListStore(item_type=Song)
+        self._queue_selection = Gtk.SingleSelection(model=self._queue_model)
+        self._queue_selection.set_autoselect(False)
+        self._queue_selection.set_can_unselect(True)
+        queue_factory = Gtk.SignalListItemFactory()
+        queue_factory.connect("setup", self._setup_queue_item)
+        queue_factory.connect("bind", self._bind_queue_item)
+        self._queue_list = Gtk.ListView(
+            model=self._queue_selection,
+            factory=queue_factory,
+        )
+        self._queue_list.set_single_click_activate(False)
+        self._queue_list.connect("activate", self._on_queue_item_activated)
 
         queue_scroller = Gtk.ScrolledWindow()
         queue_scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         queue_scroller.set_vexpand(True)
         queue_scroller.set_child(self._queue_list)
-        queue_box.append(queue_scroller)
+        self._queue_stack = Gtk.Stack()
+        self._queue_stack.set_vexpand(True)
+        self._queue_stack.add_named(queue_scroller, "queue")
+        empty_label = Gtk.Label(label=_("Queue is empty"))
+        empty_label.add_css_class("dim-label")
+        self._queue_stack.add_named(empty_label, "empty")
+        queue_box.append(self._queue_stack)
         self._queue_popover.set_child(queue_box)
 
         self._queue_button = Gtk.MenuButton(icon_name="view-list-symbolic")
@@ -146,7 +207,34 @@ class PlayerToolbar(Gtk.Box):
         set_accessible_label(self._volume, _("Volume"))
         self._volume.set_value(self._player.props.volume)
         self._volume.connect("value-changed", self._on_volume_changed)
-        controls_row.append(self._volume)
+
+        secondary_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        secondary_box.set_margin_top(12)
+        secondary_box.set_margin_bottom(12)
+        secondary_box.set_margin_start(12)
+        secondary_box.set_margin_end(12)
+
+        repeat_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        repeat_label = Gtk.Label(label=_("Repeat and shuffle"), xalign=0)
+        repeat_label.set_hexpand(True)
+        repeat_row.append(repeat_label)
+        repeat_row.append(self._repeat_button)
+        secondary_box.append(repeat_row)
+
+        volume_label = Gtk.Label(label=_("Volume"), xalign=0)
+        volume_label.add_css_class("caption")
+        volume_label.add_css_class("dim-label")
+        secondary_box.append(volume_label)
+        self._volume.set_hexpand(True)
+        secondary_box.append(self._volume)
+
+        self._secondary_popover = Gtk.Popover()
+        self._secondary_popover.set_child(secondary_box)
+        self._secondary_button = Gtk.MenuButton(icon_name="emblem-system-symbolic")
+        self._secondary_button.set_tooltip_text(_("Playback options"))
+        set_accessible_label(self._secondary_button, _("Playback options"))
+        self._secondary_button.set_popover(self._secondary_popover)
+        controls_row.append(self._secondary_button)
 
         for prop in (
             "current-song",
@@ -214,96 +302,42 @@ class PlayerToolbar(Gtk.Box):
         self._player.props.repeat_mode = int(modes[(modes.index(current) + 1) % len(modes)])
 
     def _sync_queue(self, *_args):
-        self._clear_queue_list()
         playlist = self._player.get_playlist()
+        self._queue_model.remove_all()
         if not playlist:
-            placeholder = Gtk.ListBoxRow()
-            placeholder.set_selectable(False)
-            placeholder.set_activatable(False)
-            label = Gtk.Label(label=_("Queue is empty"))
-            label.add_css_class("dim-label")
-            label.set_margin_top(24)
-            label.set_margin_bottom(24)
-            placeholder.set_child(label)
-            self._queue_list.append(placeholder)
+            self._queue_stack.set_visible_child_name("empty")
             self._queue_button.set_sensitive(False)
             return
 
         self._queue_button.set_sensitive(True)
-        for index, song in enumerate(playlist):
-            self._queue_list.append(self._queue_row(index, song))
+        self._queue_stack.set_visible_child_name("queue")
+        for song in playlist:
+            self._queue_model.append(song)
 
         self._sync_queue_rows()
 
-    def _queue_row(self, index, song):
-        row = Gtk.ListBoxRow()
-        row.queue_index = index
-        row.song = song
+    def _setup_queue_item(self, _factory, list_item):
+        list_item.set_child(QueueListItem(self._on_remove_queue_item))
 
-        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        box.set_margin_top(8)
-        box.set_margin_bottom(8)
-        box.set_margin_start(8)
-        box.set_margin_end(8)
-
-        number = Gtk.Label(label=str(index + 1), width_chars=3, xalign=1)
-        number.add_css_class("dim-label")
-        box.append(number)
-
-        labels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        labels.set_hexpand(True)
-        title = Gtk.Label(label=song.props.title, xalign=0)
-        title.add_css_class("song-title")
-        title.set_ellipsize(Pango.EllipsizeMode.END)
-        labels.append(title)
-        context = Gtk.Label(label=f"{song.props.artist} - {song.props.album}", xalign=0)
-        context.add_css_class("caption")
-        context.add_css_class("dim-label")
-        context.set_ellipsize(Pango.EllipsizeMode.END)
-        labels.append(context)
-        box.append(labels)
-
-        duration = Gtk.Label(label=format_duration(song.props.duration))
-        duration.set_width_chars(6)
-        duration.add_css_class("dim-label")
-        box.append(duration)
-
-        remove_button = Gtk.Button(icon_name="list-remove-symbolic")
-        remove_button.add_css_class("flat")
-        remove_button.set_tooltip_text(_("Remove from queue"))
-        set_accessible_label(remove_button, _("Remove from queue"))
-        remove_button.queue_index = index
-        remove_button.connect("clicked", self._on_remove_queue_item)
-        box.append(remove_button)
-
-        row.set_child(box)
-        return row
+    def _bind_queue_item(self, _factory, list_item):
+        list_item.get_child().bind(list_item.get_position(), list_item.get_item())
 
     def _sync_queue_rows(self):
         current_index = self._player.get_playlist_index()
-        row = self._queue_list.get_first_child()
-        while row:
-            if hasattr(row, "queue_index") and row.queue_index == current_index:
-                row.add_css_class("playing")
-                self._queue_list.select_row(row)
-            else:
-                row.remove_css_class("playing")
-            row = row.get_next_sibling()
+        if 0 <= current_index < self._queue_model.get_n_items():
+            self._queue_selection.select_item(current_index, True)
+        else:
+            self._queue_selection.unselect_all()
 
-    def _clear_queue_list(self):
-        child = self._queue_list.get_first_child()
-        while child:
-            self._queue_list.remove(child)
-            child = self._queue_list.get_first_child()
-
-    def _on_queue_row_activated(self, _listbox, row):
-        if hasattr(row, "queue_index"):
-            self._player.play_playlist_index(row.queue_index)
+    def _on_queue_item_activated(self, _list_view, position):
+        if 0 <= position < self._queue_model.get_n_items():
+            self._player.play_playlist_index(position)
             self._queue_popover.popdown()
 
     def _on_clear_queue(self, _button):
         self._player.clear_playlist()
         self._queue_popover.popdown()
 
-    def _on_remove_queue_item(self, button):
-        self._player.remove_playlist_index(button.queue_index)
+    def _on_remove_queue_item(self, index):
+        if 0 <= index < self._queue_model.get_n_items():
+            self._player.remove_playlist_index(index)

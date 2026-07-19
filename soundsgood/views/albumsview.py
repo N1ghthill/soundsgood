@@ -16,6 +16,61 @@ from soundsgood.models import LibraryState
 from soundsgood.widgets.songrow import SongRow, set_accessible_label
 
 
+class AlbumTile(Gtk.Box):
+    """Reusable grid tile bound by Gtk.GridView's item factory."""
+
+    def __init__(self):
+        super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        self.set_size_request(132, -1)
+        self.set_margin_top(8)
+        self.set_margin_bottom(8)
+        self.set_margin_start(8)
+        self.set_margin_end(8)
+
+        self._cover = Gtk.Image(icon_name="media-optical-cd-audio-symbolic")
+        self._cover.set_pixel_size(112)
+        self._cover.add_css_class("album-cover")
+        self.append(self._cover)
+
+        self._title = Gtk.Label()
+        self._title.set_wrap(True)
+        self._title.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
+        self._title.set_ellipsize(Pango.EllipsizeMode.END)
+        self._title.set_lines(2)
+        self._title.add_css_class("heading")
+        self.append(self._title)
+
+        self._artist = Gtk.Label()
+        self._artist.set_ellipsize(Pango.EllipsizeMode.END)
+        self._artist.add_css_class("dim-label")
+        self.append(self._artist)
+
+        self._count = Gtk.Label()
+        self._count.add_css_class("caption")
+        self._count.add_css_class("dim-label")
+        self.append(self._count)
+
+    def bind(self, album):
+        if album.props.thumbnail:
+            self._cover.set_from_file(album.props.thumbnail)
+        else:
+            self._cover.set_from_icon_name("media-optical-cd-audio-symbolic")
+        self._title.set_label(album.props.title)
+        self._artist.set_label(album.props.artist)
+        self._count.set_label(_("%d songs") % album.props.song_count)
+        set_accessible_label(self, _("Open album %s") % album.props.title)
+
+
+def create_album_factory():
+    factory = Gtk.SignalListItemFactory()
+    factory.connect("setup", lambda _factory, item: item.set_child(AlbumTile()))
+    factory.connect(
+        "bind",
+        lambda _factory, item: item.get_child().bind(item.get_item()),
+    )
+    return factory
+
+
 class AlbumsView(Adw.Bin):
     """Grid of albums."""
 
@@ -24,25 +79,39 @@ class AlbumsView(Adw.Bin):
         self._app = application
         self._library = application.props.library
         self._player = application.props.player
+        self._compact = False
+        self._selected_album = None
 
         self._stack = Gtk.Stack()
         self._stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
 
-        self._flowbox = Gtk.FlowBox()
-        self._flowbox.set_selection_mode(Gtk.SelectionMode.NONE)
-        self._flowbox.set_min_children_per_line(1)
-        self._flowbox.set_max_children_per_line(8)
-        self._flowbox.set_column_spacing(12)
-        self._flowbox.set_row_spacing(18)
-        self._flowbox.set_margin_top(18)
-        self._flowbox.set_margin_bottom(18)
-        self._flowbox.set_margin_start(18)
-        self._flowbox.set_margin_end(18)
+        self._album_selection = Gtk.NoSelection.new(self._library.props.albums)
+        self._grid = Gtk.GridView.new(self._album_selection, create_album_factory())
+        self._grid.set_min_columns(1)
+        self._grid.set_max_columns(8)
+        self._grid.set_single_click_activate(True)
+        self._grid.connect("activate", self._on_album_activated)
 
         scrolled = Gtk.ScrolledWindow()
         scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-        scrolled.set_child(self._flowbox)
-        self._stack.add_named(scrolled, "grid")
+        scrolled.set_child(self._grid)
+
+        self._grid_stack = Gtk.Stack()
+        self._grid_stack.add_named(scrolled, "albums")
+        self._status_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        self._status_box.set_halign(Gtk.Align.CENTER)
+        self._status_box.set_valign(Gtk.Align.CENTER)
+        self._status_label = Gtk.Label()
+        self._status_label.add_css_class("dim-label")
+        self._status_box.append(self._status_label)
+        self._status_button = Gtk.Button(label=_("Choose Music Folder"))
+        self._status_button.set_icon_name("folder-music-symbolic")
+        self._status_button.add_css_class("suggested-action")
+        self._status_button.connect("clicked", self._on_choose_folder_clicked)
+        set_accessible_label(self._status_button, _("Choose Music Folder"))
+        self._status_box.append(self._status_button)
+        self._grid_stack.add_named(self._status_box, "status")
+        self._stack.add_named(self._grid_stack, "grid")
 
         self._album_page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=18)
         self._album_page.set_margin_top(18)
@@ -71,107 +140,43 @@ class AlbumsView(Adw.Bin):
         self._show_status()
 
     def _rebuild(self):
-        self._clear()
         if self._library.props.scan_state == int(LibraryState.ERROR):
             self._show_status()
             return
 
         albums = self._library.props.albums
         if albums.get_n_items() == 0:
-            self._flowbox.append(self._placeholder(self._library.props.status_message or _("No albums found")))
+            self._status_label.set_label(
+                self._library.props.status_message or _("No albums found")
+            )
+            self._status_button.set_visible(True)
+            self._grid_stack.set_visible_child_name("status")
             return
-
-        for index in range(albums.get_n_items()):
-            album = albums.get_item(index)
-            self._flowbox.append(self._album_button(album))
+        self._grid_stack.set_visible_child_name("albums")
 
     def _show_status(self):
-        self._clear()
         message = self._library.props.status_message
         if not message and self._library.props.scan_state == int(LibraryState.SCANNING):
             message = _("Scanning music...")
         elif not message:
             message = _("No albums found")
-        self._flowbox.append(
-            self._placeholder(
-                message,
-                show_button=self._library.props.scan_state != int(LibraryState.SCANNING),
-            )
+        self._status_label.set_label(message)
+        self._status_button.set_visible(
+            self._library.props.scan_state != int(LibraryState.SCANNING)
         )
+        self._grid_stack.set_visible_child_name("status")
 
-    def _album_button(self, album):
-        button = Gtk.Button()
-        button.add_css_class("flat")
-        button.album = album
-        button.set_tooltip_text(_("Open album"))
-        set_accessible_label(button, _("Open album"))
-        button.connect("clicked", self._on_album_clicked)
-
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        box.set_size_request(170, -1)
-
-        cover = Gtk.Image(icon_name="media-optical-cd-audio-symbolic")
-        cover.set_pixel_size(96)
-        if album.props.thumbnail:
-            cover.set_from_file(album.props.thumbnail)
-        cover.add_css_class("album-cover")
-        box.append(cover)
-
-        title = Gtk.Label(label=album.props.title)
-        title.set_wrap(True)
-        title.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
-        title.set_ellipsize(Pango.EllipsizeMode.END)
-        title.set_max_width_chars(22)
-        title.add_css_class("heading")
-        box.append(title)
-
-        artist = Gtk.Label(label=album.props.artist)
-        artist.set_ellipsize(Pango.EllipsizeMode.END)
-        artist.set_max_width_chars(22)
-        artist.add_css_class("dim-label")
-        box.append(artist)
-
-        count = Gtk.Label(label=_("%d songs") % album.props.song_count)
-        count.add_css_class("caption")
-        count.add_css_class("dim-label")
-        box.append(count)
-
-        button.set_child(box)
-        return button
-
-    def _placeholder(self, text: str, show_button: bool = True):
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-        box.set_margin_top(48)
-        box.set_halign(Gtk.Align.CENTER)
-
-        label = Gtk.Label(label=text)
-        label.add_css_class("dim-label")
-        box.append(label)
-
-        if show_button:
-            button = Gtk.Button(label=_("Choose Music Folder"))
-            button.set_icon_name("folder-music-symbolic")
-            button.add_css_class("suggested-action")
-            button.connect("clicked", self._on_choose_folder_clicked)
-            set_accessible_label(button, _("Choose Music Folder"))
-            box.append(button)
-
-        return box
-
-    def _clear(self):
-        child = self._flowbox.get_first_child()
-        while child:
-            self._flowbox.remove(child)
-            child = self._flowbox.get_first_child()
-
-    def _on_album_clicked(self, button):
-        self._show_album(button.album)
+    def _on_album_activated(self, _grid, position):
+        album = self._library.props.albums.get_item(position)
+        if album is not None:
+            self._show_album(album)
 
     def _on_choose_folder_clicked(self, _button):
         self._app.select_music_folder(self.get_root())
 
     def _show_album(self, album):
         self._clear_box(self._album_page)
+        self._selected_album = album
 
         back_button = Gtk.Button(icon_name="go-previous-symbolic")
         back_button.set_tooltip_text(_("Back to albums"))
@@ -180,11 +185,17 @@ class AlbumsView(Adw.Bin):
         back_button.connect("clicked", lambda *_: self._stack.set_visible_child_name("grid"))
         self._album_page.append(back_button)
 
-        header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=24)
+        header = Gtk.Box(
+            orientation=(
+                Gtk.Orientation.VERTICAL
+                if self._compact else Gtk.Orientation.HORIZONTAL
+            ),
+            spacing=18,
+        )
         header.set_valign(Gtk.Align.START)
 
         cover = Gtk.Image(icon_name="media-optical-cd-audio-symbolic")
-        cover.set_pixel_size(180)
+        cover.set_pixel_size(140 if self._compact else 180)
         if album.props.thumbnail:
             cover.set_from_file(album.props.thumbnail)
         header.append(cover)
@@ -234,6 +245,13 @@ class AlbumsView(Adw.Bin):
 
         self._album_page.append(songs_list)
         self._stack.set_visible_child_name("album")
+
+    def set_compact(self, compact: bool):
+        if self._compact == compact:
+            return
+        self._compact = compact
+        if self._selected_album is not None and self._stack.get_visible_child_name() == "album":
+            self._show_album(self._selected_album)
 
     def _play_album(self, album):
         songs_model = album.props.songs

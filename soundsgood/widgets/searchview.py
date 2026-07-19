@@ -10,7 +10,7 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Adw, Gtk, Pango
+from gi.repository import Adw, GLib, Gtk, Pango
 
 from soundsgood.widgets.songrow import SongRow
 
@@ -23,6 +23,7 @@ class SearchView(Adw.Bin):
         self._app = application
         self._library = application.props.library
         self._player = application.props.player
+        self._search_source_id = 0
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         box.set_margin_top(12)
@@ -51,10 +52,16 @@ class SearchView(Adw.Bin):
         self._entry.grab_focus()
 
     def _on_search_changed(self, entry):
-        self._clear()
+        if self._search_source_id:
+            GLib.source_remove(self._search_source_id)
         query = entry.get_text().strip()
+        self._search_source_id = GLib.timeout_add(180, self._run_search, query)
+
+    def _run_search(self, query):
+        self._search_source_id = 0
+        self._clear()
         if not query:
-            return
+            return GLib.SOURCE_REMOVE
 
         results = self._library.search(query)
         albums = self._library.search_albums(query)
@@ -62,17 +69,17 @@ class SearchView(Adw.Bin):
 
         if artists:
             self._append_section(_("Artists"))
-            for artist in artists:
+            for artist in artists[:20]:
                 self._results.append(self._artist_row(artist))
 
         if albums:
             self._append_section(_("Albums"))
-            for album in albums:
+            for album in albums[:30]:
                 self._results.append(self._album_row(album))
 
         if results.get_n_items() > 0:
             self._append_section(_("Songs"))
-        for index in range(results.get_n_items()):
+        for index in range(min(results.get_n_items(), 100)):
             self._results.append(
                 SongRow(
                     results.get_item(index),
@@ -81,6 +88,13 @@ class SearchView(Adw.Bin):
                     player=self._player,
                 )
             )
+        return GLib.SOURCE_REMOVE
+
+    def do_unroot(self):
+        if self._search_source_id:
+            GLib.source_remove(self._search_source_id)
+            self._search_source_id = 0
+        Adw.Bin.do_unroot(self)
 
     def _clear(self):
         child = self._results.get_first_child()

@@ -8,7 +8,6 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 gi.require_version("Gst", "1.0")
-gi.require_version("GstAudio", "1.0")
 
 from gettext import gettext as _
 from gi.repository import Adw, GLib, GObject, Gdk, Gio, Gtk, Gst
@@ -24,6 +23,10 @@ from soundsgood.widgets.playertoolbar import PlayerToolbar
 from soundsgood.widgets.searchview import SearchView
 from soundsgood.widgets.preferencesdialog import PreferencesDialog
 from soundsgood.widgets.aboutdialog import AboutDialog
+from soundsgood.diagnostics import configure_logging, diagnostics_file, get_logger
+
+
+LOGGER = get_logger("application")
 
 
 class MemorySettings:
@@ -37,7 +40,7 @@ class MemorySettings:
         "window-height": 800,
         "window-maximized": False,
         "music-dir": "",
-        "color-scheme": "light",
+        "color-scheme": "system",
         "enable-notifications": True,
         "inhibit-suspend": True,
     }
@@ -248,8 +251,10 @@ class SoundsGoodApplication(Adw.Application):
         style_manager = Adw.StyleManager.get_default()
         if scheme == "dark":
             style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
-        else:
+        elif scheme == "light":
             style_manager.set_color_scheme(Adw.ColorScheme.FORCE_LIGHT)
+        else:
+            style_manager.set_color_scheme(Adw.ColorScheme.DEFAULT)
 
     def sync_desktop_integration(self):
         self._sync_suspend_inhibition()
@@ -297,6 +302,7 @@ class SoundsGoodApplication(Adw.Application):
         self.send_notification("now-playing", notification)
 
     def do_startup(self):
+        LOGGER.info("Application startup")
         Adw.Application.do_startup(self)
         Gtk.Window.set_default_icon_name(self.get_application_id())
         self.apply_color_scheme()
@@ -308,7 +314,7 @@ class SoundsGoodApplication(Adw.Application):
 
         # Load CSS
         css_provider = Gtk.CssProvider()
-        css = b"""
+        css = """
         .album-cover {
             border-radius: 8px;
         }
@@ -327,7 +333,7 @@ class SoundsGoodApplication(Adw.Application):
             font-weight: 700;
         }
         """
-        css_provider.load_from_data(css)
+        css_provider.load_from_string(css)
         Gtk.StyleContext.add_provider_for_display(
             Gdk.Display.get_default(),
             css_provider,
@@ -335,6 +341,7 @@ class SoundsGoodApplication(Adw.Application):
         )
 
     def do_activate(self):
+        LOGGER.info("Application activate")
         self._ensure_window()
 
         # Start library scan
@@ -343,6 +350,7 @@ class SoundsGoodApplication(Adw.Application):
         self._window.present()
 
     def do_open(self, files, n_files, hint):
+        LOGGER.info("Opening %d external file(s)", n_files)
         self._ensure_window()
 
         # Keep the library available while treating opened files as a temporary queue.
@@ -368,11 +376,14 @@ class SoundsGoodApplication(Adw.Application):
         self._player.play_song(songs[0], songs)
 
     def do_shutdown(self):
+        LOGGER.info("Application shutdown")
         if self._inhibit_cookie:
             self.uninhibit(self._inhibit_cookie)
             self._inhibit_cookie = 0
         self.withdraw_notification("now-playing")
         self._mpris.shutdown()
+        self._library.shutdown()
+        self._player.shutdown()
         Adw.Application.do_shutdown(self)
 
 
@@ -380,9 +391,18 @@ def main():
     application_id = os.environ.get("APPLICATION_ID", "io.github.n1ghthill.soundsgood")
     version = os.environ.get("VERSION", "0.1.6")
 
-    app = SoundsGoodApplication(application_id, version)
-    app.run(sys.argv)
+    logger = configure_logging(version)
+    try:
+        app = SoundsGoodApplication(application_id, version)
+        return app.run(sys.argv)
+    except Exception:
+        logger.critical(
+            "SoundsGood could not start; diagnostics=%s",
+            diagnostics_file(),
+            exc_info=True,
+        )
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

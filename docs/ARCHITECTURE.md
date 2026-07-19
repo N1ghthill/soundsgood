@@ -41,6 +41,11 @@ Responsabilidades:
 - Emitir sinais de scan e atualizacao.
 - Fornecer busca.
 
+`Library` e a fachada GObject consumida pela UI. Funcoes puras e testaveis de
+cache, playlists e ranking de busca ficam em `soundsgood/catalog`. I/O de scan e
+validacao de cache ocorre em worker; apenas a aplicacao do snapshot aos
+`Gio.ListStore` ocorre no thread principal.
+
 Dados esperados por faixa:
 
 - `title`
@@ -139,6 +144,9 @@ Views devem:
 - Conectar sinais/propriedades.
 - Criar factories GTK para listas/grids.
 - Chamar metodos publicos do `Player` para iniciar reproducao.
+- Usar `Gtk.ListView`/`Gtk.GridView` e factories para colecoes potencialmente grandes.
+- Desconectar sinais no `unbind`/`teardown` da factory ou no `unroot` do widget.
+- Adaptar composicao por breakpoints, incluindo navegacao sequencial de artistas em telas estreitas.
 
 Views nao devem:
 

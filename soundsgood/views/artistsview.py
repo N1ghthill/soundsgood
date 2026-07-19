@@ -16,6 +16,46 @@ from soundsgood.models import LibraryState
 from soundsgood.widgets.songrow import SongRow, set_accessible_label
 
 
+class ArtistListItem(Gtk.Box):
+    def __init__(self):
+        super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        self.set_margin_top(7)
+        self.set_margin_bottom(7)
+        self.set_margin_start(10)
+        self.set_margin_end(10)
+        image = Gtk.Image(icon_name="avatar-default-symbolic")
+        image.set_pixel_size(32)
+        self.append(image)
+        labels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        labels.set_hexpand(True)
+        self._name = Gtk.Label(xalign=0)
+        self._name.set_ellipsize(Pango.EllipsizeMode.END)
+        self._name.add_css_class("heading")
+        labels.append(self._name)
+        self._summary = Gtk.Label(xalign=0)
+        self._summary.add_css_class("caption")
+        self._summary.add_css_class("dim-label")
+        labels.append(self._summary)
+        self.append(labels)
+
+    def bind(self, artist):
+        self._name.set_label(artist.props.name)
+        self._summary.set_label(
+            _("%d albums, %d songs")
+            % (artist.props.album_count, artist.props.song_count)
+        )
+
+
+def create_artist_factory():
+    factory = Gtk.SignalListItemFactory()
+    factory.connect("setup", lambda _factory, item: item.set_child(ArtistListItem()))
+    factory.connect(
+        "bind",
+        lambda _factory, item: item.get_child().bind(item.get_item()),
+    )
+    return factory
+
+
 class ArtistsView(Adw.Bin):
     """Artists browser with songs for the selected artist."""
 
@@ -25,18 +65,37 @@ class ArtistsView(Adw.Bin):
         self._library = application.props.library
         self._player = application.props.player
         self._selected_artist = None
+        self._compact = False
 
-        paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
-        paned.set_wide_handle(True)
-        paned.set_position(300)
+        self._split_view = Adw.NavigationSplitView()
 
-        self._artists_list = Gtk.ListBox()
-        self._artists_list.set_selection_mode(Gtk.SelectionMode.SINGLE)
-        self._artists_list.connect("row-selected", self._on_artist_selected)
+        self._artist_selection = Gtk.SingleSelection.new(self._library.props.artists)
+        self._artist_selection.set_autoselect(False)
+        self._artist_selection.set_can_unselect(True)
+        self._artist_selection.connect(
+            "notify::selected-item",
+            self._on_artist_selection_changed,
+        )
+        self._artists_list = Gtk.ListView.new(
+            self._artist_selection,
+            create_artist_factory(),
+        )
+        self._artists_list.set_single_click_activate(True)
 
         artists_scroll = Gtk.ScrolledWindow()
         artists_scroll.set_child(self._artists_list)
-        paned.set_start_child(artists_scroll)
+
+        self._sidebar_stack = Gtk.Stack()
+        self._sidebar_stack.add_named(artists_scroll, "artists")
+        self._sidebar_status = Gtk.Label()
+        self._sidebar_status.set_wrap(True)
+        self._sidebar_status.set_halign(Gtk.Align.CENTER)
+        self._sidebar_status.set_valign(Gtk.Align.CENTER)
+        self._sidebar_status.set_margin_start(18)
+        self._sidebar_status.set_margin_end(18)
+        self._sidebar_status.add_css_class("dim-label")
+        self._sidebar_stack.add_named(self._sidebar_status, "status")
+        sidebar_page = Adw.NavigationPage.new(self._sidebar_stack, _("Artists"))
 
         self._artist_detail = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=18)
         self._artist_detail.set_margin_top(18)
@@ -47,9 +106,11 @@ class ArtistsView(Adw.Bin):
         songs_scroll = Gtk.ScrolledWindow()
         songs_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         songs_scroll.set_child(self._artist_detail)
-        paned.set_end_child(songs_scroll)
+        content_page = Adw.NavigationPage.new(songs_scroll, _("Artist"))
 
-        self.set_child(paned)
+        self._split_view.set_sidebar(sidebar_page)
+        self._split_view.set_content(content_page)
+        self.set_child(self._split_view)
 
         self._library.connect("scan-started", self._on_scan_started)
         self._library.connect("scan-finished", self._on_scan_finished)
@@ -66,22 +127,16 @@ class ArtistsView(Adw.Bin):
         self._show_status()
 
     def _show_status(self):
-        self._clear(self._artists_list)
         self._clear_box(self._artist_detail)
         message = self._library.props.status_message
         if not message and self._library.props.scan_state == int(LibraryState.SCANNING):
             message = _("Scanning music...")
         elif not message:
             message = _("No artists found")
-        self._artists_list.append(
-            self._placeholder(
-                message,
-                show_button=self._library.props.scan_state != int(LibraryState.SCANNING),
-            )
-        )
+        self._sidebar_status.set_label(message)
+        self._sidebar_stack.set_visible_child_name("status")
 
     def _rebuild(self):
-        self._clear(self._artists_list)
         self._clear_box(self._artist_detail)
         if self._library.props.scan_state == int(LibraryState.ERROR):
             self._show_status()
@@ -89,55 +144,31 @@ class ArtistsView(Adw.Bin):
 
         artists = self._library.props.artists
         if artists.get_n_items() == 0:
-            self._artists_list.append(self._placeholder(self._library.props.status_message or _("No artists found")))
+            self._sidebar_status.set_label(
+                self._library.props.status_message or _("No artists found")
+            )
+            self._sidebar_stack.set_visible_child_name("status")
             return
-
-        for index in range(artists.get_n_items()):
-            artist = artists.get_item(index)
-            self._artists_list.append(self._artist_row(artist))
-
-        first_row = self._artists_list.get_row_at_index(0)
-        if first_row:
-            self._artists_list.select_row(first_row)
-
-    def _artist_row(self, artist):
-        row = Gtk.ListBoxRow()
-        row.artist = artist
-
-        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        box.set_margin_top(8)
-        box.set_margin_bottom(8)
-        box.set_margin_start(12)
-        box.set_margin_end(12)
-
-        image = Gtk.Image(icon_name="avatar-default-symbolic")
-        image.set_pixel_size(32)
-        box.append(image)
-
-        labels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        labels.set_hexpand(True)
-        name = Gtk.Label(label=artist.props.name, xalign=0)
-        name.set_ellipsize(Pango.EllipsizeMode.END)
-        name.add_css_class("heading")
-        labels.append(name)
-        summary = Gtk.Label(
-            label=_("%d albums, %d songs") % (
-                artist.props.album_count,
-                artist.props.song_count,
-            ),
-            xalign=0,
-        )
-        summary.add_css_class("caption")
-        summary.add_css_class("dim-label")
-        labels.append(summary)
-        box.append(labels)
-
-        row.set_child(box)
-        return row
+        self._sidebar_stack.set_visible_child_name("artists")
+        self._artist_selection.set_selected(0)
+        artist = self._artist_selection.get_selected_item()
+        if artist is not None:
+            self._show_artist_songs(artist)
 
     def _show_artist_songs(self, artist):
         self._clear_box(self._artist_detail)
         self._selected_artist = artist
+
+        if self._compact:
+            back_button = Gtk.Button(icon_name="go-previous-symbolic")
+            back_button.set_halign(Gtk.Align.START)
+            back_button.set_tooltip_text(_("Back to artists"))
+            set_accessible_label(back_button, _("Back to artists"))
+            back_button.connect(
+                "clicked",
+                lambda *_args: self._split_view.set_show_content(False),
+            )
+            self._artist_detail.append(back_button)
 
         header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
         header.set_valign(Gtk.Align.START)
@@ -218,7 +249,6 @@ class ArtistsView(Adw.Bin):
         play_button.set_tooltip_text(_("Play album"))
         set_accessible_label(play_button, _("Play album"))
         play_button.set_halign(Gtk.Align.END)
-        play_button.set_hexpand(True)
         play_button.connect("clicked", lambda *_: self._play_album(album))
         header.append(play_button)
 
@@ -304,33 +334,31 @@ class ArtistsView(Adw.Bin):
 
         return box
 
-    def _clear(self, listbox):
-        child = listbox.get_first_child()
-        while child:
-            listbox.remove(child)
-            child = listbox.get_first_child()
-
     def _clear_box(self, box):
         child = box.get_first_child()
         while child:
             box.remove(child)
             child = box.get_first_child()
 
-    def _on_artist_selected(self, _listbox, row):
-        if row and hasattr(row, "artist"):
-            self._show_artist_songs(row.artist)
-
-    def _on_song_activated(self, _listbox, row):
-        song = getattr(row, "song", None)
-        if not song:
+    def _on_artist_selection_changed(self, selection, _pspec):
+        artist = selection.get_selected_item()
+        if artist is None:
             return
+        self._show_artist_songs(artist)
+        if self._compact:
+            self._split_view.set_show_content(True)
 
-        self._play_song(song)
-
-    def _play_song(self, song):
-        songs_model = self._library.get_songs_for_artist(self._selected_artist.props.name)
-        songs = [songs_model.get_item(i) for i in range(songs_model.get_n_items())]
-        self._player.play_song(song, songs)
+    def set_compact(self, compact: bool):
+        if self._compact == compact:
+            return
+        self._compact = compact
+        self._split_view.set_collapsed(compact)
+        if not compact:
+            self._split_view.set_show_content(True)
+        elif self._selected_artist is None:
+            self._split_view.set_show_content(False)
+        if self._selected_artist is not None:
+            self._show_artist_songs(self._selected_artist)
 
     def _play_artist(self):
         if self._selected_artist is None:
