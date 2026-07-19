@@ -4,9 +4,11 @@ SoundsGood is entered in the **Apps for your life** track. It is a local-first
 music player that turns an existing Linux music folder into a responsive,
 searchable library without accounts, uploads, or streaming services.
 
-Release prepared for the submission: [v0.2.2](https://github.com/N1ghthill/soundsgood/releases/tag/v0.2.2).
-The candidate passed 61 automated tests, a graphical smoke test on the real
-display, AppStream checks, and a clean GNOME 50 Flatpak build on July 19, 2026.
+Release evaluated for the submission: [v0.2.2](https://github.com/N1ghthill/soundsgood/releases/tag/v0.2.2),
+from commit `e62551bd21fc8f2a0ae0ba474a63d80dfc817c87`. Its public GNOME 50
+[CI run](https://github.com/N1ghthill/soundsgood/actions/runs/29677482974)
+passed alongside 61 automated tests, a graphical smoke test on the real
+display, AppStream checks, and a clean Flatpak build on July 19, 2026.
 
 ## Codex session
 

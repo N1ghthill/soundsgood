@@ -52,7 +52,9 @@ Ultima validacao conhecida, em 19 de julho de 2026 para a release 0.2.2:
   impediram as assercoes de UI.
 - `py_compile` passando para app e testes.
 - `meson setup builddir --reconfigure`, `meson compile -C builddir` e `meson test -C builddir` passando.
-- A release 0.2.2 deve aguardar seu proprio CI publico antes da tag.
+- O CI publico da release 0.2.2 passou no commit
+  `e62551bd21fc8f2a0ae0ba474a63d80dfc817c87` antes da criacao da tag
+  assinada `v0.2.2`.
 - App inicia pelo lancador, `flatpak run io.github.n1ghthill.soundsgood` ou
   `./builddir/local-soundsgood`; pode aparecer o warning local
   `Unknown key gtk-modules` do GTK.

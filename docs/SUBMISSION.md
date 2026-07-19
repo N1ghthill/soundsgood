@@ -81,5 +81,6 @@ network service, or API key is required.
 Verified release references:
 
 - Release: <https://github.com/N1ghthill/soundsgood/releases/tag/v0.2.2>
-- CI: <https://github.com/N1ghthill/soundsgood/actions>
+- CI: <https://github.com/N1ghthill/soundsgood/actions/runs/29677482974>
+- Flatpak repository deployment: <https://github.com/N1ghthill/soundsgood/actions/runs/29677567194>
 - Flatpak app ID: `io.github.n1ghthill.soundsgood`

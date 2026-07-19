@@ -131,7 +131,7 @@ sources:
   - type: git
     url: https://github.com/N1ghthill/soundsgood.git
     tag: v0.2.2
-    commit: COMMIT_DA_TAG
+    commit: e62551bd21fc8f2a0ae0ba474a63d80dfc817c87
 ```
 
 ## Validacao
@@ -192,6 +192,11 @@ Se o app passar a depender somente de portal/document portal para pastas escolhi
 ## Estado da Release 0.2.2
 
 - Tag assinada: `v0.2.2`.
+- Commit da tag: `e62551bd21fc8f2a0ae0ba474a63d80dfc817c87`.
+- Commit OSTree publicado: `a8e363b16bdd10c64d6a5da93c98aac41cb6434a51e1877b8dd83aec4f89c26d`.
+- [CI GNOME 50](https://github.com/N1ghthill/soundsgood/actions/runs/29677482974)
+  e [deploy do repositorio Flatpak](https://github.com/N1ghthill/soundsgood/actions/runs/29677567194)
+  concluidos com sucesso.
 - Renderizacao de albums e faixas na tela de artistas validada antes da
   publicacao.
 - Assets versionado e estavel publicados na GitHub Release.
