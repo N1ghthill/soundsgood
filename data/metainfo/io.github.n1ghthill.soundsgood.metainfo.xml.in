@@ -9,7 +9,7 @@
   </developer>
   <summary>Play and organize your music collection</summary>
   <description>
-    <p>A simple and fast music player for Linux. Browse your music by album or artist, play songs, and manage your playlist.</p>
+    <p>A simple and fast music player for Linux. Browse your music by album or artist, play songs, and manage the current playback queue.</p>
   </description>
   <categories>
     <category>AudioVideo</category>
@@ -23,29 +23,29 @@
   <screenshots>
     <screenshot type="default">
       <caption>Main library view</caption>
-      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.1.6/data/screenshots/soundsgood-main.png</image>
+      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.1.8/data/screenshots/soundsgood-main.png</image>
     </screenshot>
     <screenshot>
       <caption>Album grid</caption>
-      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.1.6/docs/screenshots/albums.png</image>
+      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.1.8/docs/screenshots/albums.png</image>
     </screenshot>
     <screenshot>
       <caption>Artists view</caption>
-      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.1.6/docs/screenshots/artists.png</image>
+      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.1.8/docs/screenshots/artists.png</image>
     </screenshot>
     <screenshot>
       <caption>Songs view</caption>
-      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.1.6/docs/screenshots/songs.png</image>
+      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.1.8/docs/screenshots/songs.png</image>
     </screenshot>
     <screenshot>
       <caption>Search results</caption>
-      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.1.6/docs/screenshots/search.png</image>
+      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.1.8/docs/screenshots/search.png</image>
     </screenshot>
   </screenshots>
   <releases>
     <release version="0.1.8" date="2026-07-19">
       <description>
-        <p>Adds background playback, an optional system tray indicator, and virtualized album and artist detail lists.</p>
+        <p>Adds background playback, an optional system tray indicator, virtualized album and artist detail lists, and stricter playback lifecycle cleanup.</p>
       </description>
     </release>
     <release version="0.1.7" date="2026-07-19">

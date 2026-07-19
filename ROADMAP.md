@@ -1,158 +1,176 @@
 # Roadmap
 
-Este roadmap prioriza um player local estavel antes de recursos avancados. O criterio principal e aproximar a organizacao e a experiencia do GNOME Music, mantendo o escopo sem radio, podcasts ou streaming.
+Atualizado em 19 de julho de 2026 para refletir a versao 0.1.8.
 
-## Fase 0: Base Executavel
+O SoundsGood prioriza um player local estavel e integrado ao desktop antes de
+recursos avancados. O produto permanece inspirado no GNOME Music e mantem fora
+do escopo radio, podcasts, streaming, contas e servicos remotos obrigatorios.
 
-Objetivo: fazer o projeto abrir uma janela GTK e tocar um arquivo local.
+## Estado Atual
 
-Status: MVP inicial implementado.
+A base do MVP, a biblioteca local, a navegacao, o player, o acabamento visual e
+o empacotamento Flatpak estao implementados. A versao 0.1.8 tambem oferece
+reproducao opcional em segundo plano, indicador de bandeja em desktops
+compativeis e listas de detalhe virtualizadas.
 
-- [x] Criar os modulos ausentes importados por `soundsgood/application.py`.
-- [x] Corrigir referencias de recursos ausentes em `data/meson.build` e `data/soundsgood.gresource.xml`.
-- [x] Implementar `Window` com stack principal: Albums, Artists, Songs e Search.
-- [x] Implementar `Player` com GStreamer `playbin`.
-- [x] Conectar acoes globais: play/pause, anterior, proxima, volume, mute, repeat e shuffle.
-- [x] Exibir `PlayerToolbar` quando houver musica selecionada.
-- [x] Usar diretorio XDG de musicas como padrao.
-- [x] Exibir thumbnails de album quando disponiveis.
-- [x] Abrir detalhe de album com faixas ordenadas.
-- [x] Reproduzir musica por linha, album, artista e resultado de busca.
-- [x] Destacar faixa atual nas listas.
-- [x] Corrigir troca de faixa no GStreamer reiniciando o `playbin` antes de aplicar nova URI.
-- [x] Remover templates `.ui` antigos nao usados pelo runtime.
-- [x] Garantir que o app inicialize sem `ImportError`.
-- [x] Validar build com Meson e execucao via `local-soundsgood`.
-- [x] Abrir arquivos de audio pelo gerenciador de arquivos quando definido como app padrao.
-- [x] Abrir playlists `.m3u`, `.m3u8` e `.pls` como fila temporaria.
+O app possui uma **fila de reproducao temporaria**. Arquivos `.m3u`, `.m3u8` e
+`.pls` podem ser abertos nessa fila, mas o app ainda nao permite criar, nomear,
+editar ou persistir playlists na biblioteca.
 
-Entregavel: aplicacao abre, lista musicas encontradas e reproduz uma faixa.
+## Fase 0: Base Executavel — concluida
 
-## Fase 1: Biblioteca Local Confiavel
+Objetivo: abrir uma janela GTK, descobrir arquivos locais e reproduzir audio.
 
-Objetivo: organizar musicas usando metadados reais, nao nomes de arquivo.
+- [x] Implementar a janela principal com Albums, Artists, Songs e Search.
+- [x] Implementar o player GStreamer e os controles globais.
+- [x] Usar o diretorio XDG de musicas como padrao.
+- [x] Exibir capas e detalhes de album.
+- [x] Reproduzir por faixa, album, artista e busca.
+- [x] Abrir arquivos de audio pelo desktop.
+- [x] Abrir `.m3u`, `.m3u8` e `.pls` como fila temporaria.
+- [x] Remover templates e recursos GTK obsoletos.
 
-- [x] Usar leitura de tags com GStreamer Discoverer.
-- [x] Manter fallback por nome/pasta quando tags estiverem incompletas.
-- [x] Capturar titulo, artista, album artist, album, faixa, disco, ano, genero, duracao e capa quando disponiveis.
-- [x] Usar URIs corretas com `Path(...).resolve().as_uri()`.
-- [x] Ordenar albums por artista/ano/titulo e faixas por disco/faixa/titulo.
-- [x] Usar diretorio XDG de musicas como padrao.
-- [x] Usar capas embutidas e arquivos de capa na pasta.
-- [x] Persistir cache de biblioteca para evitar redescoberta de metadados em arquivos inalterados.
-- [x] Monitorar mudancas na pasta de musicas e agendar rescan com debounce.
-- [x] Evitar duplicatas por URI durante aplicacao de snapshots de scan.
-- [x] Atualizar contagens de albums e musicas de forma incremental.
-- [x] Adicionar sinalizacao de estado: escaneando, vazio, erro e pronto.
-- [x] Evitar percurso completo da arvore de arquivos a cada abertura quando o indice em cache ainda esta valido.
-- [x] Adicionar acao manual para reindexar a biblioteca e reler metadados.
-- [x] Atualizar faixas por diff de URI sem limpar todo o modelo de musicas.
-- [x] Atualizar agregados de albums/artistas sem recalculo completo.
+## Fase 1: Biblioteca Local Confiavel — concluida
 
-Alternativas futuras:
+Objetivo: organizar musicas por metadados reais, com falhas isoladas e
+reabertura rapida.
 
-- Caminho simples: usar GStreamer Discoverer, `mutagen` ou `tinytag`.
-- Caminho mais alinhado ao GNOME: usar Tracker/LocalSearch + Grilo.
+- [x] Ler tags e capas com GStreamer Discoverer, com fallback seguro.
+- [x] Capturar titulo, artista, album artist, album, faixa, disco, ano, genero,
+  duracao e capa quando disponiveis.
+- [x] Persistir indice local invalidado por `mtime_ns` e tamanho.
+- [x] Gravar o cache por substituicao atomica.
+- [x] Executar validacao e scan fora da thread principal do GTK.
+- [x] Isolar arquivos malformados sem interromper o scan.
+- [x] Consolidar pedidos concorrentes de scan.
+- [x] Monitorar a pasta com debounce.
+- [x] Aplicar diffs por URI e atualizar albums/artistas incrementalmente.
+- [x] Expor estados vazio, escaneando, pronto e erro.
+- [x] Permitir reindexacao manual completa.
 
-Decisao atual: o MVP usa GStreamer Discoverer e scan local. Manter a interface `Library` isolada para permitir trocar para Tracker/LocalSearch + Grilo no futuro, se valer a pena.
+Decisao mantida: `Library` continua isolada para permitir avaliar
+Tracker/LocalSearch + Grilo no futuro sem reescrever a UI. Essa migracao nao e
+um compromisso atual.
 
-## Fase 2: Navegacao e Busca
+## Fase 2: Navegacao e Busca — concluida
 
-Objetivo: reproduzir a experiencia central de biblioteca do GNOME Music.
+Objetivo: entregar a experiencia central de uma biblioteca musical local.
 
-- [x] Tela de albums com grid responsivo.
-- [x] Tela de artistas com lista lateral e detalhes do artista.
-- [x] Tela de faixas com lista densa.
-- [x] Tela de album com capa, metadados e faixas ordenadas.
-- [x] Busca global por titulo, artista e album.
-- [x] Busca com normalizacao simples de acentos e ranking basico de relevancia.
-- [x] Separar resultados de busca por tipo: musicas, albums e artistas.
-- [x] Acionamento de item: tocar faixa, album ou artista.
-- [x] Estado vazio basico.
-- [x] Agrupar faixas por disco visualmente nos detalhes de album/artista.
-- [x] Adicionar selecao de pasta pelo estado vazio.
-- [x] Melhorar responsividade basica em telas estreitas.
+- [x] Grid responsivo de albums.
+- [x] Lista de artistas e detalhes agrupados por album/disco.
+- [x] Lista densa de faixas.
+- [x] Busca global com normalizacao de acentos e ranking basico.
+- [x] Resultados separados por artistas, albums e musicas.
+- [x] Estados vazios e escolha de pasta.
+- [x] Navegacao adaptativa e composicao para telas estreitas.
+- [x] Virtualizacao de albums, artistas, musicas e listas de detalhe.
 
-Entregavel: usuario consegue navegar, procurar e iniciar reproducao pela biblioteca.
-
-## Fase 3: Fila e Experiencia de Player
+## Fase 3: Fila e Experiencia de Player — implementada, validacao aberta
 
 Objetivo: tornar a reproducao previsivel e confortavel.
 
-- [x] Implementar fila de reproducao.
-- [x] Suportar play de album inteiro, artista inteiro e resultado de busca.
-- [x] Implementar proxima/anterior com modos `none`, `song`, `all` e `shuffle`.
+- [x] Implementar fila temporaria de reproducao.
+- [x] Tocar album, artista e resultado de busca como fila.
+- [x] Implementar anterior/proxima e modos `none`, `song`, `all` e `shuffle`.
 - [x] Exibir progresso real e permitir seek.
-- [x] Persistir volume, mute e modo de repeticao em GSettings quando schema estiver disponivel.
-- [x] Atualizar icones e labels conforme estado do player.
-- [x] Tratar fim da faixa e erros de GStreamer.
-- [x] Mostrar fila atual em um popover.
-- [x] Suportar limpar fila.
-- [x] Suportar remover itens individuais da fila.
-- [ ] Testar comportamento de shuffle/repeat com colecoes reais.
+- [x] Persistir volume, mute e repeticao em GSettings.
+- [x] Tratar fim de faixa e erros do GStreamer.
+- [x] Mostrar, selecionar, remover itens e limpar a fila atual.
+- [x] Eliminar caminhos duplicados de ativacao de faixas.
+- [ ] Executar regressao de shuffle/repeat com colecoes reais e registrar o
+  resultado.
 
-Entregavel: player usavel no dia a dia para biblioteca local.
+## Fase 4: Integracao e Acabamento — concluida para o MVP
 
-## Fase 4: Acabamento GNOME
+Objetivo: oferecer uma experiencia coerente com aplicativos Linux modernos.
 
-Objetivo: melhorar integracao com desktop e polimento visual.
+- [x] Preferencias, About, atalhos e CSS semantico.
+- [x] Barra de player compacta e adaptativa.
+- [x] Acessibilidade basica em controles e acoes de icone.
+- [x] MPRIS para controles de midia do sistema.
+- [x] Notificacoes opcionais e inibicao de suspensao.
+- [x] Execucao opcional em segundo plano separando janela e processo.
+- [x] StatusNotifier opcional com abrir, transporte e sair.
+- [x] Reabertura pelo lancador sem exigir terminal ou bandeja.
+- [x] Teardown explicito de sinais, sources, monitores, D-Bus e GStreamer.
 
-- [x] Dialogo de preferencias para pasta de musica.
-- [x] About dialog funcional.
-- [x] CSS minimo e coerente com libadwaita.
-- [x] Atalhos de teclado basicos.
-- [x] Capa de album com cache local para capas embutidas.
-- [x] MPRIS para controles do sistema.
-- [x] Refinar capacidades MPRIS e validar `PlaybackStatus`, `Metadata`, `Pause` e `Play` durante reproducao via `gdbus`.
-- [x] Inibir suspensao durante reproducao.
-- [x] Notificacoes opcionais para faixa atual.
-- [x] Refinar layout mobile/estreito.
-- [x] Melhorar acessibilidade basica: labels e tooltips em controles principais.
-- [x] Adotar navegacao adaptativa com breakpoints para telas estreitas.
-- [x] Virtualizar as colecoes principais de albums, artistas e musicas.
+## Fase 5: Qualidade e Distribuicao — concluida para a versao 0.1.8
 
-Entregavel: experiencia consistente com apps GNOME modernos.
+Objetivo: manter um app empacotavel, atualizavel e diagnosticavel.
 
-## Fase 5: Qualidade e Distribuicao
+- [x] Testes unitarios de modelos, biblioteca, cache, player, MPRIS, segundo
+  plano e StatusNotifier.
+- [x] Smoke tests graficos e matriz automatizada de larguras.
+- [x] Validacao de schemas, desktop file, AppStream e recursos.
+- [x] Manifest e build Flatpak no GNOME 50.
+- [x] CI publica para build, testes e validacao do Flatpak.
+- [x] Repositorio Flatpak proprio, assinado e atualizavel.
+- [x] Logs locais limitados e diagnosticos acessiveis pelas preferencias.
+- [x] Documentacao e kit de submissao da OpenAI Build Week 2026.
 
-Objetivo: estabilizar o projeto para uso e empacotamento.
+## Fase 6: Playlists Persistentes — planejada
 
-- [x] Testes unitarios para modelos, biblioteca e fila.
-- [x] Testes unitarios basicos para biblioteca, busca e player.
-- [x] Testes unitarios para cache persistente e logica MPRIS.
-- [x] Testes manuais documentados para UI, playback e MPRIS.
-- [x] Validacao de schemas, desktop file, metainfo e recursos.
-- [x] Flatpak manifest inicial.
-- [x] CI para build e testes.
-- [x] Documentacao inicial de empacotamento Flatpak.
-- [x] Remover `data/soundsgood.gresource.xml` vazio, ja que nao ha templates `.ui`.
-- [x] Adicionar diagnostico local, captura de falhas e teardown explicito do player.
-- [x] Tornar scan enfileiravel, cache atomico e falhas por arquivo recuperaveis.
-- [x] Adicionar smoke tests graficos e matriz de larguras.
-- [x] Documentar a participacao e submissao da OpenAI Build Week 2026.
+Objetivo: permitir que o usuario mantenha colecoes nomeadas sem confundir
+playlist salva com a fila temporaria do player.
 
-Entregavel: app empacotavel e sustentavel.
+- [ ] Definir `Playlist` e `PlaylistEntry` com identidade estavel e ordem
+  explicita.
+- [ ] Persistir playlists em `$XDG_DATA_HOME/soundsgood` com escrita atomica,
+  versao de formato e migracao testada.
+- [ ] Criar, renomear e excluir playlists com confirmacao para operacoes
+  destrutivas.
+- [ ] Adicionar faixas, albums, artistas e resultados de busca a uma playlist.
+- [ ] Remover e reordenar faixas sem alterar a fila que estiver tocando.
+- [ ] Adicionar uma secao adaptativa de Playlists, com estados vazio e de
+  arquivo ausente.
+- [ ] Tocar uma playlist inteira ou enviar seus itens para a fila atual.
+- [ ] Importar `.m3u`, `.m3u8` e `.pls` como playlists salvas sem quebrar o
+  comportamento atual de abertura temporaria.
+- [ ] Exportar playlists em `.m3u8`, tratando caminhos relativos e caracteres
+  Unicode.
+- [ ] Cobrir persistencia, migracao, importacao, exportacao, ordenacao e falhas
+  com testes unitarios e graficos.
+- [ ] Documentar claramente recuperacao quando uma faixa for movida ou
+  removida da biblioteca.
+
+Restricoes arquiteturais: a persistencia pertence a uma camada de catalogo,
+nao aos widgets; a fila continua pertencendo ao `Player`; I/O nao deve bloquear
+a thread GTK; arquivos corrompidos devem gerar diagnostico recuperavel.
+
+## Fase 7: Beta e Acessibilidade — planejada
+
+Objetivo: validar o uso diario em ambientes e bibliotecas mais diversos.
+
+- [ ] Executar regressao manual com colecoes pequenas, grandes e com metadados
+  incompletos.
+- [ ] Auditar navegacao completa por teclado, foco e leitor de tela.
+- [ ] Evoluir diagnosticos para listar arquivos problemáticos sem expor
+  caminhos pessoais por padrao.
+- [ ] Medir tempo de abertura, scan, memoria e rolagem com bibliotecas grandes.
+- [ ] Testar comportamento em GNOME, KDE e ambientes sem StatusNotifier.
+- [ ] Definir criterio objetivo para promover o projeto de MVP para beta.
+
+## Prioridade Imediata
+
+1. Concluir os itens ainda abertos da submissao Build Week em
+   `docs/SUBMISSION.md`, especialmente `/feedback`, video e envio no Devpost.
+2. Executar e registrar a regressao manual final em colecoes e larguras reais.
+3. Implementar a Fase 6 em fatias verticais, com persistencia e testes antes da
+   UI de gerenciamento.
+4. Prosseguir para a auditoria de acessibilidade e os criterios de beta.
 
 ## Fora de Escopo
 
-- Radio.
-- Podcasts.
-- Streaming.
-- Login em servicos externos.
-- Sincronizacao com nuvem.
-- Download automatico de musicas.
+- Radio e podcasts.
+- Streaming ou download automatico de musicas.
+- Login, conta, sincronizacao ou dependencia obrigatoria de nuvem.
 - Edicao completa de tags.
-
-## Prioridade Atual
-
-1. Executar regressao manual da Build Week em colecoes maiores e nas larguras 360/600/900/1200.
-2. Gravar o video final de menos de tres minutos e validar o fluxo em clone limpo.
-3. Ampliar acessibilidade com auditoria de navegacao por teclado e leitor de tela.
-4. Evoluir diagnosticos para listar arquivos com metadados incompletos sem expor caminhos por padrao.
 
 ## Como Retomar
 
-- Comece lendo `agent.md`, este roadmap e `docs/ARCHITECTURE.md`.
-- Rode `python3 -m unittest discover -s tests` antes de mexer em comportamento existente.
-- Para mudancas de UI/playback, use `docs/MANUAL_TESTS.md`.
-- O proximo trabalho recomendado e fazer uma rodada de regressao manual focada em colecoes grandes, telas estreitas, preferencias novas e fluxo de primeiro uso.
+1. Leia `AGENTS.md`, `agent.md`, este roadmap e `docs/ARCHITECTURE.md`.
+2. Rode a validacao definida em `AGENTS.md` antes de mudar comportamento.
+3. Escolha o primeiro item aberto da prioridade imediata.
+4. Para UI ou playback, siga `docs/MANUAL_TESTS.md`.
+5. Ao concluir uma etapa, atualize roadmap, README, arquitetura, testes manuais
+   e AppStream no mesmo conjunto de mudancas.

@@ -46,6 +46,10 @@ cache, playlists e ranking de busca ficam em `soundsgood/catalog`. I/O de scan e
 validacao de cache ocorre em worker; apenas a aplicacao do snapshot aos
 `Gio.ListStore` ocorre no thread principal.
 
+Neste contexto, `soundsgood/catalog/playlists.py` apenas interpreta arquivos
+externos `.m3u`, `.m3u8` e `.pls`. Nao existe armazenamento de playlists
+nomeadas na versao 0.1.8.
+
 Dados esperados por faixa:
 
 - `title`
@@ -125,6 +129,18 @@ Regras:
 - Duracoes devem ser em segundos.
 - Numeros de faixa e disco devem ser inteiros.
 
+### Integracao com o desktop
+
+- `MprisService` publica estado e transporte para os controles de midia.
+- `BackgroundController` decide se fechar a janela oculta ou encerra o app,
+  possui o `GApplication.hold()` e solicita permissao de segundo plano quando
+  o portal esta disponivel.
+- `StatusNotifierService` registra item e menu D-Bus somente quando existe um
+  watcher compativel. Ele nao e requisito de execucao nem substitui MPRIS,
+  notificacoes ou o lancador.
+- A acao explicita `Quit`, vinda da aplicacao, MPRIS ou bandeja, deve liberar o
+  hold e executar todo o teardown.
+
 ### Window e Views
 
 Estrutura sugerida:
@@ -171,6 +187,27 @@ Views nao devem:
 - Ler arquivos do disco.
 - Controlar GStreamer diretamente.
 - Recalcular modelos globais de biblioteca.
+
+## Playlists Persistentes Planejadas
+
+A fila do `Player` e transitoria e representa apenas a sequencia em execucao.
+Uma playlist salva deve ser um conceito separado, pertencente ao catalogo.
+
+Direcao aprovada para a Fase 6 do roadmap:
+
+- `Playlist` possui identificador estavel, nome e entradas ordenadas.
+- Entradas referenciam a URI canonica da faixa e preservam informacao suficiente
+  para diagnosticar arquivos ausentes.
+- Persistencia fica em `$XDG_DATA_HOME/soundsgood`, com formato versionado,
+  migracao testada e substituicao atomica.
+- Importacao e exportacao ficam em helpers puros do catalogo; widgets nao fazem
+  I/O direto.
+- Carregar uma playlist cria ou altera a fila somente por metodos publicos do
+  `Player`.
+- Remover ou reordenar uma playlist salva nao muda silenciosamente a fila que
+  ja estiver tocando.
+- Falhas parciais e arquivos ausentes sao estados recuperaveis e aparecem nos
+  diagnosticos.
 
 ## Dados e Ordenacao
 
@@ -243,6 +280,8 @@ Dependencias a avaliar:
 - O app reabre pelo indice em cache quando os arquivos conhecidos e diretorios indexados nao mudaram; quando ha mudanca detectada, troca de pasta ou cache antigo, faz rescan completo.
 - A acao manual de reindexacao força rescan e releitura de metadados.
 - Playlists `.m3u`, `.m3u8` e `.pls` sao aceitas no fluxo externo de abertura, mas nao sao indexadas como parte da biblioteca.
+- Criacao e persistencia de playlists pertencem a uma fase futura; ate la,
+  documentacao e UI devem chamar o estado atual de fila de reproducao.
 - Notificacoes e inibicao de suspensao ficam em `Application`, reagindo ao estado publico do `Player`.
 - `BackgroundController` possui o `GApplication.hold()` usado ao ocultar a
   janela e separa fechar/ocultar da acao explicita de sair.

@@ -25,6 +25,9 @@ Atualizacoes passam a vir pelo Flatpak:
 flatpak update --user io.github.n1ghthill.soundsgood
 ```
 
+Gerenciadores graficos que suportam remotes Flatpak tambem podem oferecer essa
+atualizacao ao usuario final; nao e necessario abrir o aplicativo pelo terminal.
+
 Para migrar uma instalacao antiga feita por bundle:
 
 ```bash
@@ -125,7 +128,7 @@ exemplo:
 sources:
   - type: git
     url: https://github.com/N1ghthill/soundsgood.git
-    tag: v0.1.6
+    tag: v0.1.8
     commit: COMMIT_DA_TAG
 ```
 
@@ -183,3 +186,12 @@ Se o app passar a depender somente de portal/document portal para pastas escolhi
 - Confirmar que `releases/latest/download/SoundsGood-x86_64.flatpak` baixa a versao esperada.
 - Validar os metadados AppStream.
 - Rodar `flatpak-builder-lint`.
+
+## Estado da Release 0.1.8
+
+- Tag assinada: `v0.1.8`.
+- Commit de codigo: `664abe73e3ae739c0dd899250ff8801a7554a72c`.
+- Commit publicado no repositorio Flatpak:
+  `afd4bf311b7af4621863fe1d1ff670a821d85f9703bab34c5e610ddeda064d5b`.
+- Assets versionado e estavel publicados na GitHub Release.
+- Build, testes e validacao Flatpak aprovados no CI publico do GNOME 50.

@@ -30,15 +30,17 @@ track and open an album.
 ## 0:53–1:25 — Playback
 
 **Screen:** Play an album, seek, open playback options, change repeat mode,
-open the queue, remove an item, and show the desktop media control.
+open the queue, remove an item, show the desktop media control, then close and
+reopen the window while playback continues.
 
 **Narration:**
 
 > Playback uses GStreamer and integrates with Linux media controls through
 > MPRIS. I can seek, change repeat or shuffle behavior, and manage the current
-> queue. The app owns and releases its timers, bus watches, monitors, and
-> playback resources explicitly, preventing the intermittent exits that
-> motivated this refactor.
+> queue. Closing the window can keep the session playing, while an explicit
+> Quit still releases its timers, bus watches, monitors, D-Bus registrations,
+> and playback resources. This explicit ownership prevents the intermittent
+> exits that motivated the refactor.
 
 ## 1:25–1:52 — Adaptive interface
 
@@ -84,4 +86,5 @@ application side by side.
 - Use only generated audio and non-personal paths.
 - Keep the final video under three minutes.
 - Verify spoken references to both Codex and GPT-5.6.
+- Do not describe the temporary queue as a saved playlist.
 - Export H.264 video with AAC audio and upload it publicly to YouTube.

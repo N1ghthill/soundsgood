@@ -19,9 +19,11 @@ integration.
 ## OpenAI Build Week 2026
 
 SoundsGood participates in the **Apps for your life** track of OpenAI Build
-Week. Codex helped audit and improve the application lifecycle, asynchronous
-library scan, cache safety, GTK rendering model, adaptive UI, tests, and
-submission workflow. Product scope and key architectural decisions remained
+Week. Codex running GPT-5.6 helped audit and improve the application lifecycle,
+asynchronous library scan, cache safety, GTK rendering model, adaptive UI,
+tests, and submission workflow. GPT-5.6 was used as the reasoning and coding
+model inside the qualifying Codex workflow; it is not a runtime dependency of
+the music player. Product scope and key architectural decisions remained
 human-owned: native GNOME technology, local-first playback, no accounts, and no
 streaming dependency.
 
@@ -66,6 +68,10 @@ and [docs/SUBMISSION.md](docs/SUBMISSION.md). The final recording script is in
 - Keep playback running after closing the window, with an optional
   StatusNotifier tray menu on compatible desktops.
 
+Saved playlists are not available yet. In the current release, the queue is
+temporary and opening a playlist file does not import it into the library. See
+the [roadmap](ROADMAP.md) for the persistent-playlist plan.
+
 ## Installation
 
 SoundsGood is distributed through its own signed Flatpak repository. Add the
@@ -89,8 +95,9 @@ Versioned Flatpak bundles are also available on
 ## Latest Release
 
 SoundsGood 0.1.8 adds background playback, an optional system tray indicator,
-and virtualized album and artist detail lists. Version 0.1.7 introduced the
-compact adaptive player bar and polished responsive navigation.
+virtualized album and artist detail lists, and stricter playback lifecycle
+cleanup. Version 0.1.7 introduced the compact adaptive player bar and polished
+responsive navigation.
 
 ## Command Line
 
@@ -194,17 +201,21 @@ scripts/generate-assets.sh
 
 ## Project Status
 
-SoundsGood is a functional local-first MVP moving toward beta quality. It can
+SoundsGood is a functional local-first MVP moving toward beta quality. Version
+0.1.8 can
 scan a local music folder, reopen quickly from a persistent library index,
-search tracks, play audio, expose media controls, and run from Flatpak. The
-current focus is regression testing with larger collections, CI validation, and
-polish for narrow screens and accessibility.
+search tracks, play audio, remain active in the background, expose media
+controls, and update through its signed Flatpak repository. The current focus
+is Build Week release validation followed by persistent playlists and broader
+beta hardening.
 
 Known areas still planned:
 
 - More regression testing with large real-world music collections.
 - Deeper keyboard and screen-reader accessibility review.
 - Diagnostics for files with unreadable or incomplete metadata.
+- Create, edit, persist, import, and export named playlists. This is distinct
+  from the temporary playback queue available today.
 
 See [ROADMAP.md](ROADMAP.md) for the development roadmap.
 
@@ -212,9 +223,12 @@ See [ROADMAP.md](ROADMAP.md) for the development roadmap.
 
 The application is organized around a small set of modules:
 
-- `Application`: startup, settings, library, player wiring, and opened files.
+- `Application`: startup, settings, library, player wiring, opened files, and
+  desktop integration lifecycle.
 - `Library`: local file discovery, metadata extraction, cache, and models.
 - `Player`: GStreamer playback, queue, progress, volume, repeat, and shuffle.
+- `BackgroundController` and `StatusNotifierService`: optional background
+  lifetime and tray integration without making the tray a requirement.
 - `Models`: GObject models for songs, albums, artists, and player state.
 - `Views`: albums, artists, songs, search, and detail screens.
 - `Widgets`: reusable UI components such as the toolbar, song rows, and dialogs.

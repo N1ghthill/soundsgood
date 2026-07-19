@@ -53,6 +53,9 @@ meson test -C builddir
 - Definir SoundsGood como app padrao para arquivos `.mp3` e abrir uma faixa pelo gerenciador de arquivos.
 - Abrir uma faixa pelo terminal com `soundsgood caminho/para/faixa.mp3` e confirmar que o app inicia a reproducao.
 - Abrir playlists `.m3u` e `.pls` e confirmar que as faixas entram como fila temporaria.
+- Confirmar que a UI chama esse estado de fila e nao oferece salvar, renomear ou
+  editar playlists persistentes enquanto a Fase 6 do roadmap nao estiver
+  implementada.
 - Dar duplo clique em faixas diferentes e confirmar que o audio real muda junto com a UI.
 - Testar Play/Pause, Previous, Next e Seek.
 - Testar volume e mute.
@@ -71,6 +74,18 @@ meson test -C builddir
 - Confirmar que a sessao nao entra em suspensao enquanto ha musica tocando, se a preferencia estiver ativa.
 - Alternar as preferencias de notificacao e prevencao de suspensao e confirmar que os comportamentos mudam sem reiniciar o app.
 - Abrir Preferences > Diagnostics e confirmar que a pasta do log pode ser acessada.
+
+## Flatpak e Atualizacao
+
+- Abrir o app pelo menu do sistema sem terminal.
+- Confirmar em `flatpak info io.github.n1ghthill.soundsgood` que versao, origem
+  e branch correspondem a release em teste.
+- Com o remote `soundsgood` configurado, executar a atualizacao pelo gerenciador
+  grafico ou `flatpak update --user io.github.n1ghthill.soundsgood`.
+- Depois da atualizacao, abrir pelo lancador e confirmar que configuracoes e
+  indice local continuam disponiveis.
+- Confirmar que fechar com `Run in Background` ativo nao cria uma segunda
+  instancia ao abrir novamente pelo lancador.
 
 ## MPRIS
 

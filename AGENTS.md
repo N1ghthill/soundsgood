@@ -16,6 +16,9 @@ integration, and UI.
 - Prefer adaptive libadwaita layout primitives over fixed size requests.
 - Reuse the semantic classes in `soundsgood/style.css`; icon actions must stay
   vertically centered and must not inherit the height of adjacent artwork.
+- Keep the transient playback queue distinct from saved playlists. The current
+  release can open playlist files as temporary queues, but persistent playlist
+  creation is planned work and must not be advertised as implemented.
 
 The detailed architecture and metadata rules remain in `agent.md` and
 `docs/ARCHITECTURE.md`.
@@ -38,3 +41,11 @@ matrix in `docs/MANUAL_TESTS.md`.
 This repository participates in OpenAI Build Week 2026. Material changes must
 keep `docs/BUILD_WEEK.md` and `docs/SUBMISSION.md` accurate. Do not claim a
 model version, successful test, or demo capability that was not verified.
+
+## Documentation
+
+Material product or release changes must keep `README.md`, `ROADMAP.md`,
+`agent.md`, `docs/ARCHITECTURE.md`, `docs/MANUAL_TESTS.md`, and AppStream
+metadata consistent. Completed roadmap history stays checked; new work belongs
+in an explicitly planned phase rather than being implied as an existing
+feature.

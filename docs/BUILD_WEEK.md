@@ -4,6 +4,11 @@ SoundsGood is entered in the **Apps for your life** track. It is a local-first
 music player that turns an existing Linux music folder into a responsive,
 searchable library without accounts, uploads, or streaming services.
 
+Release evaluated for the submission: [v0.1.8](https://github.com/N1ghthill/soundsgood/releases/tag/v0.1.8),
+commit `664abe73e3ae739c0dd899250ff8801a7554a72c`. Its public GNOME 50
+[CI run](https://github.com/N1ghthill/soundsgood/actions/runs/29674643734)
+completed successfully on July 19, 2026.
+
 ## Codex session
 
 - Core implementation session: `019f7856-0676-79b0-838c-97e81573eb0f`
@@ -16,6 +21,10 @@ searchable library without accounts, uploads, or streaming services.
 The session ID is recorded for traceability. The value entered in Devpost must
 be the `/feedback` value from the session containing the majority of the final
 core implementation.
+
+The repository records a candidate implementation-session identifier, not a
+claim that the interactive `/feedback` requirement has been completed. That
+item remains open in `docs/SUBMISSION.md` until the owner verifies it.
 
 ## How Codex accelerated the project
 
@@ -65,6 +74,12 @@ The project owner made the decisions that define the product:
 9. Closing the window can preserve playback without weakening explicit
    shutdown; tray integration remains optional and MPRIS stays authoritative.
 
+## Current product boundary
+
+The release manages a temporary playback queue and can open `.m3u`, `.m3u8`,
+and `.pls` files into that queue. Creating and maintaining named, persistent
+playlists is planned in `ROADMAP.md` and is not claimed as a v0.1.8 capability.
+
 ## Official submission requirements
 
 The challenge requires a working project, category, project description,
@@ -72,3 +87,9 @@ public demo video under three minutes, accessible code repository, README with
 setup/test instructions, an explanation of Codex/GPT-5.6 usage, and the
 qualifying `/feedback` session ID. The operational checklist and video outline
 are in `docs/SUBMISSION.md`.
+
+Official references checked on July 19, 2026:
+
+- [OpenAI Build Week official rules](https://openai.devpost.com/rules)
+- [OpenAI Build Week FAQ](https://openai.devpost.com/details/faqs)
+- [Submission schedule](https://openai.devpost.com/details/dates)

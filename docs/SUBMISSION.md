@@ -9,7 +9,12 @@ Apps for your life
 SoundsGood is a private, local-first music player for Linux. It indexes music
 already on the computer, reads real metadata and artwork, organizes albums and
 artists, provides fast search and playback queues, and integrates with desktop
-media controls without requiring an account or uploading a library.
+media controls without requiring an account or uploading a library. Version
+0.1.8 can remain active after its window closes and exposes an optional tray
+menu on compatible desktops.
+
+Saved playlists are planned but are not part of the submitted release. Playlist
+files opened by the desktop become temporary playback queues.
 
 ## Problem and impact
 
@@ -26,7 +31,7 @@ imperfect real-world collections.
 2. **0:20–0:55 — Library:** open SoundsGood, show cached startup, albums,
    artists, songs, real tags, and artwork.
 3. **0:55–1:25 — Playback:** play an album, seek, change repeat, open the queue,
-   and demonstrate MPRIS desktop controls.
+   and demonstrate MPRIS desktop controls and background playback.
 4. **1:25–1:50 — Adaptive design:** resize from 1200 px to 600/360 px and show
    navigation, album detail, artist split view, and compact player behavior.
 5. **1:50–2:20 — Reliability:** show reindexing, an unreadable file being
@@ -56,7 +61,10 @@ network service, or API key is required.
 - [ ] Join the challenge and confirm eligibility in Devpost.
 - [ ] Confirm the selected track is **Apps for your life**.
 - [x] Confirm the project builds from a clean clone.
-- [ ] Run all automated and manual release checks.
+- [x] Run automated tests, graphical smoke test, AppStream/manifest validation,
+      Flatpak build, public update, and GNOME 50 CI for v0.1.8.
+- [ ] Complete and record the full manual matrix with large real collections
+      and 360/600/900/1200 px widths.
 - [ ] Record the demo against the final commit.
 - [ ] Upload a public YouTube video shorter than three minutes.
 - [x] Make the repository public with its GPL-2.0-or-later license, or grant
@@ -64,5 +72,11 @@ network service, or API key is required.
 - [ ] Run `/feedback` in the qualifying Codex session.
 - [x] Confirm GPT-5.6 in the qualifying Build Week environment.
 - [ ] Enter the verified session ID in Devpost.
-- [ ] Review `docs/BUILD_WEEK.md` for truthful, current claims.
+- [x] Review `docs/BUILD_WEEK.md` against the official rules and FAQ.
 - [ ] Submit before July 21, 2026 at 5:00 PM PDT.
+
+Verified release references:
+
+- Release: <https://github.com/N1ghthill/soundsgood/releases/tag/v0.1.8>
+- CI: <https://github.com/N1ghthill/soundsgood/actions/runs/29674643734>
+- Flatpak app ID: `io.github.n1ghthill.soundsgood`

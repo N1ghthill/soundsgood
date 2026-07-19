@@ -16,7 +16,10 @@ Nao implementar:
 
 ## Estado do Projeto
 
-O projeto tem um MVP funcional. Ele inicia com `python3 -m soundsgood.application`, escaneia o diretorio XDG de musicas, mostra albums/artistas/faixas, reproduz via GStreamer e permite trocar faixas.
+O projeto tem um MVP funcional na versao 0.1.8. Ele inicia pelo lancador,
+Flatpak ou ambiente de desenvolvimento, escaneia o diretorio XDG de musicas,
+mostra albums/artistas/faixas, reproduz via GStreamer e pode continuar em
+segundo plano quando a janela e fechada.
 
 Antes de assumir que algo existe, verifique os arquivos reais. O MVP atual usa UI programatica em Python. Os templates `.ui` antigos foram removidos.
 
@@ -26,28 +29,49 @@ Pontos importantes:
 - `soundsgood/models.py` contem modelos GObject e enums como `RepeatMode`, `PlayState` e `LibraryState`.
 - `soundsgood/library.py` coordena o catalogo GObject e o scan; helpers puros de cache, playlists e busca ficam em `soundsgood/catalog`.
 - `soundsgood/player.py` contem o `playbin`, fila e controles de reproducao.
+- `soundsgood/background.py` separa o ciclo de vida da janela do ciclo de vida
+  da aplicacao.
+- `soundsgood/statusnotifier.py` implementa o indicador opcional e seu menu
+  D-Bus sem adicionar dependencia GTK3/AppIndicator.
 - `soundsgood/window.py` compoe a janela principal.
 - `soundsgood/views` contem telas de albums, artistas e musicas.
-- `soundsgood/widgets` contem toolbar, linhas de musica, busca e dialogs.
+- `soundsgood/widgets` contem toolbar, linhas de musica, busca, detalhes e
+  dialogs.
 - `data/soundsgood.gresource.xml` foi removido porque estava vazio; a UI segue programatica em Python.
 - `docs/MANUAL_TESTS.md` contem o roteiro de validacao manual.
 
-Ultima validacao conhecida:
+Ultima validacao conhecida, em 19 de julho de 2026 para o commit da versao
+0.1.8:
 
-- 41 testes headless e 2 smoke tests graficos passando no GNOME SDK 50.
+- 49 testes automatizados passando; o smoke grafico separado tambem passou no
+  GNOME SDK 50.
 - `py_compile` passando para app e testes.
 - `meson setup builddir --reconfigure`, `meson compile -C builddir` e `meson test -C builddir` passando.
-- App inicia por `./builddir/local-soundsgood`; pode aparecer o warning local `Unknown key gtk-modules` do GTK.
+- CI publica do GNOME 50 passou para o commit
+  `664abe73e3ae739c0dd899250ff8801a7554a72c`.
+- App inicia pelo lancador, `flatpak run io.github.n1ghthill.soundsgood` ou
+  `./builddir/local-soundsgood`; pode aparecer o warning local
+  `Unknown key gtk-modules` do GTK.
 - App tambem aceita arquivos de audio abertos pelo gerenciador de arquivos/default app via `GApplication.open`.
 - MPRIS respondeu via `gdbus` para `Identity`, `PlaybackStatus` e `Metadata`, e o usuario validou o app em ambiente real.
+- StatusNotifier foi validado em KDE, incluindo a acao `Quit`; em desktops sem
+  host de bandeja, lancador e MPRIS continuam funcionando.
+
+Terminologia: o `Player` ainda usa nomes internos como `_playlist`, mas esse
+estado e a fila temporaria. Playlists nomeadas e persistentes ainda nao foram
+implementadas; consulte a Fase 6 de `ROADMAP.md`.
 
 ## Prioridades
 
-1. Validar o workflow de CI no GitHub Actions apos o proximo push.
+1. Concluir `/feedback`, video e envio da OpenAI Build Week conforme
+   `docs/SUBMISSION.md`.
 2. Testar regressao manual em colecoes maiores e em telas estreitas reais.
-3. Avaliar controles avancados de biblioteca, como limpar cache e mostrar data do ultimo indice.
-4. Planejar uma opcao de diagnostico para relatar erros de metadados por arquivo.
-5. Ampliar acessibilidade com auditoria de navegacao por teclado e leitor de tela.
+3. Implementar playlists persistentes pela camada de catalogo, com formato
+   versionado e escrita atomica antes da UI de gerenciamento.
+4. Evoluir diagnosticos para relatar arquivos com metadados incompletos sem
+   expor caminhos pessoais por padrao.
+5. Ampliar acessibilidade com auditoria de navegacao por teclado e leitor de
+   tela.
 
 Consulte `ROADMAP.md` antes de escolher a proxima tarefa.
 
@@ -59,7 +83,8 @@ Consulte `ROADMAP.md` antes de escolher a proxima tarefa.
 4. Mantenha o escopo local-first e sem radio/streaming.
 5. Depois de alterar codigo, rode unitarios, `py_compile`, Meson e, se houver UI/playback, o roteiro manual relevante.
 
-O repositorio pode nao estar inicializado como Git. Nao assuma que `git status` funcionara.
+Confirme o estado do Git antes de editar e preserve mudancas existentes do
+usuario.
 
 ## Regras de Arquitetura
 
@@ -73,6 +98,8 @@ O repositorio pode nao estar inicializado como Git. Nao assuma que `git status` 
 - Colecoes sem limite devem usar `Gtk.ListView`/`Gtk.GridView` com factories, nunca uma arvore permanente de widgets por item.
 - Todo sinal, source GLib, monitor ou bus watch deve ter teardown explicito.
 - Preserve o escopo local-first.
+- Mantenha playlists persistentes fora de `Player`: o player possui a fila; o
+  catalogo possui colecoes salvas.
 - Mantenha a troca de faixa no `Player` reiniciando o `playbin` antes de aplicar nova URI.
 
 ## Biblioteca e Metadados
@@ -162,6 +189,9 @@ O `Player` deve concentrar:
 - volume e mute.
 - repeat e shuffle.
 - tratamento de fim de faixa e erro.
+
+A fila atual e transitoria. Nao reutilize diretamente sua lista mutavel como
+armazenamento de playlists persistentes.
 
 Views devem chamar metodos publicos como `play_song`, `play_pause`, `next`, `previous` e `seek`.
 
