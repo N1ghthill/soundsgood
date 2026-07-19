@@ -49,6 +49,10 @@ and [docs/SUBMISSION.md](docs/SUBMISSION.md). The final recording script is in
 - Open local audio files from the file manager when SoundsGood is the default
   music app.
 - Open `.m3u`, `.m3u8`, and `.pls` playlists as temporary playback queues.
+- Import `.m3u`, `.m3u8`, and `.pls` as named, persistent playlists.
+- Create, rename, delete, reorder, play, and export saved playlists.
+- Add individual songs, albums, artists, or all song search results to a saved
+  playlist.
 - Play local audio through GStreamer.
 - Control playback with play/pause, previous, next, seek, volume, repeat, and
   shuffle.
@@ -68,9 +72,10 @@ and [docs/SUBMISSION.md](docs/SUBMISSION.md). The final recording script is in
 - Keep playback running after closing the window, with an optional
   StatusNotifier tray menu on compatible desktops.
 
-Saved playlists are not available yet. In the current release, the queue is
-temporary and opening a playlist file does not import it into the library. See
-the [roadmap](ROADMAP.md) for the persistent-playlist plan.
+Saved playlists and the playback queue are separate. Editing a saved playlist
+does not silently alter the queue that is already playing. Opening a playlist
+file from the desktop still creates a temporary queue; use the Playlists page
+to import it as a persistent collection.
 
 ## Installation
 
@@ -98,6 +103,13 @@ SoundsGood 0.1.8 adds background playback, an optional system tray indicator,
 virtualized album and artist detail lists, and stricter playback lifecycle
 cleanup. Version 0.1.7 introduced the compact adaptive player bar and polished
 responsive navigation.
+
+## Current Development
+
+The `main` branch is version 0.2.0. It adds persistent playlists with atomic,
+versioned local storage, import/export, missing-file handling, adaptive
+management UI, and add-to-playlist actions throughout the library. The latest
+published Flatpak remains 0.1.8 until the 0.2.0 release workflow is completed.
 
 ## Command Line
 
@@ -201,21 +213,20 @@ scripts/generate-assets.sh
 
 ## Project Status
 
-SoundsGood is a functional local-first MVP moving toward beta quality. Version
-0.1.8 can
+SoundsGood is a functional local-first MVP moving toward beta quality. The
+0.2.0 development tree can
 scan a local music folder, reopen quickly from a persistent library index,
 search tracks, play audio, remain active in the background, expose media
-controls, and update through its signed Flatpak repository. The current focus
-is Build Week release validation followed by persistent playlists and broader
-beta hardening.
+controls, manage saved playlists, and update through its signed Flatpak
+repository. The current focus is Build Week submission work, validation of
+playlists with real collections, and broader beta hardening.
 
 Known areas still planned:
 
 - More regression testing with large real-world music collections.
 - Deeper keyboard and screen-reader accessibility review.
 - Diagnostics for files with unreadable or incomplete metadata.
-- Create, edit, persist, import, and export named playlists. This is distinct
-  from the temporary playback queue available today.
+- Validate playlist workflows with large and imperfect real-world collections.
 
 See [ROADMAP.md](ROADMAP.md) for the development roadmap.
 
@@ -227,6 +238,8 @@ The application is organized around a small set of modules:
   desktop integration lifecycle.
 - `Library`: local file discovery, metadata extraction, cache, and models.
 - `Player`: GStreamer playback, queue, progress, volume, repeat, and shuffle.
+- `PlaylistManager`: versioned persistent collections, atomic writes,
+  availability checks, and import/export coordination.
 - `BackgroundController` and `StatusNotifierService`: optional background
   lifetime and tray integration without making the tray a requirement.
 - `Models`: GObject models for songs, albums, artists, and player state.

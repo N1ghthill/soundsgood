@@ -16,9 +16,10 @@ integration, and UI.
 - Prefer adaptive libadwaita layout primitives over fixed size requests.
 - Reuse the semantic classes in `soundsgood/style.css`; icon actions must stay
   vertically centered and must not inherit the height of adjacent artwork.
-- Keep the transient playback queue distinct from saved playlists. The current
-  release can open playlist files as temporary queues, but persistent playlist
-  creation is planned work and must not be advertised as implemented.
+- Keep the transient playback queue distinct from saved playlists. Saved
+  playlists belong to `PlaylistManager`; the active queue belongs to `Player`.
+  The public v0.1.8 release only opens playlist files as temporary queues,
+  while persistent playlist support is part of the v0.2.0 development tree.
 
 The detailed architecture and metadata rules remain in `agent.md` and
 `docs/ARCHITECTURE.md`.

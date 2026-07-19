@@ -4,6 +4,10 @@ O formato de distribuicao atual do SoundsGood e um repositorio Flatpak proprio,
 hospedado via GitHub Pages. O app nao depende de listagem no Flathub para ser
 instalado ou atualizado.
 
+Os exemplos de bundle abaixo apontam para a ultima release publica, 0.1.8. A
+branch `main` esta em desenvolvimento 0.2.0 e so deve substituir esses numeros
+depois de tag, assets, repositorio Flatpak e instalacao publica serem validados.
+
 ## Instalar pelo repositorio
 
 O usuario adiciona o remote uma vez:

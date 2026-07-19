@@ -13,8 +13,9 @@ media controls without requiring an account or uploading a library. Version
 0.1.8 can remain active after its window closes and exposes an optional tray
 menu on compatible desktops.
 
-Saved playlists are planned but are not part of the submitted release. Playlist
-files opened by the desktop become temporary playback queues.
+The evaluated v0.1.8 release treats playlist files as temporary queues. The
+v0.2.0 development tree also supports named persistent playlists; update the
+release reference below before demonstrating that capability to judges.
 
 ## Problem and impact
 
@@ -30,8 +31,8 @@ imperfect real-world collections.
    local-first/privacy premise.
 2. **0:20–0:55 — Library:** open SoundsGood, show cached startup, albums,
    artists, songs, real tags, and artwork.
-3. **0:55–1:25 — Playback:** play an album, seek, change repeat, open the queue,
-   and demonstrate MPRIS desktop controls and background playback.
+3. **0:55–1:25 — Playback:** save an album to a playlist, play it, seek, open
+   the queue, and demonstrate MPRIS desktop controls and background playback.
 4. **1:25–1:50 — Adaptive design:** resize from 1200 px to 600/360 px and show
    navigation, album detail, artist split view, and compact player behavior.
 5. **1:50–2:20 — Reliability:** show reindexing, an unreadable file being

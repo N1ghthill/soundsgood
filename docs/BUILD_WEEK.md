@@ -76,9 +76,10 @@ The project owner made the decisions that define the product:
 
 ## Current product boundary
 
-The release manages a temporary playback queue and can open `.m3u`, `.m3u8`,
-and `.pls` files into that queue. Creating and maintaining named, persistent
-playlists is planned in `ROADMAP.md` and is not claimed as a v0.1.8 capability.
+The evaluated v0.1.8 release manages a temporary playback queue and can open
+`.m3u`, `.m3u8`, and `.pls` files into that queue. The v0.2.0 development tree
+adds named persistent playlists with import/export and remains clearly
+identified as unreleased until its release checks and publication are complete.
 
 ## Official submission requirements
 

@@ -53,9 +53,8 @@ meson test -C builddir
 - Definir SoundsGood como app padrao para arquivos `.mp3` e abrir uma faixa pelo gerenciador de arquivos.
 - Abrir uma faixa pelo terminal com `soundsgood caminho/para/faixa.mp3` e confirmar que o app inicia a reproducao.
 - Abrir playlists `.m3u` e `.pls` e confirmar que as faixas entram como fila temporaria.
-- Confirmar que a UI chama esse estado de fila e nao oferece salvar, renomear ou
-  editar playlists persistentes enquanto a Fase 6 do roadmap nao estiver
-  implementada.
+- Confirmar que esse estado aparece como fila e que importar/salvar fica na
+  secao Playlists, sem converter silenciosamente uma fila temporaria.
 - Dar duplo clique em faixas diferentes e confirmar que o audio real muda junto com a UI.
 - Testar Play/Pause, Previous, Next e Seek.
 - Testar volume e mute.
@@ -74,6 +73,28 @@ meson test -C builddir
 - Confirmar que a sessao nao entra em suspensao enquanto ha musica tocando, se a preferencia estiver ativa.
 - Alternar as preferencias de notificacao e prevencao de suspensao e confirmar que os comportamentos mudam sem reiniciar o app.
 - Abrir Preferences > Diagnostics e confirmar que a pasta do log pode ser acessada.
+
+## Playlists Persistentes
+
+- Criar uma playlist vazia, renomear e confirmar que nomes vazios ou duplicados
+  sao recusados com feedback.
+- Adicionar uma faixa pela tela Songs e pelos detalhes de album/artista.
+- Adicionar todas as faixas retornadas por uma busca e confirmar a ordem.
+- Fechar e reabrir o app e confirmar que nome, IDs implicitos e ordem continuam
+  em `$XDG_DATA_HOME/soundsgood/playlists.json`.
+- Reordenar e remover entradas enquanto outra fila toca; confirmar que a
+  reproducao atual nao muda ate pressionar Play na playlist.
+- Tocar uma playlist inteira e iniciar por uma entrada intermediaria.
+- Importar `.m3u`, `.m3u8` e `.pls`; confirmar que abrir o mesmo arquivo pelo
+  desktop continua produzindo apenas uma fila temporaria.
+- Exportar `.m3u8` com nomes Unicode e confirmar caminhos relativos quando os
+  arquivos estiverem no mesmo volume.
+- Mover temporariamente um arquivo, reindexar e confirmar `File unavailable`;
+  restaurar o arquivo, reindexar e confirmar a recuperacao.
+- Excluir uma playlist e confirmar o dialogo destrutivo e que nenhum arquivo de
+  audio foi removido.
+- Repetir criacao, adicao e reordenacao em 360/600/900/1200 px e confirmar que
+  listas usam rolagem/virtualizacao sem corte horizontal.
 
 ## Flatpak e Atualizacao
 

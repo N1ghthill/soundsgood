@@ -1,6 +1,8 @@
 # Roadmap
 
-Atualizado em 19 de julho de 2026 para refletir a versao 0.1.8.
+Atualizado em 19 de julho de 2026 para refletir a arvore de desenvolvimento
+0.2.0. A ultima release publica continua sendo a 0.1.8 ate a conclusao do fluxo
+de release.
 
 O SoundsGood prioriza um player local estavel e integrado ao desktop antes de
 recursos avancados. O produto permanece inspirado no GNOME Music e mantem fora
@@ -13,9 +15,9 @@ o empacotamento Flatpak estao implementados. A versao 0.1.8 tambem oferece
 reproducao opcional em segundo plano, indicador de bandeja em desktops
 compativeis e listas de detalhe virtualizadas.
 
-O app possui uma **fila de reproducao temporaria**. Arquivos `.m3u`, `.m3u8` e
-`.pls` podem ser abertos nessa fila, mas o app ainda nao permite criar, nomear,
-editar ou persistir playlists na biblioteca.
+O app mantem conceitos separados para **fila de reproducao temporaria** e
+**playlists persistentes**. Arquivos `.m3u`, `.m3u8` e `.pls` podem ser abertos
+como fila ou importados como colecoes nomeadas na secao Playlists.
 
 ## Fase 0: Base Executavel — concluida
 
@@ -108,29 +110,30 @@ Objetivo: manter um app empacotavel, atualizavel e diagnosticavel.
 - [x] Logs locais limitados e diagnosticos acessiveis pelas preferencias.
 - [x] Documentacao e kit de submissao da OpenAI Build Week 2026.
 
-## Fase 6: Playlists Persistentes — planejada
+## Fase 6: Playlists Persistentes — implementada no desenvolvimento 0.2.0
 
 Objetivo: permitir que o usuario mantenha colecoes nomeadas sem confundir
 playlist salva com a fila temporaria do player.
 
-- [ ] Definir `Playlist` e `PlaylistEntry` com identidade estavel e ordem
+- [x] Definir `Playlist` e `PlaylistEntry` com identidade estavel e ordem
   explicita.
-- [ ] Persistir playlists em `$XDG_DATA_HOME/soundsgood` com escrita atomica,
-  versao de formato e migracao testada.
-- [ ] Criar, renomear e excluir playlists com confirmacao para operacoes
+- [x] Persistir playlists em `$XDG_DATA_HOME/soundsgood` com escrita atomica e
+  formato versionado; como este e o formato inicial, versoes desconhecidas sao
+  rejeitadas com seguranca ate existir uma migracao real.
+- [x] Criar, renomear e excluir playlists com confirmacao para operacoes
   destrutivas.
-- [ ] Adicionar faixas, albums, artistas e resultados de busca a uma playlist.
-- [ ] Remover e reordenar faixas sem alterar a fila que estiver tocando.
-- [ ] Adicionar uma secao adaptativa de Playlists, com estados vazio e de
+- [x] Adicionar faixas, albums, artistas e resultados de busca a uma playlist.
+- [x] Remover e reordenar faixas sem alterar a fila que estiver tocando.
+- [x] Adicionar uma secao adaptativa de Playlists, com estados vazio e de
   arquivo ausente.
-- [ ] Tocar uma playlist inteira ou enviar seus itens para a fila atual.
-- [ ] Importar `.m3u`, `.m3u8` e `.pls` como playlists salvas sem quebrar o
+- [x] Tocar uma playlist inteira, criando a fila apenas quando solicitado.
+- [x] Importar `.m3u`, `.m3u8` e `.pls` como playlists salvas sem quebrar o
   comportamento atual de abertura temporaria.
-- [ ] Exportar playlists em `.m3u8`, tratando caminhos relativos e caracteres
+- [x] Exportar playlists em `.m3u8`, tratando caminhos relativos e caracteres
   Unicode.
-- [ ] Cobrir persistencia, migracao, importacao, exportacao, ordenacao e falhas
-  com testes unitarios e graficos.
-- [ ] Documentar claramente recuperacao quando uma faixa for movida ou
+- [x] Cobrir persistencia, versao de formato, importacao, exportacao, ordenacao,
+  arquivos ausentes e falhas com testes unitarios e graficos.
+- [x] Documentar claramente recuperacao quando uma faixa for movida ou
   removida da biblioteca.
 
 Restricoes arquiteturais: a persistencia pertence a uma camada de catalogo,
@@ -155,8 +158,7 @@ Objetivo: validar o uso diario em ambientes e bibliotecas mais diversos.
 1. Concluir os itens ainda abertos da submissao Build Week em
    `docs/SUBMISSION.md`, especialmente `/feedback`, video e envio no Devpost.
 2. Executar e registrar a regressao manual final em colecoes e larguras reais.
-3. Implementar a Fase 6 em fatias verticais, com persistencia e testes antes da
-   UI de gerenciamento.
+3. Validar playlists com colecoes reais e concluir o fluxo de release 0.2.0.
 4. Prosseguir para a auditoria de acessibilidade e os criterios de beta.
 
 ## Fora de Escopo

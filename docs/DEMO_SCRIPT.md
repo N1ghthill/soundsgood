@@ -29,15 +29,16 @@ track and open an album.
 
 ## 0:53–1:25 — Playback
 
-**Screen:** Play an album, seek, open playback options, change repeat mode,
-open the queue, remove an item, show the desktop media control, then close and
-reopen the window while playback continues.
+**Screen:** Add an album to a named playlist, open the Playlists page, play it,
+seek, open the queue, show the desktop media control, then close and reopen the
+window while playback continues.
 
 **Narration:**
 
 > Playback uses GStreamer and integrates with Linux media controls through
-> MPRIS. I can seek, change repeat or shuffle behavior, and manage the current
-> queue. Closing the window can keep the session playing, while an explicit
+> MPRIS. Saved playlists remain separate from the active queue, are stored
+> locally with atomic updates, and can be imported or exported as standard
+> files. Closing the window can keep the session playing, while an explicit
 > Quit still releases its timers, bus watches, monitors, D-Bus registrations,
 > and playback resources. This explicit ownership prevents the intermittent
 > exits that motivated the refactor.
@@ -86,5 +87,5 @@ application side by side.
 - Use only generated audio and non-personal paths.
 - Keep the final video under three minutes.
 - Verify spoken references to both Codex and GPT-5.6.
-- Do not describe the temporary queue as a saved playlist.
+- Clearly distinguish the saved playlist from the temporary playback queue.
 - Export H.264 video with AAC audio and upload it publicly to YouTube.

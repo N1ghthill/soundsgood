@@ -42,13 +42,14 @@ Responsabilidades:
 - Fornecer busca.
 
 `Library` e a fachada GObject consumida pela UI. Funcoes puras e testaveis de
-cache, playlists e ranking de busca ficam em `soundsgood/catalog`. I/O de scan e
+cache, formatos de playlist e ranking de busca ficam em `soundsgood/catalog`. I/O de scan e
 validacao de cache ocorre em worker; apenas a aplicacao do snapshot aos
 `Gio.ListStore` ocorre no thread principal.
 
-Neste contexto, `soundsgood/catalog/playlists.py` apenas interpreta arquivos
-externos `.m3u`, `.m3u8` e `.pls`. Nao existe armazenamento de playlists
-nomeadas na versao 0.1.8.
+`soundsgood/catalog/playlists.py` interpreta arquivos externos `.m3u`, `.m3u8`
+e `.pls`; `soundsgood/catalog/playlist_storage.py` valida o documento interno e
+exporta M3U8. A biblioteca continua responsavel por transformar arquivos locais
+em `Song`, nao por possuir as colecoes nomeadas.
 
 Dados esperados por faixa:
 
@@ -81,6 +82,22 @@ Implementacao inicial aceitavel:
 Implementacao futura possivel:
 
 - Backend baseado em Tracker/LocalSearch e Grilo, como no GNOME Music.
+
+### PlaylistManager
+
+Responsabilidades:
+
+- Possuir o `Gio.ListStore` de playlists nomeadas.
+- Criar, renomear e excluir playlists.
+- Adicionar, remover e reordenar snapshots de faixas.
+- Resolver snapshots contra os objetos `Song` atuais da biblioteca.
+- Verificar arquivos ausentes fora do loop GTK.
+- Coordenar importacao e exportacao sem bloquear a interface.
+- Persistir `$XDG_DATA_HOME/soundsgood/playlists.json` com formato versionado e
+  substituicao atomica.
+
+Nao deve controlar GStreamer nem reutilizar a lista mutavel do `Player` como
+armazenamento. A fila so muda quando o usuario manda tocar uma playlist.
 
 ### Player
 
@@ -125,6 +142,9 @@ Regras:
 - `Song.url` e a identidade primaria de uma faixa.
 - `Album` deve agrupar por `album` + `album_artist`.
 - `Artist` deve representar artista de faixa ou album artist conforme a view.
+- `Playlist` deve ter identificador e nome estaveis, alem de entradas ordenadas.
+- `PlaylistEntry` preserva URI e um snapshot minimo de metadados para continuar
+  diagnosticavel quando o arquivo nao estiver na biblioteca.
 - `LibraryState` representa o estado observavel da biblioteca: vazio, escaneando, pronto ou erro.
 - Duracoes devem ser em segundos.
 - Numeros de faixa e disco devem ser inteiros.
@@ -150,6 +170,8 @@ Estrutura sugerida:
 - `ArtistsView`: lista de artistas e painel de detalhes com albums agrupados.
 - `SongsView`: lista de faixas.
 - `SearchView`: busca global com secoes de artistas, albums e musicas.
+- `PlaylistsView`: navegacao adaptativa, CRUD, ordenacao, importacao e
+  exportacao de colecoes salvas.
 - `PlayerToolbar`: controles de reproducao.
 - `PlayerToolbar` tambem contem o popover da fila atual, com selecao, remocao por item e limpeza.
 - `MprisService`: interface DBus MPRIS para controles do sistema.
@@ -188,18 +210,19 @@ Views nao devem:
 - Controlar GStreamer diretamente.
 - Recalcular modelos globais de biblioteca.
 
-## Playlists Persistentes Planejadas
+## Playlists Persistentes
 
 A fila do `Player` e transitoria e representa apenas a sequencia em execucao.
-Uma playlist salva deve ser um conceito separado, pertencente ao catalogo.
+Uma playlist salva e um conceito separado, pertencente a `PlaylistManager`.
 
-Direcao aprovada para a Fase 6 do roadmap:
+Implementacao da Fase 6:
 
 - `Playlist` possui identificador estavel, nome e entradas ordenadas.
 - Entradas referenciam a URI canonica da faixa e preservam informacao suficiente
   para diagnosticar arquivos ausentes.
-- Persistencia fica em `$XDG_DATA_HOME/soundsgood`, com formato versionado,
-  migracao testada e substituicao atomica.
+- Persistencia fica em `$XDG_DATA_HOME/soundsgood/playlists.json`, com formato
+  versionado e substituicao atomica. Como a versao 1 e o primeiro formato,
+  versoes desconhecidas sao recusadas em vez de convertidas silenciosamente.
 - Importacao e exportacao ficam em helpers puros do catalogo; widgets nao fazem
   I/O direto.
 - Carregar uma playlist cria ou altera a fila somente por metodos publicos do
@@ -208,6 +231,11 @@ Direcao aprovada para a Fase 6 do roadmap:
   ja estiver tocando.
 - Falhas parciais e arquivos ausentes sao estados recuperaveis e aparecem nos
   diagnosticos.
+
+Quando um arquivo e movido, a entrada permanece na playlist e aparece como
+indisponivel. O usuario pode remover a entrada ou reimportar/adicionar a faixa
+no novo caminho; o app nao tenta adivinhar automaticamente que dois caminhos
+representam o mesmo audio.
 
 ## Dados e Ordenacao
 
@@ -279,9 +307,10 @@ Dependencias a avaliar:
 - MPRIS usa ID de faixa deterministico derivado da URI por SHA-256.
 - O app reabre pelo indice em cache quando os arquivos conhecidos e diretorios indexados nao mudaram; quando ha mudanca detectada, troca de pasta ou cache antigo, faz rescan completo.
 - A acao manual de reindexacao força rescan e releitura de metadados.
-- Playlists `.m3u`, `.m3u8` e `.pls` sao aceitas no fluxo externo de abertura, mas nao sao indexadas como parte da biblioteca.
-- Criacao e persistencia de playlists pertencem a uma fase futura; ate la,
-  documentacao e UI devem chamar o estado atual de fila de reproducao.
+- Playlists `.m3u`, `.m3u8` e `.pls` abertas pelo desktop continuam criando uma
+  fila temporaria; a secao Playlists oferece importacao persistente explicita.
+- Playlists salvas e fila de reproducao permanecem conceitos e modelos
+  distintos.
 - Notificacoes e inibicao de suspensao ficam em `Application`, reagindo ao estado publico do `Player`.
 - `BackgroundController` possui o `GApplication.hold()` usado ao ocultar a
   janela e separa fechar/ocultar da acao explicita de sair.

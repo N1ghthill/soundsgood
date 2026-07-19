@@ -9,7 +9,7 @@
   </developer>
   <summary>Play and organize your music collection</summary>
   <description>
-    <p>A simple and fast music player for Linux. Browse your music by album or artist, play songs, and manage the current playback queue.</p>
+    <p>A simple and fast music player for Linux. Browse your music by album or artist, play songs, manage the current playback queue, and create persistent playlists.</p>
   </description>
   <categories>
     <category>AudioVideo</category>

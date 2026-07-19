@@ -16,7 +16,8 @@ Nao implementar:
 
 ## Estado do Projeto
 
-O projeto tem um MVP funcional na versao 0.1.8. Ele inicia pelo lancador,
+O projeto tem um MVP funcional; a arvore principal esta em desenvolvimento
+0.2.0 e a ultima release publica e a 0.1.8. Ele inicia pelo lancador,
 Flatpak ou ambiente de desenvolvimento, escaneia o diretorio XDG de musicas,
 mostra albums/artistas/faixas, reproduz via GStreamer e pode continuar em
 segundo plano quando a janela e fechada.
@@ -29,6 +30,9 @@ Pontos importantes:
 - `soundsgood/models.py` contem modelos GObject e enums como `RepeatMode`, `PlayState` e `LibraryState`.
 - `soundsgood/library.py` coordena o catalogo GObject e o scan; helpers puros de cache, playlists e busca ficam em `soundsgood/catalog`.
 - `soundsgood/player.py` contem o `playbin`, fila e controles de reproducao.
+- `soundsgood/playlists.py` possui playlists nomeadas, persistencia assincrona,
+  disponibilidade de arquivos e importacao/exportacao; nao confundir com a
+  fila do player.
 - `soundsgood/background.py` separa o ciclo de vida da janela do ciclo de vida
   da aplicacao.
 - `soundsgood/statusnotifier.py` implementa o indicador opcional e seu menu
@@ -40,10 +44,10 @@ Pontos importantes:
 - `data/soundsgood.gresource.xml` foi removido porque estava vazio; a UI segue programatica em Python.
 - `docs/MANUAL_TESTS.md` contem o roteiro de validacao manual.
 
-Ultima validacao conhecida, em 19 de julho de 2026 para o commit da versao
-0.1.8:
+Ultima validacao conhecida, em 19 de julho de 2026 para a arvore de
+desenvolvimento 0.2.0:
 
-- 49 testes automatizados passando; o smoke grafico separado tambem passou no
+- 58 testes automatizados passando; o smoke grafico separado tambem passou no
   GNOME SDK 50.
 - `py_compile` passando para app e testes.
 - `meson setup builddir --reconfigure`, `meson compile -C builddir` e `meson test -C builddir` passando.
@@ -58,16 +62,16 @@ Ultima validacao conhecida, em 19 de julho de 2026 para o commit da versao
   host de bandeja, lancador e MPRIS continuam funcionando.
 
 Terminologia: o `Player` ainda usa nomes internos como `_playlist`, mas esse
-estado e a fila temporaria. Playlists nomeadas e persistentes ainda nao foram
-implementadas; consulte a Fase 6 de `ROADMAP.md`.
+estado e a fila temporaria. Playlists nomeadas pertencem a `PlaylistManager` e
+sao armazenadas em `$XDG_DATA_HOME/soundsgood/playlists.json`.
 
 ## Prioridades
 
 1. Concluir `/feedback`, video e envio da OpenAI Build Week conforme
    `docs/SUBMISSION.md`.
 2. Testar regressao manual em colecoes maiores e em telas estreitas reais.
-3. Implementar playlists persistentes pela camada de catalogo, com formato
-   versionado e escrita atomica antes da UI de gerenciamento.
+3. Validar playlists persistentes com colecoes reais e preparar a release
+   0.2.0.
 4. Evoluir diagnosticos para relatar arquivos com metadados incompletos sem
    expor caminhos pessoais por padrao.
 5. Ampliar acessibilidade com auditoria de navegacao por teclado e leitor de
@@ -192,6 +196,14 @@ O `Player` deve concentrar:
 
 A fila atual e transitoria. Nao reutilize diretamente sua lista mutavel como
 armazenamento de playlists persistentes.
+
+Playlists persistentes:
+
+- usam `PlaylistManager`, `Playlist` e `PlaylistEntry`;
+- sao gravadas de forma atomica fora do loop GTK;
+- preservam snapshots para diagnosticar faixas ausentes;
+- so alteram a fila quando o usuario pede para reproduzi-las;
+- devem manter IDs e ordem durante renomeacao, exportacao e reabertura.
 
 Views devem chamar metodos publicos como `play_song`, `play_pause`, `next`, `previous` e `seek`.
 
