@@ -21,6 +21,10 @@ The public 0.2.3 release contains additional playlist-editor hardening
 requested after that release. It remains separate from the evaluated v0.2.2
 claims recorded for the Build Week submission.
 
+The 0.2.4 release candidate fixes and visually refines the right-click playlist
+destination popover. It does not change the evaluated v0.2.2 submission or its
+verified claims.
+
 ## Problem and impact
 
 People with personal music collections often have to choose between dated

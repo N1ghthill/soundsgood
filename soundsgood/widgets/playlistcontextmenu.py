@@ -12,11 +12,11 @@ import gi
 gi.require_version("Gdk", "4.0")
 gi.require_version("Gtk", "4.0")
 
-from gi.repository import Gdk, Gio, GLib, Gtk
+from gi.repository import Gdk, Gtk, Pango
 
 
 class PlaylistContextMenu:
-    """Attach a current, snapshot-safe playlist submenu to a widget."""
+    """Attach a current, snapshot-safe playlist destination popover."""
 
     def __init__(
         self,
@@ -35,19 +35,6 @@ class PlaylistContextMenu:
         self._songs = []
         self._popover = None
 
-        actions = Gio.SimpleActionGroup()
-        add_action = Gio.SimpleAction.new(
-            "add",
-            GLib.VariantType.new("s"),
-        )
-        add_action.connect("activate", self._add_to_playlist)
-        actions.add_action(add_action)
-        new_action = Gio.SimpleAction.new("new", None)
-        new_action.connect("activate", self._create_playlist)
-        actions.add_action(new_action)
-        widget.insert_action_group("playlist-context", actions)
-        self._actions = actions
-
         gesture = Gtk.GestureClick()
         gesture.set_button(Gdk.BUTTON_SECONDARY)
         gesture.connect("pressed", self._show)
@@ -65,11 +52,11 @@ class PlaylistContextMenu:
         gesture.set_state(Gtk.EventSequenceState.CLAIMED)
         self._close_popover()
 
-        root = self._build_menu_model()
-
-        popover = Gtk.PopoverMenu.new_from_model(root)
+        popover = Gtk.Popover()
         popover.set_has_arrow(True)
+        popover.add_css_class("playlist-context-popover")
         popover.set_parent(self._widget)
+        popover.set_child(self._build_content())
         rectangle = Gdk.Rectangle()
         rectangle.x = int(x)
         rectangle.y = int(y)
@@ -80,27 +67,68 @@ class PlaylistContextMenu:
         self._popover = popover
         popover.popup()
 
-    def _build_menu_model(self):
-        root = Gio.Menu()
-        playlists = Gio.Menu()
+    def _build_content(self):
+        content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
+        content.set_margin_top(5)
+        content.set_margin_bottom(5)
+        content.set_margin_start(5)
+        content.set_margin_end(5)
+
+        header = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
+        header.add_css_class("playlist-context-header")
+        heading = Gtk.Label(label=self._label(), xalign=0)
+        heading.add_css_class("heading")
+        header.append(heading)
+
         model = self._manager.props.playlists
-        for index in range(model.get_n_items()):
-            playlist = model.get_item(index)
-            item = Gio.MenuItem.new(playlist.props.name, None)
-            item.set_action_and_target_value(
-                "playlist-context.add",
-                GLib.Variant("s", playlist.props.identifier),
+        destination_count = model.get_n_items()
+        hint = Gtk.Label(
+            label=_playlist_count(destination_count),
+            xalign=0,
+        )
+        hint.add_css_class("caption")
+        hint.add_css_class("dim-label")
+        header.append(hint)
+        content.append(header)
+
+        if destination_count:
+            selection = Gtk.NoSelection.new(model)
+            destinations = Gtk.ListView.new(
+                selection,
+                _create_destination_factory(self._activate_playlist),
             )
-            playlists.append_item(item)
+            destinations.add_css_class("playlist-destination-list")
+            destinations.set_single_click_activate(False)
+            scroller = Gtk.ScrolledWindow()
+            scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+            scroller.set_min_content_width(272)
+            scroller.set_max_content_height(276)
+            scroller.set_propagate_natural_height(True)
+            scroller.set_child(destinations)
+            content.append(scroller)
+        else:
+            empty = Gtk.Label(label=_("No playlists yet"), xalign=0)
+            empty.add_css_class("dim-label")
+            empty.set_margin_top(10)
+            empty.set_margin_bottom(10)
+            empty.set_margin_start(8)
+            empty.set_margin_end(8)
+            content.append(empty)
 
-        if model.get_n_items() == 0:
-            playlists.append(_("No playlists yet"), None)
-
-        create = Gio.Menu()
-        create.append(_("New Playlist…"), "playlist-context.new")
-        playlists.append_section(None, create)
-        root.append_submenu(self._label(), playlists)
-        return root
+        separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        separator.set_margin_top(2)
+        separator.set_margin_bottom(2)
+        content.append(separator)
+        create = Gtk.Button(
+            label=_("New Playlist…"),
+            icon_name="list-add-symbolic",
+        )
+        create.add_css_class("flat")
+        create.add_css_class("playlist-create")
+        create.set_halign(Gtk.Align.FILL)
+        create.connect("clicked", self._create_playlist)
+        content.append(create)
+        return content
 
     def _label(self):
         if callable(self._submenu_label):
@@ -112,25 +140,29 @@ class PlaylistContextMenu:
             return self._description_provider()
         return self._description_provider or ""
 
-    def _add_to_playlist(self, _action, parameter):
-        playlist = self._find_playlist(parameter.get_string())
-        if playlist is None:
-            return
-        added = self._manager.add_songs(playlist, self._songs)
-        if added:
-            message = _("Added %d song to %s") % (added, playlist.props.name)
-            if added != 1:
-                message = _("Added %d songs to %s") % (added, playlist.props.name)
+    def _activate_playlist(self, playlist):
+        self._close_popover()
+        try:
+            added = self._manager.add_songs(playlist, self._songs)
+        except ValueError as error:
+            message = str(error)
         else:
-            message = _("Already in %s") % playlist.props.name
+            if added:
+                message = _("Added %d song to %s") % (added, playlist.props.name)
+                if added != 1:
+                    message = _("Added %d songs to %s") % (added, playlist.props.name)
+            else:
+                message = _("Already in %s") % playlist.props.name
         window = self._app.props.window
         if window is not None:
             window.show_message(message)
 
     def _create_playlist(self, *_args):
+        parent = self._widget.get_root()
+        self._close_popover()
         self._app.add_to_playlist(
             self._songs,
-            self._widget.get_root(),
+            parent,
             self._description(),
             focus_new=True,
         )
@@ -163,3 +195,99 @@ class PlaylistContextMenu:
         popover = self._popover
         self._popover = None
         popover.popdown()
+
+
+class _PlaylistDestination(Gtk.Button):
+    def __init__(self, on_activate):
+        super().__init__()
+        self._playlist = None
+        self._name_handler = 0
+        self._count_handler = 0
+        self._on_activate = on_activate
+        self.add_css_class("flat")
+        self.add_css_class("playlist-destination")
+        self.set_halign(Gtk.Align.FILL)
+
+        row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=9)
+        icon = Gtk.Image.new_from_icon_name("view-list-symbolic")
+        icon.set_pixel_size(18)
+        icon.add_css_class("playlist-destination-icon")
+        row.append(icon)
+
+        labels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        labels.set_hexpand(True)
+        labels.set_valign(Gtk.Align.CENTER)
+        self._name = Gtk.Label(xalign=0)
+        self._name.set_ellipsize(Pango.EllipsizeMode.END)
+        self._name.set_single_line_mode(True)
+        self._name.add_css_class("playlist-destination-name")
+        labels.append(self._name)
+        self._count = Gtk.Label(xalign=0)
+        self._count.add_css_class("caption")
+        self._count.add_css_class("dim-label")
+        labels.append(self._count)
+        row.append(labels)
+
+        add_icon = Gtk.Image.new_from_icon_name("list-add-symbolic")
+        add_icon.set_pixel_size(16)
+        add_icon.add_css_class("dim-label")
+        row.append(add_icon)
+        self.set_child(row)
+        self.connect("clicked", self._clicked)
+
+    def bind(self, playlist):
+        self.unbind()
+        self._playlist = playlist
+        self._name_handler = playlist.connect("notify::name", self._sync)
+        self._count_handler = playlist.connect(
+            "notify::entry-count",
+            self._sync,
+        )
+        self._sync()
+
+    def unbind(self):
+        if self._playlist is not None and self._name_handler:
+            if self._playlist.handler_is_connected(self._name_handler):
+                self._playlist.disconnect(self._name_handler)
+        if self._playlist is not None and self._count_handler:
+            if self._playlist.handler_is_connected(self._count_handler):
+                self._playlist.disconnect(self._count_handler)
+        self._name_handler = 0
+        self._count_handler = 0
+        self._playlist = None
+
+    def _sync(self, *_args):
+        if self._playlist is not None:
+            self._name.set_label(self._playlist.props.name)
+            self._count.set_label(_song_count(self._playlist.props.entry_count))
+            self.set_tooltip_text(_("Add to %s") % self._playlist.props.name)
+
+    def _clicked(self, _button):
+        if self._playlist is not None:
+            self._on_activate(self._playlist)
+
+
+def _create_destination_factory(on_activate):
+    factory = Gtk.SignalListItemFactory()
+    factory.connect(
+        "setup",
+        lambda _factory, item: item.set_child(_PlaylistDestination(on_activate)),
+    )
+    factory.connect(
+        "bind",
+        lambda _factory, item: item.get_child().bind(item.get_item()),
+    )
+    factory.connect("unbind", lambda _factory, item: item.get_child().unbind())
+    return factory
+
+
+def _playlist_count(count):
+    if count == 1:
+        return _("1 playlist available")
+    return _("%d playlists available") % count
+
+
+def _song_count(count):
+    if count == 1:
+        return _("1 song")
+    return _("%d songs") % count

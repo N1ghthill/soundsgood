@@ -6,8 +6,9 @@ import gi
 
 gi.require_version("Gdk", "4.0")
 gi.require_version("GLib", "2.0")
+gi.require_version("Gtk", "4.0")
 
-from gi.repository import Gdk, Gio, GLib
+from gi.repository import Gdk, Gio, GLib, Gtk
 
 from soundsgood.application import SoundsGoodApplication
 from soundsgood.models import Album, Artist, Song
@@ -131,16 +132,49 @@ class WindowSmokeTest(unittest.TestCase):
                     add_item._playlist_menu,
                     PlaylistContextMenu,
                 )
-                menu_model = add_item._playlist_menu._build_menu_model()
-                submenu = menu_model.get_item_link(0, Gio.MENU_LINK_SUBMENU)
-                self.assertIsNotNone(submenu)
-                self.assertGreaterEqual(submenu.get_n_items(), 2)
                 add_item._playlist_menu._songs = [context_song]
-                add_item._playlist_menu._add_to_playlist(
-                    None,
-                    GLib.Variant("s", saved.props.identifier),
+                context_host = Gtk.Window(application=app)
+                context_host.set_child(add_item)
+                context_host.present()
+                while GLib.MainContext.default().iteration(False):
+                    pass
+                context_popover = Gtk.Popover()
+                context_popover.set_parent(add_item)
+                context_popover.set_child(add_item._playlist_menu._build_content())
+                context_popover.connect(
+                    "closed",
+                    add_item._playlist_menu._on_popover_closed,
                 )
+                add_item._playlist_menu._popover = context_popover
+                context_popover.popup()
+                while GLib.MainContext.default().iteration(False):
+                    pass
+                pending = [context_popover]
+                destination_button = None
+                while pending:
+                    candidate = pending.pop()
+                    if (
+                        isinstance(candidate, Gtk.Button)
+                        and candidate.has_css_class("playlist-destination")
+                        and candidate._playlist is saved
+                    ):
+                        destination_button = candidate
+                        break
+                    child = candidate.get_first_child()
+                    while child is not None:
+                        pending.append(child)
+                        child = child.get_next_sibling()
+                self.assertIsNotNone(destination_button)
+                self.assertEqual(
+                    destination_button._name.get_label(),
+                    "Smoke playlist",
+                )
+                self.assertEqual(destination_button._count.get_label(), "1 song")
+                destination_button.emit("clicked")
+                while GLib.MainContext.default().iteration(False):
+                    pass
                 self.assertEqual(saved.props.entry_count, 2)
+                context_host.destroy()
                 add_item.unbind()
 
                 chooser = PlaylistChooserDialog(

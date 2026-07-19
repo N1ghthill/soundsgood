@@ -4,7 +4,8 @@ O formato de distribuicao atual do SoundsGood e um repositorio Flatpak proprio,
 hospedado via GitHub Pages. O app nao depende de listagem no Flathub para ser
 instalado ou atualizado.
 
-Os exemplos de bundle abaixo apontam para a ultima release publica, 0.2.3.
+Os exemplos de bundle abaixo apontam para a candidata 0.2.4. A ultima release
+publica permanece 0.2.3 ate a verificacao dos artefatos abaixo.
 
 ## Instalar pelo repositorio
 
@@ -74,14 +75,14 @@ flatpak run io.github.n1ghthill.soundsgood
 Gerar bundle versionado para GitHub Releases:
 
 ```bash
-flatpak build-bundle ~/.local/share/flatpak/repo SoundsGood-0.2.3-x86_64.flatpak io.github.n1ghthill.soundsgood stable
+flatpak build-bundle ~/.local/share/flatpak/repo SoundsGood-0.2.4-x86_64.flatpak io.github.n1ghthill.soundsgood stable
 ```
 
 Tambem publique uma copia com nome estavel para permitir o link
 `releases/latest/download`:
 
 ```bash
-cp SoundsGood-0.2.3-x86_64.flatpak SoundsGood-x86_64.flatpak
+cp SoundsGood-0.2.4-x86_64.flatpak SoundsGood-x86_64.flatpak
 ```
 
 Instalar a ultima release publicada:
@@ -130,8 +131,8 @@ exemplo:
 sources:
   - type: git
     url: https://github.com/N1ghthill/soundsgood.git
-    tag: v0.2.3
-    commit: 96a7baf3732546c3c4e7243d9876f8be9472e4b7
+    tag: v0.2.4
+    commit: COMMIT_DA_TAG
 ```
 
 ## Validacao
@@ -205,3 +206,10 @@ Se o app passar a depender somente de portal/document portal para pastas escolhi
   a partir de `soundsgood` no commit OSTree acima.
 - Build, 66 testes, smoke grafico, metadados pedantic, lint e composicao
   Flatpak executados no GNOME 50.
+
+## Estado da Release 0.2.4
+
+- Candidata validada com 66 testes, smoke grafico sobre o botao real e teste
+  manual do funcionamento e acabamento na instalacao principal.
+- Tag, commit, CI, OSTree e assets devem ser preenchidos somente depois da
+  verificacao publica; nenhum resultado pendente e declarado como concluido.

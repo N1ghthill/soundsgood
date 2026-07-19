@@ -182,9 +182,11 @@ Estrutura sugerida:
 - `PlaylistChooserDialog`: usa `Gtk.ListView` sobre o modelo de playlists e
   mantem linhas reativas; uma alteracao de contagem nao reconstrói a colecao
   durante o clique que a originou.
-- `PlaylistContextMenu`: constroi sob demanda um submenu nativo a partir do
-  `Gio.ListModel` de playlists. O conteudo alvo e capturado ao abrir o menu para
-  que a reciclagem de uma linha virtualizada nunca altere a operacao pendente.
+- `PlaylistContextMenu`: constroi sob demanda um popover de destinos com
+  `Gtk.ListView` sobre o `Gio.ListModel` de playlists. Cada linha chama o
+  `PlaylistManager` diretamente, sem depender de roteamento indireto por
+  `GAction`. O conteudo alvo e capturado ao abrir o menu para que a reciclagem
+  de uma linha virtualizada nunca altere a operacao pendente.
 - `PlayerToolbar`: controles de reproducao.
 - `PlayerToolbar` tambem contem o popover da fila atual, com selecao, remocao por item e limpeza.
 - `MprisService`: interface DBus MPRIS para controles do sistema.

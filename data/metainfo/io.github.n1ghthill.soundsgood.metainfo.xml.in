@@ -43,6 +43,11 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="0.2.4" date="2026-07-19">
+      <description>
+        <p>Fixes right-click playlist destinations with a compact, virtualized popover that invokes playlist operations directly, shows current song counts, and is covered by a real button-click regression.</p>
+      </description>
+    </release>
     <release version="0.2.3" date="2026-07-19">
       <description>
         <p>Makes persistent playlists reliable for daily use with searchable multi-song selection, direct deletion, stable in-place editing, coalesced atomic saves, and stress-tested recovery.</p>

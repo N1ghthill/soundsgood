@@ -103,7 +103,9 @@ meson test -C builddir
 - Clicar com o botao direito em uma capa/cabecalho de album e confirmar que
   `Add Album to Playlist` adiciona todas as faixas sem alterar a fila atual.
 - Abrir o menu contextual depois de criar ou renomear uma playlist e confirmar
-  que o submenu reflete o nome novo sem reiniciar o app.
+  que o popover de destinos reflete o nome novo sem reiniciar o app.
+- Confirmar que o seletor contextual permanece compacto: cada destino mostra
+  nome e quantidade de musicas, sem botoes excessivamente altos ou largos.
 - Usar `New Playlist…` pelo menu contextual e confirmar que o dialogo abre com
   o campo de nome pronto para edicao; validar tambem o botao visivel de adicao
   por teclado para preservar o caminho sem mouse.

@@ -3,8 +3,6 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 
-from gi.repository import Gio, GLib
-
 from soundsgood.models import Song
 from soundsgood.playlists import PlaylistManager
 from soundsgood.widgets.playlistcontextmenu import PlaylistContextMenu
@@ -24,6 +22,7 @@ class PlaylistContextMenuTest(unittest.TestCase):
         self.menu._submenu_label = "Add to Playlist"
         self.menu._description_provider = None
         self.menu._songs = [self.song]
+        self.menu._popover = None
         self.menu._app = SimpleNamespace(
             props=SimpleNamespace(window=None),
         )
@@ -32,48 +31,20 @@ class PlaylistContextMenuTest(unittest.TestCase):
         self.manager.shutdown()
         self._temporary_directory.cleanup()
 
-    def test_menu_model_exposes_current_playlists_as_targeted_actions(self):
-        model = self.menu._build_menu_model()
-        self.assertEqual(model.get_n_items(), 1)
-        submenu = model.get_item_link(0, Gio.MENU_LINK_SUBMENU)
-        self.assertIsNotNone(submenu)
-
-        label = submenu.get_item_attribute_value(
-            0,
-            Gio.MENU_ATTRIBUTE_LABEL,
-            GLib.VariantType.new("s"),
+    def test_destination_lookup_uses_stable_playlist_identifier(self):
+        self.assertIs(
+            self.menu._find_playlist(self.playlist.props.identifier),
+            self.playlist,
         )
-        action = submenu.get_item_attribute_value(
-            0,
-            Gio.MENU_ATTRIBUTE_ACTION,
-            GLib.VariantType.new("s"),
-        )
-        target = submenu.get_item_attribute_value(
-            0,
-            Gio.MENU_ATTRIBUTE_TARGET,
-            GLib.VariantType.new("s"),
-        )
-        self.assertEqual(label.get_string(), "Favorites")
-        self.assertEqual(action.get_string(), "playlist-context.add")
-        self.assertEqual(target.get_string(), self.playlist.props.identifier)
 
         self.manager.rename(self.playlist, "Renamed")
-        refreshed = self.menu._build_menu_model().get_item_link(
-            0,
-            Gio.MENU_LINK_SUBMENU,
+        self.assertEqual(
+            self.menu._find_playlist(self.playlist.props.identifier).props.name,
+            "Renamed",
         )
-        refreshed_label = refreshed.get_item_attribute_value(
-            0,
-            Gio.MENU_ATTRIBUTE_LABEL,
-            GLib.VariantType.new("s"),
-        )
-        self.assertEqual(refreshed_label.get_string(), "Renamed")
 
     def test_targeted_action_adds_snapshot_to_selected_playlist(self):
-        self.menu._add_to_playlist(
-            None,
-            GLib.Variant("s", self.playlist.props.identifier),
-        )
+        self.menu._activate_playlist(self.playlist)
         self.assertEqual(self.playlist.props.entry_count, 1)
         self.assertEqual(
             self.playlist.props.entries.get_item(0).props.url,

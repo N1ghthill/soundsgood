@@ -16,8 +16,8 @@ Nao implementar:
 
 ## Estado do Projeto
 
-O projeto tem um MVP funcional; a ultima release publica e a 0.2.3. Ele inicia
-pelo lancador,
+O projeto tem um MVP funcional; a ultima release publica e a 0.2.3 e a 0.2.4
+esta em validacao. Ele inicia pelo lancador,
 Flatpak ou ambiente de desenvolvimento, escaneia o diretorio XDG de musicas,
 mostra albums/artistas/faixas, reproduz via GStreamer e pode continuar em
 segundo plano quando a janela e fechada.
@@ -44,7 +44,7 @@ Pontos importantes:
 - `data/soundsgood.gresource.xml` foi removido porque estava vazio; a UI segue programatica em Python.
 - `docs/MANUAL_TESTS.md` contem o roteiro de validacao manual.
 
-Ultima validacao local conhecida, em 19 de julho de 2026 para a 0.2.3:
+Ultima validacao local conhecida, em 19 de julho de 2026 para a candidata 0.2.4:
 
 - 66 testes automatizados passando, incluindo resistencia de playlists e a
   verificacao estatica dos aliases de traducao usados por factories GTK.
@@ -58,6 +58,10 @@ Ultima validacao local conhecida, em 19 de julho de 2026 para a 0.2.3:
   `v0.2.3`.
 - O repositorio Flatpak publico oferece a 0.2.3 no commit OSTree
   `32c287132828e5e810bbe8999bbf7cbedbefab9e004338480913366ce2a4be46`.
+- A candidata 0.2.4 corrige a ativacao real do menu contextual. O clique e o
+  acabamento compacto foram confirmados pelo mantenedor na instalacao Flatpak
+  local `0.2.4`, commit OSTree
+  `8ba73a18ef5645ed06346d15e3351fb47153860d6f0d7b403a84d2ad7990acbe`.
 - App inicia pelo lancador, `flatpak run io.github.n1ghthill.soundsgood` ou
   `./builddir/local-soundsgood`; pode aparecer o warning local
   `Unknown key gtk-modules` do GTK.
@@ -73,6 +77,11 @@ rajadas e limites validados antes da mutacao. A regressao isolada de
 desenvolvimento cobre 50 playlists, 5.000 entradas, reaberturas e falha de
 gravacao simulada. A regressao manual com bibliotecas reais maiores continua
 como trabalho de beta e nao deve ser declarada concluida sem execucao humana.
+
+A candidata 0.2.4 substitui o roteamento indireto do menu contextual por um
+popover virtualizado e compacto. Cada destino chama `PlaylistManager`
+diretamente, acompanha nome e contagem e possui regressao grafica sobre o botao
+real.
 
 Terminologia: o `Player` ainda usa nomes internos como `_playlist`, mas esse
 estado e a fila temporaria. Playlists nomeadas pertencem a `PlaylistManager` e
