@@ -69,14 +69,14 @@ flatpak run io.github.n1ghthill.soundsgood
 Gerar bundle versionado para GitHub Releases:
 
 ```bash
-flatpak build-bundle ~/.local/share/flatpak/repo SoundsGood-0.1.6-x86_64.flatpak io.github.n1ghthill.soundsgood stable
+flatpak build-bundle ~/.local/share/flatpak/repo SoundsGood-0.1.7-x86_64.flatpak io.github.n1ghthill.soundsgood stable
 ```
 
 Tambem publique uma copia com nome estavel para permitir o link
 `releases/latest/download`:
 
 ```bash
-cp SoundsGood-0.1.6-x86_64.flatpak SoundsGood-x86_64.flatpak
+cp SoundsGood-0.1.7-x86_64.flatpak SoundsGood-x86_64.flatpak
 ```
 
 Instalar a ultima release publicada:

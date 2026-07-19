@@ -56,6 +56,8 @@ The project owner made the decisions that define the product:
 5. Signal and GLib/GStreamer resources have explicit teardown ownership.
 6. Artwork is normalized into bounded thumbnails before being shown by views.
 7. Narrow layouts are a first-class design target, not a CSS afterthought.
+8. Playback uses a compact, adaptive three-zone bar: track context, centered
+   transport controls, and secondary actions, with a dedicated seek line.
 
 ## Official submission requirements
 

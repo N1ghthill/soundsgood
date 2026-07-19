@@ -43,6 +43,9 @@ meson test -C builddir
 - Iniciar reproducao por faixa, album, artista e resultado de busca.
 - Redimensionar para 1200, 900, 600 e 360 px e confirmar que nao ha corte ou rolagem horizontal.
 - Em largura estreita, confirmar o switcher inferior, retorno da tela de artista e cabecalho vertical do album.
+- Com uma faixa tocando, confirmar que a barra inferior permanece compacta,
+  centraliza os controles e oculta tempo/artista abaixo de 600 px sem cortar o
+  titulo, a fila ou as opcoes de reproducao.
 - Repetir buscas e reindexacoes e confirmar que memoria/tempo de resposta nao crescem continuamente.
 
 ## Playback

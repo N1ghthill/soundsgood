@@ -86,9 +86,9 @@ Versioned Flatpak bundles are also available on
 
 ## Latest Release
 
-SoundsGood 0.1.6 adds playlist opening for `.m3u`, `.m3u8`, and `.pls` files.
-The previous 0.1.5 release fixed opening audio files from the file manager when
-SoundsGood is configured as the default music app.
+SoundsGood 0.1.7 introduces a compact adaptive player bar, smaller controls,
+and polished responsive navigation. Version 0.1.6 added playlist opening for
+`.m3u`, `.m3u8`, and `.pls` files.
 
 ## Command Line
 

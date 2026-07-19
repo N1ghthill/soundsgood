@@ -43,6 +43,11 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="0.1.7" date="2026-07-19">
+      <description>
+        <p>Introduces a compact adaptive player bar, smaller controls, and polished responsive navigation.</p>
+      </description>
+    </release>
     <release version="0.1.6" date="2026-07-07"/>
     <release version="0.1.5" date="2026-07-07"/>
     <release version="0.1.4" date="2026-07-07"/>

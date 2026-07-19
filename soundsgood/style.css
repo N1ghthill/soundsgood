@@ -61,6 +61,26 @@ button.compact-pill {
   box-shadow: 0 -2px 8px alpha(black, 0.08);
 }
 
+.player-controls {
+  min-height: 42px;
+  padding: 3px 8px 5px;
+}
+
+scale.player-progress {
+  min-height: 10px;
+  padding: 0 8px;
+}
+
+scale.player-progress trough,
+scale.player-progress highlight {
+  min-height: 3px;
+  border-radius: 9999px;
+}
+
+.player-time {
+  margin-right: 4px;
+}
+
 .player-title {
   font-weight: 600;
 }

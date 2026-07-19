@@ -113,10 +113,12 @@ class Window(Adw.ApplicationWindow):
         def apply_compact(*_args):
             self._artists_view.set_compact(True)
             self._albums_view.set_compact(True)
+            self._player_toolbar.set_compact(True)
 
         def unapply_compact(*_args):
             self._artists_view.set_compact(False)
             self._albums_view.set_compact(False)
+            self._player_toolbar.set_compact(False)
 
         compact.connect("apply", apply_compact)
         compact.connect("unapply", unapply_compact)

@@ -69,20 +69,29 @@ class PlayerToolbar(Gtk.Box):
     """Bottom playback controls."""
 
     def __init__(self, application):
-        super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=3)
+        super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         self._app = application
         self._player = application.props.player
         self._updating = False
 
         self.add_css_class("player-toolbar")
-        self.set_margin_top(5)
-        self.set_margin_bottom(5)
-        self.set_margin_start(8)
-        self.set_margin_end(8)
         self.set_visible(False)
 
-        controls_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        # Keep seeking visually connected to the content while allowing the
+        # main player row to remain a single, compact surface.
+        self._progress = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 1, 1)
+        self._progress.set_draw_value(False)
+        self._progress.set_hexpand(True)
+        self._progress.add_css_class("player-progress")
+        self._progress.set_tooltip_text(_("Seek"))
+        set_accessible_label(self._progress, _("Seek"))
+        self._progress.connect("change-value", self._on_seek)
+        self.append(self._progress)
+
+        controls_row = Gtk.CenterBox()
         controls_row.set_hexpand(True)
+        controls_row.add_css_class("player-controls")
+        controls_row.set_shrink_center_last(True)
         self.append(controls_row)
 
         self._previous_button = Gtk.Button(icon_name="media-skip-backward-symbolic")
@@ -110,51 +119,54 @@ class PlayerToolbar(Gtk.Box):
         self._next_button.connect("clicked", lambda *_: self._player.next())
 
         self._cover = Gtk.Image(icon_name="audio-x-generic-symbolic")
-        self._cover.set_pixel_size(40)
+        self._cover.set_pixel_size(36)
         self._cover.add_css_class("player-cover")
 
-        info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        info_box.set_hexpand(True)
+        self._info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        self._info_box.set_hexpand(True)
         self._title_label = Gtk.Label(label=_("Not playing"), xalign=0)
         self._title_label.set_ellipsize(Pango.EllipsizeMode.END)
+        self._title_label.set_max_width_chars(28)
         self._title_label.add_css_class("player-title")
         self._artist_label = Gtk.Label(xalign=0)
         self._artist_label.set_ellipsize(Pango.EllipsizeMode.END)
+        self._artist_label.set_max_width_chars(28)
         self._artist_label.add_css_class("caption")
         self._artist_label.add_css_class("dim-label")
-        info_box.append(self._title_label)
-        info_box.append(self._artist_label)
-        # Artwork and context lead the row; transport controls stay compact on
-        # the trailing side and no longer dominate narrow windows.
-        controls_row.append(self._cover)
-        controls_row.append(info_box)
-        controls_row.append(self._previous_button)
-        controls_row.append(self._play_button)
-        controls_row.append(self._next_button)
+        self._info_box.append(self._title_label)
+        self._info_box.append(self._artist_label)
+
+        track_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        track_box.set_hexpand(True)
+        track_box.append(self._cover)
+        track_box.append(self._info_box)
+        controls_row.set_start_widget(track_box)
+
+        transport_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
+        transport_box.set_halign(Gtk.Align.CENTER)
+        transport_box.append(self._previous_button)
+        transport_box.append(self._play_button)
+        transport_box.append(self._next_button)
+        controls_row.set_center_widget(transport_box)
 
         self._position_label = Gtk.Label(label="0:00")
         self._position_label.set_width_chars(5)
         self._position_label.add_css_class("caption")
         self._position_label.add_css_class("dim-label")
 
-        progress_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        progress_row.set_hexpand(True)
-        self.append(progress_row)
-        progress_row.append(self._position_label)
-
-        self._progress = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 1, 1)
-        self._progress.set_draw_value(False)
-        self._progress.set_hexpand(True)
-        self._progress.set_tooltip_text(_("Seek"))
-        set_accessible_label(self._progress, _("Seek"))
-        self._progress.connect("change-value", self._on_seek)
-        progress_row.append(self._progress)
-
         self._duration_label = Gtk.Label(label="--:--")
         self._duration_label.set_width_chars(5)
         self._duration_label.add_css_class("caption")
         self._duration_label.add_css_class("dim-label")
-        progress_row.append(self._duration_label)
+
+        self._time_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
+        self._time_box.add_css_class("player-time")
+        self._time_box.append(self._position_label)
+        separator = Gtk.Label(label="/")
+        separator.add_css_class("caption")
+        separator.add_css_class("dim-label")
+        self._time_box.append(separator)
+        self._time_box.append(self._duration_label)
 
         self._repeat_button = Gtk.Button(icon_name="media-playlist-consecutive-symbolic")
         self._repeat_button.add_css_class("flat")
@@ -220,7 +232,6 @@ class PlayerToolbar(Gtk.Box):
         self._queue_button.set_tooltip_text(_("Queue"))
         set_accessible_label(self._queue_button, _("Queue"))
         self._queue_button.set_popover(self._queue_popover)
-        controls_row.append(self._queue_button)
 
         self._volume = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 1, 0.01)
         self._volume.set_draw_value(False)
@@ -259,7 +270,13 @@ class PlayerToolbar(Gtk.Box):
         self._secondary_button.set_tooltip_text(_("Playback options"))
         set_accessible_label(self._secondary_button, _("Playback options"))
         self._secondary_button.set_popover(self._secondary_popover)
-        controls_row.append(self._secondary_button)
+
+        trailing_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
+        trailing_box.set_halign(Gtk.Align.END)
+        trailing_box.append(self._time_box)
+        trailing_box.append(self._queue_button)
+        trailing_box.append(self._secondary_button)
+        controls_row.set_end_widget(trailing_box)
 
         for prop in (
             "current-song",
@@ -274,6 +291,13 @@ class PlayerToolbar(Gtk.Box):
 
         self._sync()
         self._sync_queue()
+
+    def set_compact(self, compact):
+        """Reduce secondary information without changing player behavior."""
+        self._artist_label.set_visible(not compact)
+        self._time_box.set_visible(not compact)
+        self._cover.set_pixel_size(32 if compact else 36)
+        self._title_label.set_max_width_chars(12 if compact else 28)
 
     def _sync(self, *_args):
         song = self._player.props.current_song
