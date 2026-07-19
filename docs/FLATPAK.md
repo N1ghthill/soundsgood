@@ -4,9 +4,7 @@ O formato de distribuicao atual do SoundsGood e um repositorio Flatpak proprio,
 hospedado via GitHub Pages. O app nao depende de listagem no Flathub para ser
 instalado ou atualizado.
 
-Os exemplos de bundle abaixo apontam para a ultima release publica, 0.1.8. A
-branch `main` esta em desenvolvimento 0.2.0 e so deve substituir esses numeros
-depois de tag, assets, repositorio Flatpak e instalacao publica serem validados.
+Os exemplos de bundle abaixo apontam para a ultima release publica, 0.2.0.
 
 ## Instalar pelo repositorio
 
@@ -76,14 +74,14 @@ flatpak run io.github.n1ghthill.soundsgood
 Gerar bundle versionado para GitHub Releases:
 
 ```bash
-flatpak build-bundle ~/.local/share/flatpak/repo SoundsGood-0.1.8-x86_64.flatpak io.github.n1ghthill.soundsgood stable
+flatpak build-bundle ~/.local/share/flatpak/repo SoundsGood-0.2.0-x86_64.flatpak io.github.n1ghthill.soundsgood stable
 ```
 
 Tambem publique uma copia com nome estavel para permitir o link
 `releases/latest/download`:
 
 ```bash
-cp SoundsGood-0.1.8-x86_64.flatpak SoundsGood-x86_64.flatpak
+cp SoundsGood-0.2.0-x86_64.flatpak SoundsGood-x86_64.flatpak
 ```
 
 Instalar a ultima release publicada:
@@ -132,7 +130,7 @@ exemplo:
 sources:
   - type: git
     url: https://github.com/N1ghthill/soundsgood.git
-    tag: v0.1.8
+    tag: v0.2.0
     commit: COMMIT_DA_TAG
 ```
 
@@ -191,11 +189,10 @@ Se o app passar a depender somente de portal/document portal para pastas escolhi
 - Validar os metadados AppStream.
 - Rodar `flatpak-builder-lint`.
 
-## Estado da Release 0.1.8
+## Estado da Release 0.2.0
 
-- Tag assinada: `v0.1.8`.
-- Commit de codigo: `664abe73e3ae739c0dd899250ff8801a7554a72c`.
-- Commit publicado no repositorio Flatpak:
-  `afd4bf311b7af4621863fe1d1ff670a821d85f9703bab34c5e610ddeda064d5b`.
+- Tag assinada: `v0.2.0`.
+- Playlists persistentes, importacao/exportacao e a interface adaptativa foram
+  validadas antes da publicacao.
 - Assets versionado e estavel publicados na GitHub Release.
-- Build, testes e validacao Flatpak aprovados no CI publico do GNOME 50.
+- Build, testes e validacao Flatpak executados no GNOME 50.

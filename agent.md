@@ -16,8 +16,7 @@ Nao implementar:
 
 ## Estado do Projeto
 
-O projeto tem um MVP funcional; a arvore principal esta em desenvolvimento
-0.2.0 e a ultima release publica e a 0.1.8. Ele inicia pelo lancador,
+O projeto tem um MVP funcional; a ultima release publica e a 0.2.0. Ele inicia pelo lancador,
 Flatpak ou ambiente de desenvolvimento, escaneia o diretorio XDG de musicas,
 mostra albums/artistas/faixas, reproduz via GStreamer e pode continuar em
 segundo plano quando a janela e fechada.
@@ -44,8 +43,7 @@ Pontos importantes:
 - `data/soundsgood.gresource.xml` foi removido porque estava vazio; a UI segue programatica em Python.
 - `docs/MANUAL_TESTS.md` contem o roteiro de validacao manual.
 
-Ultima validacao conhecida, em 19 de julho de 2026 para a arvore de
-desenvolvimento 0.2.0:
+Ultima validacao conhecida, em 19 de julho de 2026 para a release 0.2.0:
 
 - 58 testes automatizados passando; o smoke grafico separado tambem passou no
   GNOME SDK 50.
@@ -70,8 +68,7 @@ sao armazenadas em `$XDG_DATA_HOME/soundsgood/playlists.json`.
 1. Concluir `/feedback`, video e envio da OpenAI Build Week conforme
    `docs/SUBMISSION.md`.
 2. Testar regressao manual em colecoes maiores e em telas estreitas reais.
-3. Validar playlists persistentes com colecoes reais e preparar a release
-   0.2.0.
+3. Validar playlists persistentes com colecoes reais e ampliar a regressao.
 4. Evoluir diagnosticos para relatar arquivos com metadados incompletos sem
    expor caminhos pessoais por padrao.
 5. Ampliar acessibilidade com auditoria de navegacao por teclado e leitor de

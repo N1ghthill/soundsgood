@@ -18,8 +18,7 @@ integration, and UI.
   vertically centered and must not inherit the height of adjacent artwork.
 - Keep the transient playback queue distinct from saved playlists. Saved
   playlists belong to `PlaylistManager`; the active queue belongs to `Player`.
-  The public v0.1.8 release only opens playlist files as temporary queues,
-  while persistent playlist support is part of the v0.2.0 development tree.
+  Version 0.2.0 supports both temporary queues and persistent playlists.
 
 The detailed architecture and metadata rules remain in `agent.md` and
 `docs/ARCHITECTURE.md`.

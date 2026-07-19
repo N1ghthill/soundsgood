@@ -1,8 +1,6 @@
 # Roadmap
 
-Atualizado em 19 de julho de 2026 para refletir a arvore de desenvolvimento
-0.2.0. A ultima release publica continua sendo a 0.1.8 ate a conclusao do fluxo
-de release.
+Atualizado em 19 de julho de 2026 para a release publica 0.2.0.
 
 O SoundsGood prioriza um player local estavel e integrado ao desktop antes de
 recursos avancados. O produto permanece inspirado no GNOME Music e mantem fora
@@ -11,7 +9,7 @@ do escopo radio, podcasts, streaming, contas e servicos remotos obrigatorios.
 ## Estado Atual
 
 A base do MVP, a biblioteca local, a navegacao, o player, o acabamento visual e
-o empacotamento Flatpak estao implementados. A versao 0.1.8 tambem oferece
+o empacotamento Flatpak estao implementados. A versao 0.2.0 tambem oferece
 reproducao opcional em segundo plano, indicador de bandeja em desktops
 compativeis e listas de detalhe virtualizadas.
 
@@ -96,7 +94,7 @@ Objetivo: oferecer uma experiencia coerente com aplicativos Linux modernos.
 - [x] Reabertura pelo lancador sem exigir terminal ou bandeja.
 - [x] Teardown explicito de sinais, sources, monitores, D-Bus e GStreamer.
 
-## Fase 5: Qualidade e Distribuicao — concluida para a versao 0.1.8
+## Fase 5: Qualidade e Distribuicao — concluida para a versao 0.2.0
 
 Objetivo: manter um app empacotavel, atualizavel e diagnosticavel.
 
@@ -110,7 +108,7 @@ Objetivo: manter um app empacotavel, atualizavel e diagnosticavel.
 - [x] Logs locais limitados e diagnosticos acessiveis pelas preferencias.
 - [x] Documentacao e kit de submissao da OpenAI Build Week 2026.
 
-## Fase 6: Playlists Persistentes — implementada no desenvolvimento 0.2.0
+## Fase 6: Playlists Persistentes — concluida na versao 0.2.0
 
 Objetivo: permitir que o usuario mantenha colecoes nomeadas sem confundir
 playlist salva com a fila temporaria do player.
@@ -158,7 +156,7 @@ Objetivo: validar o uso diario em ambientes e bibliotecas mais diversos.
 1. Concluir os itens ainda abertos da submissao Build Week em
    `docs/SUBMISSION.md`, especialmente `/feedback`, video e envio no Devpost.
 2. Executar e registrar a regressao manual final em colecoes e larguras reais.
-3. Validar playlists com colecoes reais e concluir o fluxo de release 0.2.0.
+3. Validar playlists com colecoes reais e ampliar a cobertura de regressao.
 4. Prosseguir para a auditoria de acessibilidade e os criterios de beta.
 
 ## Fora de Escopo
