@@ -229,7 +229,17 @@ class ArtistsView(Adw.Bin):
         play_button.add_css_class("compact-pill")
         play_button.set_halign(Gtk.Align.START)
         play_button.connect("clicked", lambda *_: self._play_artist())
-        metadata.append(play_button)
+        actions = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        actions.append(play_button)
+        add_button = Gtk.Button(icon_name="list-add-symbolic")
+        add_button.add_css_class("flat")
+        add_button.add_css_class("compact-icon")
+        add_button.set_valign(Gtk.Align.CENTER)
+        add_button.set_tooltip_text(_("Add artist to playlist"))
+        set_accessible_label(add_button, _("Add artist to playlist"))
+        add_button.connect("clicked", lambda *_: self._add_artist())
+        actions.append(add_button)
+        metadata.append(actions)
 
         header.append(metadata)
         self._artist_detail.append(header)
@@ -247,6 +257,7 @@ class ArtistsView(Adw.Bin):
                 self._player,
                 self._play_album,
                 self._play_album_song,
+                self._add_song,
             ),
         )
         songs_list.set_single_click_activate(False)
@@ -357,6 +368,24 @@ class ArtistsView(Adw.Bin):
         songs = [songs_model.get_item(i) for i in range(songs_model.get_n_items())]
         if songs:
             self._player.play_song(songs[0], songs)
+
+    def _add_artist(self):
+        if self._selected_artist is None:
+            return
+        songs_model = self._library.get_songs_for_artist(self._selected_artist.props.name)
+        songs = [songs_model.get_item(i) for i in range(songs_model.get_n_items())]
+        self._app.add_to_playlist(
+            songs,
+            self.get_root(),
+            _("Add artist %s to a saved playlist") % self._selected_artist.props.name,
+        )
+
+    def _add_song(self, song):
+        self._app.add_to_playlist(
+            [song],
+            self.get_root(),
+            _("Add %s to a saved playlist") % song.props.title,
+        )
 
     def _play_album(self, album):
         songs_model = album.props.songs

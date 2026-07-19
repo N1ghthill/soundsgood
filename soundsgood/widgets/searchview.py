@@ -12,7 +12,7 @@ gi.require_version("Adw", "1")
 
 from gi.repository import Adw, GLib, Gtk, Pango
 
-from soundsgood.widgets.songrow import SongRow
+from soundsgood.widgets.songrow import SongRow, set_accessible_label
 
 
 class SearchView(Adw.Bin):
@@ -24,6 +24,7 @@ class SearchView(Adw.Bin):
         self._library = application.props.library
         self._player = application.props.player
         self._search_source_id = 0
+        self._last_song_results = []
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         box.set_margin_top(10)
@@ -31,10 +32,21 @@ class SearchView(Adw.Bin):
         box.set_margin_start(10)
         box.set_margin_end(10)
 
+        search_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         self._entry = Gtk.SearchEntry()
+        self._entry.set_hexpand(True)
         self._entry.set_placeholder_text(_("Search songs, albums, artists..."))
         self._entry.connect("search-changed", self._on_search_changed)
-        box.append(self._entry)
+        search_box.append(self._entry)
+        self._add_results = Gtk.Button(icon_name="list-add-symbolic")
+        self._add_results.add_css_class("flat")
+        self._add_results.add_css_class("compact-icon")
+        self._add_results.set_tooltip_text(_("Add song results to playlist"))
+        set_accessible_label(self._add_results, _("Add song results to playlist"))
+        self._add_results.connect("clicked", self._add_search_results)
+        self._add_results.set_visible(False)
+        search_box.append(self._add_results)
+        box.append(search_box)
 
         self._results = Gtk.ListBox()
         self._results.add_css_class("boxed-list")
@@ -61,6 +73,8 @@ class SearchView(Adw.Bin):
     def _run_search(self, query):
         self._search_source_id = 0
         self._clear()
+        self._last_song_results = []
+        self._add_results.set_visible(False)
         if not query:
             return GLib.SOURCE_REMOVE
 
@@ -80,6 +94,10 @@ class SearchView(Adw.Bin):
 
         if results.get_n_items() > 0:
             self._append_section(_("Songs"))
+        self._last_song_results = [
+            results.get_item(index) for index in range(results.get_n_items())
+        ]
+        self._add_results.set_visible(bool(self._last_song_results))
         for index in range(min(results.get_n_items(), 100)):
             self._results.append(
                 SongRow(
@@ -87,6 +105,7 @@ class SearchView(Adw.Bin):
                     show_context=True,
                     on_activate=self._play_song,
                     player=self._player,
+                    on_add=self._add_song,
                 )
             )
         return GLib.SOURCE_REMOVE
@@ -150,6 +169,15 @@ class SearchView(Adw.Bin):
         labels.append(summary)
         box.append(labels)
 
+        add = Gtk.Button(icon_name="list-add-symbolic")
+        add.add_css_class("flat")
+        add.add_css_class("compact-icon")
+        add.set_valign(Gtk.Align.CENTER)
+        add.set_tooltip_text(_("Add artist to playlist"))
+        set_accessible_label(add, _("Add artist to playlist"))
+        add.connect("clicked", lambda *_args: self._add_artist(artist))
+        box.append(add)
+
         row.set_child(box)
         return row
 
@@ -183,6 +211,15 @@ class SearchView(Adw.Bin):
         labels.append(summary)
         box.append(labels)
 
+        add = Gtk.Button(icon_name="list-add-symbolic")
+        add.add_css_class("flat")
+        add.add_css_class("compact-icon")
+        add.set_valign(Gtk.Align.CENTER)
+        add.set_tooltip_text(_("Add album to playlist"))
+        set_accessible_label(add, _("Add album to playlist"))
+        add.connect("clicked", lambda *_args: self._add_album(album))
+        box.append(add)
+
         row.set_child(box)
         return row
 
@@ -203,6 +240,41 @@ class SearchView(Adw.Bin):
         songs_model = self._library.search(self._entry.get_text().strip())
         songs = [songs_model.get_item(i) for i in range(songs_model.get_n_items())]
         self._player.play_song(song, songs)
+
+    def _add_song(self, song):
+        self._app.add_to_playlist(
+            [song],
+            self.get_root(),
+            _("Add %s to a saved playlist") % song.props.title,
+        )
+
+    def _add_search_results(self, _button):
+        if not self._last_song_results:
+            return
+        self._app.add_to_playlist(
+            self._last_song_results,
+            self.get_root(),
+            _("Add %d search results to a saved playlist")
+            % len(self._last_song_results),
+        )
+
+    def _add_album(self, album):
+        songs_model = album.props.songs
+        songs = [songs_model.get_item(i) for i in range(songs_model.get_n_items())]
+        self._app.add_to_playlist(
+            songs,
+            self.get_root(),
+            _("Add album %s to a saved playlist") % album.props.title,
+        )
+
+    def _add_artist(self, artist):
+        songs_model = self._library.get_songs_for_artist(artist.props.name)
+        songs = [songs_model.get_item(i) for i in range(songs_model.get_n_items())]
+        self._app.add_to_playlist(
+            songs,
+            self.get_root(),
+            _("Add artist %s to a saved playlist") % artist.props.name,
+        )
 
     def _play_album(self, album):
         songs_model = album.props.songs

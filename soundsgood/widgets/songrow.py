@@ -33,11 +33,19 @@ def set_accessible_label(widget, label: str):
 class SongRow(Gtk.ListBoxRow):
     """Reusable row for a song."""
 
-    def __init__(self, song, show_context: bool = False, on_activate=None, player=None):
+    def __init__(
+        self,
+        song,
+        show_context: bool = False,
+        on_activate=None,
+        player=None,
+        on_add=None,
+    ):
         super().__init__()
         self.song = song
         self._on_activate = on_activate
         self._player = player
+        self._on_add = on_add
         self._player_handlers = []
         self.set_activatable(True)
         self.set_selectable(True)
@@ -102,6 +110,16 @@ class SongRow(Gtk.ListBoxRow):
         duration.add_css_class("dim-label")
         box.append(duration)
 
+        if self._on_add:
+            add_button = Gtk.Button(icon_name="list-add-symbolic")
+            add_button.add_css_class("flat")
+            add_button.add_css_class("compact-icon")
+            add_button.set_valign(Gtk.Align.CENTER)
+            add_button.set_tooltip_text("Add to playlist")
+            set_accessible_label(add_button, "Add to playlist")
+            add_button.connect("clicked", lambda *_args: self._on_add(self.song))
+            box.append(add_button)
+
         self.set_child(box)
 
         if self._player:
@@ -152,12 +170,13 @@ class SongRow(Gtk.ListBoxRow):
 class SongListItem(Gtk.Box):
     """Factory-backed song item whose signal lifetime follows its binding."""
 
-    def __init__(self, player, on_activate, show_context: bool):
+    def __init__(self, player, on_activate, show_context: bool, on_add=None):
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=9)
         self.add_css_class("song-item")
         self._player = player
         self._on_activate = on_activate
         self._show_context = show_context
+        self._on_add = on_add
         self._song = None
         self._player_handlers = []
         self.set_margin_top(5)
@@ -198,6 +217,19 @@ class SongListItem(Gtk.Box):
         self._duration = Gtk.Label(width_chars=6)
         self._duration.add_css_class("dim-label")
         self.append(self._duration)
+
+        if self._on_add:
+            self._add_button = Gtk.Button(icon_name="list-add-symbolic")
+            self._add_button.add_css_class("flat")
+            self._add_button.add_css_class("compact-icon")
+            self._add_button.set_valign(Gtk.Align.CENTER)
+            self._add_button.set_tooltip_text("Add to playlist")
+            set_accessible_label(self._add_button, "Add to playlist")
+            self._add_button.connect(
+                "clicked",
+                lambda *_args: self._song and self._on_add(self._song),
+            )
+            self.append(self._add_button)
 
     @property
     def song(self):
@@ -255,11 +287,11 @@ class SongListItem(Gtk.Box):
         set_accessible_label(self._play_button, label)
 
 
-def create_song_factory(player, on_activate, show_context: bool = True):
+def create_song_factory(player, on_activate, show_context: bool = True, on_add=None):
     factory = Gtk.SignalListItemFactory()
 
     def setup(_factory, list_item):
-        list_item.set_child(SongListItem(player, on_activate, show_context))
+        list_item.set_child(SongListItem(player, on_activate, show_context, on_add))
 
     def bind(_factory, list_item):
         list_item.get_child().bind(list_item.get_item())

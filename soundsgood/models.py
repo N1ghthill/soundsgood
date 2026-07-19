@@ -109,3 +109,45 @@ class Artist(GObject.GObject):
 
     def __repr__(self):
         return f"Artist(name={self.props.name!r})"
+
+
+class PlaylistEntry(GObject.GObject):
+    """Stable snapshot of one ordered entry in a saved playlist."""
+
+    __gtype_name__ = "SoundsGoodPlaylistEntry"
+
+    identifier = GObject.Property(type=str, default="")
+    url = GObject.Property(type=str, default="")
+    title = GObject.Property(type=str, default="")
+    artist = GObject.Property(type=str, default="")
+    album = GObject.Property(type=str, default="")
+    duration = GObject.Property(type=int, default=0)
+    thumbnail = GObject.Property(type=str, default=None)
+    available = GObject.Property(type=bool, default=True)
+
+    def __init__(self, **kwargs):
+        super().__init__()
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self.props, key, value)
+
+
+class Playlist(GObject.GObject):
+    """Named persistent collection, separate from the player's queue."""
+
+    __gtype_name__ = "SoundsGoodPlaylist"
+
+    identifier = GObject.Property(type=str, default="")
+    name = GObject.Property(type=str, default="")
+    entries = GObject.Property(type=object, default=None)
+    entry_count = GObject.Property(type=int, default=0)
+    updated_at = GObject.Property(type=str, default="")
+
+    def __init__(self, **kwargs):
+        super().__init__()
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self.props, key, value)
+
+    def __repr__(self):
+        return f"Playlist(name={self.props.name!r}, entries={self.props.entry_count})"

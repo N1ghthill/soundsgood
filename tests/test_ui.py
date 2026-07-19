@@ -1,4 +1,6 @@
 import unittest
+import os
+import tempfile
 
 import gi
 
@@ -12,6 +14,7 @@ from soundsgood.models import Album, Artist, Song
 from soundsgood.views.albumsview import AlbumTile
 from soundsgood.views.artistsview import ArtistListItem
 from soundsgood.widgets.songrow import SongListItem
+from soundsgood.widgets.playlistchooser import PlaylistChooserDialog
 
 
 class WindowSmokeTest(unittest.TestCase):
@@ -19,6 +22,18 @@ class WindowSmokeTest(unittest.TestCase):
         if Gdk.Display.get_default() is None:
             self.skipTest("A graphical display is required")
 
+        with tempfile.TemporaryDirectory() as data_home:
+            previous_data_home = os.environ.get("XDG_DATA_HOME")
+            os.environ["XDG_DATA_HOME"] = data_home
+            try:
+                self._run_application_smoke()
+            finally:
+                if previous_data_home is None:
+                    os.environ.pop("XDG_DATA_HOME", None)
+                else:
+                    os.environ["XDG_DATA_HOME"] = previous_data_home
+
+    def _run_application_smoke(self):
         app = SoundsGoodApplication(
             "io.github.n1ghthill.soundsgood.Test",
             "test",
@@ -27,6 +42,9 @@ class WindowSmokeTest(unittest.TestCase):
         failures = []
 
         def inspect_window():
+            if not app.props.playlist_manager.props.loaded:
+                GLib.timeout_add(20, inspect_window)
+                return GLib.SOURCE_REMOVE
             try:
                 window = app.props.window
                 self.assertIsNotNone(window)
@@ -40,17 +58,19 @@ class WindowSmokeTest(unittest.TestCase):
                         window._albums_view,
                         window._artists_view,
                         window._songs_view,
+                        window._playlists_view,
                         window._search_view,
                     )
                 }
                 self.assertEqual(
                     page_names,
-                    {"albums", "artists", "songs", "search"},
+                    {"albums", "artists", "songs", "playlists", "search"},
                 )
                 for child in (
                     window._albums_view,
                     window._artists_view,
                     window._songs_view,
+                    window._playlists_view,
                     window._search_view,
                 ):
                     self.assertTrue(window._stack.get_page(child).get_icon_name())
@@ -74,11 +94,42 @@ class WindowSmokeTest(unittest.TestCase):
                 window._artists_view.set_compact(False)
                 self.assertFalse(window._artists_view._split_view.get_collapsed())
 
+                window._playlists_view.set_compact(True)
+                self.assertTrue(window._playlists_view._split_view.get_collapsed())
+                window._playlists_view.set_compact(False)
+                self.assertFalse(window._playlists_view._split_view.get_collapsed())
+
+                saved = app.props.playlist_manager.create(
+                    "Smoke playlist",
+                    [Song(title="Saved", url="file:///tmp/saved.wav")],
+                )
+                self.assertEqual(saved.props.entry_count, 1)
+                window._playlists_view._selection.set_selected(0)
+                self.assertIs(window._playlists_view._selected_playlist, saved)
+
                 item = SongListItem(app.props.player, lambda _song: None, True)
                 item.bind(Song(title="Lifecycle", url="file:///tmp/test.wav"))
                 self.assertEqual(len(item._player_handlers), 2)
                 item.unbind()
                 self.assertEqual(item._player_handlers, [])
+
+                add_item = SongListItem(
+                    app.props.player,
+                    lambda _song: None,
+                    True,
+                    lambda _song: None,
+                )
+                add_item.bind(Song(title="Add action", url="file:///tmp/add.wav"))
+                self.assertTrue(add_item._add_button.has_css_class("compact-icon"))
+                add_item.unbind()
+
+                chooser = PlaylistChooserDialog(
+                    app,
+                    [Song(title="Chooser", url="file:///tmp/chooser.wav")],
+                )
+                chooser.present(window)
+                self.assertIsNotNone(chooser._list.get_first_child())
+                chooser.close()
 
                 album_tile = AlbumTile()
                 album = Album(title="Reactive album", song_count=0)

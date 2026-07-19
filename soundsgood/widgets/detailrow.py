@@ -32,7 +32,7 @@ class DetailEntry(GObject.GObject):
 class DetailListItem(Gtk.Stack):
     """Reusable detail row whose visible content follows its model entry."""
 
-    def __init__(self, player, on_play_album, on_play_song):
+    def __init__(self, player, on_play_album, on_play_song, on_add_song=None):
         super().__init__()
         self._entry = None
         self._on_play_album = on_play_album
@@ -78,7 +78,12 @@ class DetailListItem(Gtk.Stack):
         self._heading.set_margin_end(10)
         self.add_named(self._heading, "heading")
 
-        self._song_item = SongListItem(player, self._play_song, False)
+        self._song_item = SongListItem(
+            player,
+            self._play_song,
+            False,
+            on_add_song,
+        )
         self.add_named(self._song_item, "song")
 
     def bind(self, entry):
@@ -114,11 +119,13 @@ class DetailListItem(Gtk.Stack):
             self._on_play_song(self._entry.props.context, song)
 
 
-def create_detail_factory(player, on_play_album, on_play_song):
+def create_detail_factory(player, on_play_album, on_play_song, on_add_song=None):
     factory = Gtk.SignalListItemFactory()
 
     def setup(_factory, list_item):
-        list_item.set_child(DetailListItem(player, on_play_album, on_play_song))
+        list_item.set_child(
+            DetailListItem(player, on_play_album, on_play_song, on_add_song)
+        )
 
     def bind(_factory, list_item):
         list_item.get_child().bind(list_item.get_item())

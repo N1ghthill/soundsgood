@@ -18,6 +18,7 @@ from soundsgood.library import Library
 from soundsgood.mpris import MprisService
 from soundsgood.models import PlayState, RepeatMode
 from soundsgood.background import BackgroundController
+from soundsgood.playlists import PlaylistManager
 from soundsgood.widgets.preferencesdialog import PreferencesDialog
 from soundsgood.widgets.aboutdialog import AboutDialog
 from soundsgood.diagnostics import configure_logging, diagnostics_file, get_logger
@@ -103,6 +104,7 @@ class SoundsGoodApplication(Adw.Application):
         # Core components
         self._library = Library(self)
         self._player = Player(self)
+        self._playlist_manager = PlaylistManager()
         self._mpris = MprisService(self)
         self._background = BackgroundController(self)
         self._status_notifier = None
@@ -111,6 +113,28 @@ class SoundsGoodApplication(Adw.Application):
                 "notify::current-song", self._on_player_activity_changed
             ),
             self._player.connect("notify::play-state", self._on_player_activity_changed),
+        ]
+        self._library_handlers = [
+            self._library.connect(
+                "scan-finished",
+                lambda *_args: self._playlist_manager.refresh_availability(
+                    self._library
+                ),
+            ),
+            self._library.connect(
+                "scan-error",
+                lambda *_args: self._playlist_manager.refresh_availability(
+                    self._library
+                ),
+            ),
+        ]
+        self._playlist_handlers = [
+            self._playlist_manager.connect(
+                "loaded",
+                lambda *_args: self._playlist_manager.refresh_availability(
+                    self._library
+                ),
+            )
         ]
 
         self._setup_actions()
@@ -122,6 +146,10 @@ class SoundsGoodApplication(Adw.Application):
     @GObject.Property(type=object, flags=GObject.ParamFlags.READABLE)
     def player(self):
         return self._player
+
+    @GObject.Property(type=object, flags=GObject.ParamFlags.READABLE)
+    def playlist_manager(self):
+        return self._playlist_manager
 
     @GObject.Property(type=object, flags=GObject.ParamFlags.READABLE)
     def settings(self):
@@ -246,6 +274,12 @@ class SoundsGoodApplication(Adw.Application):
 
     def reindex_library(self):
         self._library.scan(force=True, refresh_metadata=True)
+
+    def add_to_playlist(self, songs, parent=None, description=""):
+        from soundsgood.widgets.playlistchooser import PlaylistChooserDialog
+
+        dialog = PlaylistChooserDialog(self, songs, description)
+        dialog.present(parent or self._window)
 
     def apply_color_scheme(self):
         scheme = self._settings.get_string("color-scheme")
@@ -381,6 +415,14 @@ class SoundsGoodApplication(Adw.Application):
             if self._player.handler_is_connected(handler_id):
                 self._player.disconnect(handler_id)
         self._player_handlers.clear()
+        for handler_id in self._library_handlers:
+            if self._library.handler_is_connected(handler_id):
+                self._library.disconnect(handler_id)
+        self._library_handlers.clear()
+        for handler_id in self._playlist_handlers:
+            if self._playlist_manager.handler_is_connected(handler_id):
+                self._playlist_manager.disconnect(handler_id)
+        self._playlist_handlers.clear()
         if self._settings_changed_handler and hasattr(self._settings, "disconnect"):
             self._settings.disconnect(self._settings_changed_handler)
             self._settings_changed_handler = None
@@ -389,6 +431,7 @@ class SoundsGoodApplication(Adw.Application):
             self._inhibit_cookie = 0
         self.withdraw_notification("now-playing")
         self._mpris.shutdown()
+        self._playlist_manager.shutdown()
         self._library.shutdown()
         self._player.shutdown()
         Adw.Application.do_shutdown(self)
@@ -396,7 +439,7 @@ class SoundsGoodApplication(Adw.Application):
 
 def main():
     application_id = os.environ.get("APPLICATION_ID", "io.github.n1ghthill.soundsgood")
-    version = os.environ.get("VERSION", "0.1.8")
+    version = os.environ.get("VERSION", "0.2.0")
 
     logger = configure_logging(version)
     try:

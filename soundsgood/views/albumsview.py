@@ -257,7 +257,17 @@ class AlbumsView(Adw.Bin):
         play_button.add_css_class("compact-pill")
         play_button.set_halign(Gtk.Align.START)
         play_button.connect("clicked", lambda *_: self._play_album(album))
-        metadata.append(play_button)
+        actions = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        actions.append(play_button)
+        add_button = Gtk.Button(icon_name="list-add-symbolic")
+        add_button.add_css_class("flat")
+        add_button.add_css_class("compact-icon")
+        add_button.set_valign(Gtk.Align.CENTER)
+        add_button.set_tooltip_text(_("Add album to playlist"))
+        set_accessible_label(add_button, _("Add album to playlist"))
+        add_button.connect("clicked", lambda *_: self._add_album(album))
+        actions.append(add_button)
+        metadata.append(actions)
 
         header.append(metadata)
         self._album_page.append(header)
@@ -270,6 +280,7 @@ class AlbumsView(Adw.Bin):
                 self._player,
                 self._play_album,
                 self._play_album_song,
+                self._add_song,
             ),
         )
         songs_list.add_css_class("boxed-list")
@@ -299,6 +310,22 @@ class AlbumsView(Adw.Bin):
         songs_model = album.props.songs
         songs = [songs_model.get_item(i) for i in range(songs_model.get_n_items())]
         self._player.play_song(song, songs)
+
+    def _add_album(self, album):
+        songs_model = album.props.songs
+        songs = [songs_model.get_item(i) for i in range(songs_model.get_n_items())]
+        self._app.add_to_playlist(
+            songs,
+            self.get_root(),
+            _("Add album %s to a saved playlist") % album.props.title,
+        )
+
+    def _add_song(self, song):
+        self._app.add_to_playlist(
+            [song],
+            self.get_root(),
+            _("Add %s to a saved playlist") % song.props.title,
+        )
 
     def _on_album_song_activated(self, _listview, position):
         entry = self._album_song_model.get_item(position)

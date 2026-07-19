@@ -29,7 +29,12 @@ class SongsView(Adw.Bin):
         self._selection = Gtk.NoSelection.new(self._library.props.songs)
         self._listview = Gtk.ListView.new(
             self._selection,
-            create_song_factory(self._player, self._play_song, show_context=True),
+            create_song_factory(
+                self._player,
+                self._play_song,
+                show_context=True,
+                on_add=self._add_song,
+            ),
         )
         self._listview.set_single_click_activate(False)
         self._listview.connect("activate", self._on_item_activated)
@@ -100,6 +105,13 @@ class SongsView(Adw.Bin):
 
     def _play_song(self, song):
         self._player.play_song(song, self._library.get_all_songs())
+
+    def _add_song(self, song):
+        self._app.add_to_playlist(
+            [song],
+            self.get_root(),
+            _("Add %s to a saved playlist") % song.props.title,
+        )
 
     def _on_choose_folder_clicked(self, _button):
         self._app.select_music_folder(self.get_root())

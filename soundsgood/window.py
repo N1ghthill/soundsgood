@@ -15,6 +15,7 @@ from gi.repository import Adw, Gio, Gtk
 from soundsgood.views.albumsview import AlbumsView
 from soundsgood.views.artistsview import ArtistsView
 from soundsgood.views.songsview import SongsView
+from soundsgood.views.playlistsview import PlaylistsView
 from soundsgood.widgets.playertoolbar import PlayerToolbar
 from soundsgood.widgets.searchview import SearchView
 
@@ -70,6 +71,7 @@ class Window(Adw.ApplicationWindow):
         self._albums_view = AlbumsView(application)
         self._artists_view = ArtistsView(application)
         self._songs_view = SongsView(application)
+        self._playlists_view = PlaylistsView(application)
         self._search_view = SearchView(application)
 
         pages = (
@@ -81,6 +83,12 @@ class Window(Adw.ApplicationWindow):
             ),
             (self._artists_view, "artists", _("Artists"), "avatar-default-symbolic"),
             (self._songs_view, "songs", _("Songs"), "audio-x-generic-symbolic"),
+            (
+                self._playlists_view,
+                "playlists",
+                _("Playlists"),
+                "view-list-symbolic",
+            ),
             (self._search_view, "search", _("Search"), "system-search-symbolic"),
         )
         for child, name, title, icon_name in pages:
@@ -114,11 +122,13 @@ class Window(Adw.ApplicationWindow):
             self._artists_view.set_compact(True)
             self._albums_view.set_compact(True)
             self._player_toolbar.set_compact(True)
+            self._playlists_view.set_compact(True)
 
         def unapply_compact(*_args):
             self._artists_view.set_compact(False)
             self._albums_view.set_compact(False)
             self._player_toolbar.set_compact(False)
+            self._playlists_view.set_compact(False)
 
         compact.connect("apply", apply_compact)
         compact.connect("unapply", unapply_compact)
