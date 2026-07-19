@@ -14,13 +14,14 @@ from gi.repository import Adw, Gio, Gtk, Pango
 
 from soundsgood.models import LibraryState
 from soundsgood.widgets.detailrow import DetailEntry, create_detail_factory
+from soundsgood.widgets.playlistcontextmenu import PlaylistContextMenu
 from soundsgood.widgets.songrow import set_accessible_label
 
 
 class AlbumTile(Gtk.Box):
     """Reusable grid tile bound by Gtk.GridView's item factory."""
 
-    def __init__(self):
+    def __init__(self, application=None):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         self._album = None
         self._album_handlers = []
@@ -54,6 +55,17 @@ class AlbumTile(Gtk.Box):
         self._count.add_css_class("dim-label")
         self.append(self._count)
 
+        self._playlist_menu = None
+        if application is not None:
+            self._playlist_menu = PlaylistContextMenu(
+                self,
+                application,
+                self._album_songs,
+                submenu_label=_("Add Album to Playlist"),
+                description_provider=lambda: _("Add album %s to a saved playlist")
+                % self._album.props.title,
+            )
+
     def bind(self, album):
         self.unbind()
         self._album = album
@@ -83,10 +95,19 @@ class AlbumTile(Gtk.Box):
         self._count.set_label(_("%d songs") % self._album.props.song_count)
         set_accessible_label(self, _("Open album %s") % self._album.props.title)
 
+    def _album_songs(self):
+        if self._album is None:
+            return []
+        songs = self._album.props.songs
+        return [songs.get_item(index) for index in range(songs.get_n_items())]
 
-def create_album_factory():
+
+def create_album_factory(application=None):
     factory = Gtk.SignalListItemFactory()
-    factory.connect("setup", lambda _factory, item: item.set_child(AlbumTile()))
+    factory.connect(
+        "setup",
+        lambda _factory, item: item.set_child(AlbumTile(application)),
+    )
     factory.connect(
         "bind",
         lambda _factory, item: item.get_child().bind(item.get_item()),
@@ -110,7 +131,10 @@ class AlbumsView(Adw.Bin):
         self._stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
 
         self._album_selection = Gtk.NoSelection.new(self._library.props.albums)
-        self._grid = Gtk.GridView.new(self._album_selection, create_album_factory())
+        self._grid = Gtk.GridView.new(
+            self._album_selection,
+            create_album_factory(self._app),
+        )
         self._grid.set_min_columns(1)
         self._grid.set_max_columns(8)
         self._grid.set_single_click_activate(True)
@@ -270,6 +294,14 @@ class AlbumsView(Adw.Bin):
         metadata.append(actions)
 
         header.append(metadata)
+        self._album_header_playlist_menu = PlaylistContextMenu(
+            header,
+            self._app,
+            lambda: self._album_songs(album),
+            submenu_label=_("Add Album to Playlist"),
+            description_provider=lambda: _("Add album %s to a saved playlist")
+            % album.props.title,
+        )
         self._album_page.append(header)
 
         self._album_song_model = self._build_song_model(album)
@@ -281,6 +313,7 @@ class AlbumsView(Adw.Bin):
                 self._play_album,
                 self._play_album_song,
                 self._add_song,
+                self._app,
             ),
         )
         songs_list.add_css_class("boxed-list")
@@ -312,13 +345,20 @@ class AlbumsView(Adw.Bin):
         self._player.play_song(song, songs)
 
     def _add_album(self, album):
-        songs_model = album.props.songs
-        songs = [songs_model.get_item(i) for i in range(songs_model.get_n_items())]
+        songs = self._album_songs(album)
         self._app.add_to_playlist(
             songs,
             self.get_root(),
             _("Add album %s to a saved playlist") % album.props.title,
         )
+
+    @staticmethod
+    def _album_songs(album):
+        songs_model = album.props.songs
+        return [
+            songs_model.get_item(index)
+            for index in range(songs_model.get_n_items())
+        ]
 
     def _add_song(self, song):
         self._app.add_to_playlist(

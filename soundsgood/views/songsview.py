@@ -34,6 +34,7 @@ class SongsView(Adw.Bin):
                 self._play_song,
                 show_context=True,
                 on_add=self._add_song,
+                application=self._app,
             ),
         )
         self._listview.set_single_click_activate(False)

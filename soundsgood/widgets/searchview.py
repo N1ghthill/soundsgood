@@ -13,6 +13,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, GLib, Gtk, Pango
 
 from soundsgood.widgets.songrow import SongRow, set_accessible_label
+from soundsgood.widgets.playlistcontextmenu import PlaylistContextMenu
 
 
 class SearchView(Adw.Bin):
@@ -106,6 +107,7 @@ class SearchView(Adw.Bin):
                     on_activate=self._play_song,
                     player=self._player,
                     on_add=self._add_song,
+                    application=self._app,
                 )
             )
         return GLib.SOURCE_REMOVE
@@ -221,6 +223,14 @@ class SearchView(Adw.Bin):
         box.append(add)
 
         row.set_child(box)
+        row._playlist_menu = PlaylistContextMenu(
+            row,
+            self._app,
+            lambda: self._album_songs(album),
+            submenu_label=_("Add Album to Playlist"),
+            description_provider=lambda: _("Add album %s to a saved playlist")
+            % album.props.title,
+        )
         return row
 
     def _on_row_activated(self, _listbox, row):
@@ -259,13 +269,20 @@ class SearchView(Adw.Bin):
         )
 
     def _add_album(self, album):
-        songs_model = album.props.songs
-        songs = [songs_model.get_item(i) for i in range(songs_model.get_n_items())]
+        songs = self._album_songs(album)
         self._app.add_to_playlist(
             songs,
             self.get_root(),
             _("Add album %s to a saved playlist") % album.props.title,
         )
+
+    @staticmethod
+    def _album_songs(album):
+        songs_model = album.props.songs
+        return [
+            songs_model.get_item(index)
+            for index in range(songs_model.get_n_items())
+        ]
 
     def _add_artist(self, artist):
         songs_model = self._library.get_songs_for_artist(artist.props.name)

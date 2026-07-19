@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from gettext import gettext as _
+
 import gi
 
 gi.require_version("Gtk", "4.0")
@@ -10,6 +12,7 @@ gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk, Pango
 
 from soundsgood.models import PlayState
+from soundsgood.widgets.playlistcontextmenu import PlaylistContextMenu
 
 
 def format_duration(seconds: int) -> str:
@@ -40,6 +43,7 @@ class SongRow(Gtk.ListBoxRow):
         on_activate=None,
         player=None,
         on_add=None,
+        application=None,
     ):
         super().__init__()
         self.song = song
@@ -122,6 +126,16 @@ class SongRow(Gtk.ListBoxRow):
 
         self.set_child(box)
 
+        self._playlist_menu = None
+        if application is not None:
+            self._playlist_menu = PlaylistContextMenu(
+                self,
+                application,
+                lambda: [self.song],
+                description_provider=lambda: _("Add %s to a saved playlist")
+                % self.song.props.title,
+            )
+
         if self._player:
             self._player_handlers = [
                 self._player.connect("notify::current-song", self._sync_playing_state),
@@ -170,7 +184,14 @@ class SongRow(Gtk.ListBoxRow):
 class SongListItem(Gtk.Box):
     """Factory-backed song item whose signal lifetime follows its binding."""
 
-    def __init__(self, player, on_activate, show_context: bool, on_add=None):
+    def __init__(
+        self,
+        player,
+        on_activate,
+        show_context: bool,
+        on_add=None,
+        application=None,
+    ):
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=9)
         self.add_css_class("song-item")
         self._player = player
@@ -231,6 +252,16 @@ class SongListItem(Gtk.Box):
             )
             self.append(self._add_button)
 
+        self._playlist_menu = None
+        if application is not None:
+            self._playlist_menu = PlaylistContextMenu(
+                self,
+                application,
+                lambda: [self._song] if self._song is not None else [],
+                description_provider=lambda: _("Add %s to a saved playlist")
+                % self._song.props.title,
+            )
+
     @property
     def song(self):
         return self._song
@@ -287,11 +318,25 @@ class SongListItem(Gtk.Box):
         set_accessible_label(self._play_button, label)
 
 
-def create_song_factory(player, on_activate, show_context: bool = True, on_add=None):
+def create_song_factory(
+    player,
+    on_activate,
+    show_context: bool = True,
+    on_add=None,
+    application=None,
+):
     factory = Gtk.SignalListItemFactory()
 
     def setup(_factory, list_item):
-        list_item.set_child(SongListItem(player, on_activate, show_context, on_add))
+        list_item.set_child(
+            SongListItem(
+                player,
+                on_activate,
+                show_context,
+                on_add,
+                application,
+            )
+        )
 
     def bind(_factory, list_item):
         list_item.get_child().bind(list_item.get_item())

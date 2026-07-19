@@ -275,10 +275,16 @@ class SoundsGoodApplication(Adw.Application):
     def reindex_library(self):
         self._library.scan(force=True, refresh_metadata=True)
 
-    def add_to_playlist(self, songs, parent=None, description=""):
+    def add_to_playlist(
+        self,
+        songs,
+        parent=None,
+        description="",
+        focus_new=False,
+    ):
         from soundsgood.widgets.playlistchooser import PlaylistChooserDialog
 
-        dialog = PlaylistChooserDialog(self, songs, description)
+        dialog = PlaylistChooserDialog(self, songs, description, focus_new=focus_new)
         dialog.present(parent or self._window)
 
     def apply_color_scheme(self):
@@ -439,7 +445,7 @@ class SoundsGoodApplication(Adw.Application):
 
 def main():
     application_id = os.environ.get("APPLICATION_ID", "io.github.n1ghthill.soundsgood")
-    version = os.environ.get("VERSION", "0.2.0")
+    version = os.environ.get("VERSION", "0.2.1")
 
     logger = configure_logging(version)
     try:

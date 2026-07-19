@@ -12,6 +12,7 @@ gi.require_version("Gtk", "4.0")
 from gi.repository import GObject, Gtk, Pango
 
 from soundsgood.widgets.songrow import SongListItem, set_accessible_label
+from soundsgood.widgets.playlistcontextmenu import PlaylistContextMenu
 
 
 class DetailEntry(GObject.GObject):
@@ -32,7 +33,14 @@ class DetailEntry(GObject.GObject):
 class DetailListItem(Gtk.Stack):
     """Reusable detail row whose visible content follows its model entry."""
 
-    def __init__(self, player, on_play_album, on_play_song, on_add_song=None):
+    def __init__(
+        self,
+        player,
+        on_play_album,
+        on_play_song,
+        on_add_song=None,
+        application=None,
+    ):
         super().__init__()
         self._entry = None
         self._on_play_album = on_play_album
@@ -69,6 +77,17 @@ class DetailListItem(Gtk.Stack):
         album_box.append(album_play)
         self.add_named(album_box, "album")
 
+        self._album_playlist_menu = None
+        if application is not None:
+            self._album_playlist_menu = PlaylistContextMenu(
+                album_box,
+                application,
+                self._album_songs,
+                submenu_label=_("Add Album to Playlist"),
+                description_provider=lambda: _("Add album %s to a saved playlist")
+                % self._entry.props.title,
+            )
+
         self._heading = Gtk.Label(xalign=0)
         self._heading.add_css_class("heading")
         self._heading.add_css_class("dim-label")
@@ -83,6 +102,7 @@ class DetailListItem(Gtk.Stack):
             self._play_song,
             False,
             on_add_song,
+            application,
         )
         self.add_named(self._song_item, "song")
 
@@ -118,13 +138,32 @@ class DetailListItem(Gtk.Stack):
         if self._entry:
             self._on_play_song(self._entry.props.context, song)
 
+    def _album_songs(self):
+        if not self._entry or self._entry.props.kind != "album":
+            return []
+        album = self._entry.props.item
+        songs = album.props.songs
+        return [songs.get_item(index) for index in range(songs.get_n_items())]
 
-def create_detail_factory(player, on_play_album, on_play_song, on_add_song=None):
+
+def create_detail_factory(
+    player,
+    on_play_album,
+    on_play_song,
+    on_add_song=None,
+    application=None,
+):
     factory = Gtk.SignalListItemFactory()
 
     def setup(_factory, list_item):
         list_item.set_child(
-            DetailListItem(player, on_play_album, on_play_song, on_add_song)
+            DetailListItem(
+                player,
+                on_play_album,
+                on_play_song,
+                on_add_song,
+                application,
+            )
         )
 
     def bind(_factory, list_item):

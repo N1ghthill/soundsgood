@@ -172,6 +172,9 @@ Estrutura sugerida:
 - `SearchView`: busca global com secoes de artistas, albums e musicas.
 - `PlaylistsView`: navegacao adaptativa, CRUD, ordenacao, importacao e
   exportacao de colecoes salvas.
+- `PlaylistContextMenu`: constroi sob demanda um submenu nativo a partir do
+  `Gio.ListModel` de playlists. O conteudo alvo e capturado ao abrir o menu para
+  que a reciclagem de uma linha virtualizada nunca altere a operacao pendente.
 - `PlayerToolbar`: controles de reproducao.
 - `PlayerToolbar` tambem contem o popover da fila atual, com selecao, remocao por item e limpeza.
 - `MprisService`: interface DBus MPRIS para controles do sistema.
@@ -229,6 +232,8 @@ Implementacao da Fase 6:
   `Player`.
 - Remover ou reordenar uma playlist salva nao muda silenciosamente a fila que
   ja estiver tocando.
+- Menus contextuais de musicas e albums chamam somente `PlaylistManager`; eles
+  nao possuem persistencia propria nem alteram a fila temporaria.
 - Falhas parciais e arquivos ausentes sao estados recuperaveis e aparecem nos
   diagnosticos.
 

@@ -105,6 +105,13 @@ management UI, and add-to-playlist actions throughout the library. It includes
 the background playback, optional system tray indicator, virtualized detail
 lists, and compact responsive player introduced in the 0.1 series.
 
+## Current Development
+
+The `main` branch is version 0.2.1. It adds native right-click menus to songs
+and albums, with a live “Add to Playlist” submenu and direct access to playlist
+creation. Visible add buttons remain available for touch and keyboard use. The
+latest published Flatpak remains 0.2.0 until the next release workflow.
+
 ## Command Line
 
 For Flatpak installations, run SoundsGood from a terminal with:

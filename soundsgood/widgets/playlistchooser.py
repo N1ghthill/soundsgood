@@ -18,7 +18,13 @@ from soundsgood.widgets.songrow import set_accessible_label
 
 
 class PlaylistChooserDialog(Adw.Dialog):
-    def __init__(self, application, songs, description: str = ""):
+    def __init__(
+        self,
+        application,
+        songs,
+        description: str = "",
+        focus_new=False,
+    ):
         super().__init__(title=_("Add to Playlist"))
         self.set_content_width(390)
         self.set_content_height(480)
@@ -80,6 +86,8 @@ class PlaylistChooserDialog(Adw.Dialog):
         toolbar.set_content(content)
         self.set_child(toolbar)
         self._rebuild()
+        if focus_new:
+            self._name_entry.grab_focus()
 
     def do_unroot(self):
         for handler_id in self._manager_handlers:

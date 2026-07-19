@@ -15,6 +15,7 @@ from soundsgood.views.albumsview import AlbumTile
 from soundsgood.views.artistsview import ArtistListItem
 from soundsgood.widgets.songrow import SongListItem
 from soundsgood.widgets.playlistchooser import PlaylistChooserDialog
+from soundsgood.widgets.playlistcontextmenu import PlaylistContextMenu
 
 
 class WindowSmokeTest(unittest.TestCase):
@@ -118,9 +119,25 @@ class WindowSmokeTest(unittest.TestCase):
                     lambda _song: None,
                     True,
                     lambda _song: None,
+                    app,
                 )
-                add_item.bind(Song(title="Add action", url="file:///tmp/add.wav"))
+                context_song = Song(title="Add action", url="file:///tmp/add.wav")
+                add_item.bind(context_song)
                 self.assertTrue(add_item._add_button.has_css_class("compact-icon"))
+                self.assertIsInstance(
+                    add_item._playlist_menu,
+                    PlaylistContextMenu,
+                )
+                menu_model = add_item._playlist_menu._build_menu_model()
+                submenu = menu_model.get_item_link(0, Gio.MENU_LINK_SUBMENU)
+                self.assertIsNotNone(submenu)
+                self.assertGreaterEqual(submenu.get_n_items(), 2)
+                add_item._playlist_menu._songs = [context_song]
+                add_item._playlist_menu._add_to_playlist(
+                    None,
+                    GLib.Variant("s", saved.props.identifier),
+                )
+                self.assertEqual(saved.props.entry_count, 2)
                 add_item.unbind()
 
                 chooser = PlaylistChooserDialog(
@@ -131,11 +148,15 @@ class WindowSmokeTest(unittest.TestCase):
                 self.assertIsNotNone(chooser._list.get_first_child())
                 chooser.close()
 
-                album_tile = AlbumTile()
+                album_tile = AlbumTile(app)
                 album = Album(title="Reactive album", song_count=0)
                 album_tile.bind(album)
                 album.props.song_count = 2
                 self.assertEqual(album_tile._count.get_label(), "2 songs")
+                self.assertIsInstance(
+                    album_tile._playlist_menu,
+                    PlaylistContextMenu,
+                )
                 album_tile.unbind()
                 self.assertEqual(album_tile._album_handlers, [])
 

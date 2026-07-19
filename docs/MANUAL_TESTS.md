@@ -93,6 +93,16 @@ meson test -C builddir
   restaurar o arquivo, reindexar e confirmar a recuperacao.
 - Excluir uma playlist e confirmar o dialogo destrutivo e que nenhum arquivo de
   audio foi removido.
+- Clicar com o botao direito em uma musica nas telas Songs, album, artista e
+  busca; abrir `Add to Playlist`, confirmar que a lista atual de playlists
+  aparece e adicionar diretamente a uma delas.
+- Clicar com o botao direito em uma capa/cabecalho de album e confirmar que
+  `Add Album to Playlist` adiciona todas as faixas sem alterar a fila atual.
+- Abrir o menu contextual depois de criar ou renomear uma playlist e confirmar
+  que o submenu reflete o nome novo sem reiniciar o app.
+- Usar `New Playlist…` pelo menu contextual e confirmar que o dialogo abre com
+  o campo de nome pronto para edicao; validar tambem o botao visivel de adicao
+  por teclado para preservar o caminho sem mouse.
 - Repetir criacao, adicao e reordenacao em 360/600/900/1200 px e confirmar que
   listas usam rolagem/virtualizacao sem corte horizontal.
 

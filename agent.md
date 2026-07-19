@@ -16,7 +16,8 @@ Nao implementar:
 
 ## Estado do Projeto
 
-O projeto tem um MVP funcional; a ultima release publica e a 0.2.0. Ele inicia pelo lancador,
+O projeto tem um MVP funcional; a arvore principal esta em desenvolvimento
+0.2.1 e a ultima release publica e a 0.2.0. Ele inicia pelo lancador,
 Flatpak ou ambiente de desenvolvimento, escaneia o diretorio XDG de musicas,
 mostra albums/artistas/faixas, reproduz via GStreamer e pode continuar em
 segundo plano quando a janela e fechada.
@@ -38,15 +39,16 @@ Pontos importantes:
   D-Bus sem adicionar dependencia GTK3/AppIndicator.
 - `soundsgood/window.py` compoe a janela principal.
 - `soundsgood/views` contem telas de albums, artistas e musicas.
-- `soundsgood/widgets` contem toolbar, linhas de musica, busca, detalhes e
-  dialogs.
+- `soundsgood/widgets` contem toolbar, linhas de musica, busca, detalhes,
+  dialogs e o menu contextual dinamico de playlists.
 - `data/soundsgood.gresource.xml` foi removido porque estava vazio; a UI segue programatica em Python.
 - `docs/MANUAL_TESTS.md` contem o roteiro de validacao manual.
 
-Ultima validacao conhecida, em 19 de julho de 2026 para a release 0.2.0:
+Ultima validacao conhecida, em 19 de julho de 2026 para a arvore de
+desenvolvimento 0.2.1:
 
-- 58 testes automatizados passando; o smoke grafico separado tambem passou no
-  GNOME SDK 50.
+- 60 testes automatizados passando. O smoke grafico requer uma sessao com
+  display; nesta rodada ele foi ignorado de forma explicita no GNOME SDK 50.
 - `py_compile` passando para app e testes.
 - `meson setup builddir --reconfigure`, `meson compile -C builddir` e `meson test -C builddir` passando.
 - CI publica do GNOME 50 passou para o commit da release

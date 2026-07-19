@@ -258,6 +258,7 @@ class ArtistsView(Adw.Bin):
                 self._play_album,
                 self._play_album_song,
                 self._add_song,
+                self._app,
             ),
         )
         songs_list.set_single_click_activate(False)
