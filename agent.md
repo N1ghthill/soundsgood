@@ -16,8 +16,8 @@ Nao implementar:
 
 ## Estado do Projeto
 
-O projeto tem um MVP funcional; a ultima release publica e a 0.2.2 e a 0.2.3
-esta em preparacao. Ele inicia pelo lancador,
+O projeto tem um MVP funcional; a ultima release publica e a 0.2.3. Ele inicia
+pelo lancador,
 Flatpak ou ambiente de desenvolvimento, escaneia o diretorio XDG de musicas,
 mostra albums/artistas/faixas, reproduz via GStreamer e pode continuar em
 segundo plano quando a janela e fechada.
@@ -53,8 +53,11 @@ Ultima validacao local conhecida, em 19 de julho de 2026 para a 0.2.3:
   impediram as assercoes de UI.
 - `py_compile` passando para app e testes.
 - `meson setup builddir --reconfigure`, `meson compile -C builddir` e `meson test -C builddir` passando.
-- O CI publico, a tag e os artefatos da 0.2.3 devem ser registrados somente
-  depois que os respectivos resultados forem verificados.
+- O CI publico da release 0.2.3 passou no commit
+  `96a7baf3732546c3c4e7243d9876f8be9472e4b7`, associado a tag GPG
+  `v0.2.3`.
+- O repositorio Flatpak publico oferece a 0.2.3 no commit OSTree
+  `32c287132828e5e810bbe8999bbf7cbedbefab9e004338480913366ce2a4be46`.
 - App inicia pelo lancador, `flatpak run io.github.n1ghthill.soundsgood` ou
   `./builddir/local-soundsgood`; pode aparecer o warning local
   `Unknown key gtk-modules` do GTK.
@@ -63,7 +66,7 @@ Ultima validacao local conhecida, em 19 de julho de 2026 para a 0.2.3:
 - StatusNotifier foi validado em KDE, incluindo a acao `Quit`; em desktops sem
   host de bandeja, lancador e MPRIS continuam funcionando.
 
-A candidata 0.2.3 endurece o uso diario de playlists com
+A versao 0.2.3 endurece o uso diario de playlists com
 selecao multipla pesquisavel da biblioteca, escolha de destino virtualizada,
 exclusao visivel, atualizacoes de detalhe no lugar, persistencia consolidada em
 rajadas e limites validados antes da mutacao. A regressao isolada de

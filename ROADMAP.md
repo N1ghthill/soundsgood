@@ -1,6 +1,6 @@
 # Roadmap
 
-Atualizado em 19 de julho de 2026 para a candidata a release 0.2.3.
+Atualizado em 19 de julho de 2026 para a release publica 0.2.3.
 
 O SoundsGood prioriza um player local estavel e integrado ao desktop antes de
 recursos avancados. O produto permanece inspirado no GNOME Music e mantem fora
@@ -9,7 +9,7 @@ do escopo radio, podcasts, streaming, contas e servicos remotos obrigatorios.
 ## Estado Atual
 
 A base do MVP, a biblioteca local, a navegacao, o player, o acabamento visual e
-o empacotamento Flatpak estao implementados. A candidata 0.2.3 tambem oferece
+o empacotamento Flatpak estao implementados. A versao 0.2.3 tambem oferece
 reproducao opcional em segundo plano, indicador de bandeja em desktops
 compativeis e listas de detalhe virtualizadas.
 

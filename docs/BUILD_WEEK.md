@@ -82,7 +82,7 @@ named persistent playlists. It can open `.m3u`, `.m3u8`, and `.pls` files into
 the queue or import them as saved collections, export playlists as M3U8, and
 add songs or albums through native contextual playlist submenus.
 
-The 0.2.3 release candidate adds a searchable multi-song library picker and a
+The current 0.2.3 release adds a searchable multi-song library picker and a
 more predictable playlist editor. It also coalesces rapid persistent edits and
 adds isolated stress coverage for 5,000 entries, repeated restarts, and
 recoverable write failure. This later release does not change the evaluated

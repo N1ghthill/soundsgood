@@ -17,7 +17,7 @@ actions and native context menus.
 The evaluated v0.2.2 release separates temporary playback queues from named
 persistent playlists and supports playlist import and export.
 
-The 0.2.3 release candidate contains additional playlist-editor hardening
+The public 0.2.3 release contains additional playlist-editor hardening
 requested after that release. It remains separate from the evaluated v0.2.2
 claims recorded for the Build Week submission.
 

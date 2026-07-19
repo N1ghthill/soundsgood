@@ -99,9 +99,9 @@ flatpak update --user io.github.n1ghthill.soundsgood
 Versioned Flatpak bundles are also available on
 [GitHub Releases](https://github.com/N1ghthill/soundsgood/releases).
 
-## Release 0.2.3 Candidate
+## Latest Release
 
-SoundsGood 0.2.3 is prepared to make saved playlists suitable for dependable
+SoundsGood 0.2.3 makes saved playlists suitable for dependable
 daily use. The playlist editor now includes searchable multi-song selection
 from the local library, filters songs already present, exposes deletion
 directly, preserves focus and scrolling during edits, and keeps selection
