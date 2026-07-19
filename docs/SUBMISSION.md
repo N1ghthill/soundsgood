@@ -62,7 +62,7 @@ network service, or API key is required.
 - [ ] Confirm the selected track is **Apps for your life**.
 - [x] Confirm the project builds from a clean clone.
 - [x] Run automated tests, graphical smoke test, AppStream/manifest validation,
-      and Flatpak build with the GNOME 50 SDK for v0.2.0.
+      Flatpak build, public update, and GNOME 50 CI for v0.2.0.
 - [ ] Complete and record the full manual matrix with large real collections
       and 360/600/900/1200 px widths.
 - [ ] Record the demo against the final commit.
@@ -78,5 +78,5 @@ network service, or API key is required.
 Verified release references:
 
 - Release: <https://github.com/N1ghthill/soundsgood/releases/tag/v0.2.0>
-- CI: <https://github.com/N1ghthill/soundsgood/actions>
+- CI: <https://github.com/N1ghthill/soundsgood/actions/runs/29676018006>
 - Flatpak app ID: `io.github.n1ghthill.soundsgood`

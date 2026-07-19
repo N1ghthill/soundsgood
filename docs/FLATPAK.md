@@ -192,7 +192,11 @@ Se o app passar a depender somente de portal/document portal para pastas escolhi
 ## Estado da Release 0.2.0
 
 - Tag assinada: `v0.2.0`.
+- Commit de codigo: `4c33eec22355d66ae1098d71b78be5568b515d6c`.
+- Commit publicado no repositorio Flatpak:
+  `e9c4157d9de07b40c4b8679455c80651f9c430dfece373387e4583a81705ba6c`.
 - Playlists persistentes, importacao/exportacao e a interface adaptativa foram
   validadas antes da publicacao.
 - Assets versionado e estavel publicados na GitHub Release.
-- Build, testes e validacao Flatpak executados no GNOME 50.
+- Build, testes e validacao Flatpak aprovados no
+  [CI publico do GNOME 50](https://github.com/N1ghthill/soundsgood/actions/runs/29676018006).
