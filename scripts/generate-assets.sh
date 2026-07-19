@@ -119,11 +119,11 @@ cat > "$SOURCE_DIR/soundsgood-release-card.svg" <<SVG
     <image href="$LOGO_IMAGE" x="0" y="0" width="390" height="106" preserveAspectRatio="xMinYMid meet"/>
     <text x="4" y="176" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="28" font-weight="700" fill="#f5f7ff">Release $VERSION</text>
     <rect x="4" y="238" width="350" height="54" rx="27" fill="#246bfe"/>
-    <text x="32" y="273" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Native context menus</text>
+    <text x="32" y="273" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Artist details restored</text>
     <rect x="4" y="316" width="350" height="54" rx="27" fill="#7738ff"/>
-    <text x="32" y="351" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Direct playlist actions</text>
+    <text x="32" y="351" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Album thumbnails</text>
     <rect x="4" y="394" width="350" height="54" rx="27" fill="#101b35"/>
-    <text x="32" y="429" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Mouse &amp; keyboard access</text>
+    <text x="32" y="429" font-family="DejaVu Sans, Noto Sans, sans-serif" font-size="21" font-weight="700" fill="#ffffff">Factory regression test</text>
   </g>
   <g transform="translate(464 118)">
     <rect x="-8" y="-8" width="692" height="477" rx="22" fill="#4d7dff" opacity="0.35"/>

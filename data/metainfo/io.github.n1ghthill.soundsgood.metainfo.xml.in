@@ -43,6 +43,11 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="0.2.2" date="2026-07-19">
+      <description>
+        <p>Restores album thumbnails and song rows in artist details and adds a regression check for translation aliases used by GTK factories.</p>
+      </description>
+    </release>
     <release version="0.2.1" date="2026-07-19">
       <description>
         <p>Adds native contextual playlist submenus to songs and albums, direct playlist creation, and safe handling for recycled list rows.</p>

@@ -4,10 +4,9 @@ SoundsGood is entered in the **Apps for your life** track. It is a local-first
 music player that turns an existing Linux music folder into a responsive,
 searchable library without accounts, uploads, or streaming services.
 
-Release evaluated for the submission: [v0.2.1](https://github.com/N1ghthill/soundsgood/releases/tag/v0.2.1),
-commit `968fc3fa4d7556a3e7dffb9f082d0d56c1fd931b`. Its public GNOME 50
-[CI run](https://github.com/N1ghthill/soundsgood/actions/runs/29676931211)
-completed successfully on July 19, 2026.
+Release prepared for the submission: [v0.2.2](https://github.com/N1ghthill/soundsgood/releases/tag/v0.2.2).
+The candidate passed 61 automated tests, a graphical smoke test on the real
+display, AppStream checks, and a clean GNOME 50 Flatpak build on July 19, 2026.
 
 ## Codex session
 
@@ -76,7 +75,7 @@ The project owner made the decisions that define the product:
 
 ## Current product boundary
 
-The v0.2.1 release keeps the temporary playback queue separate from
+The v0.2.2 release keeps the temporary playback queue separate from
 named persistent playlists. It can open `.m3u`, `.m3u8`, and `.pls` files into
 the queue or import them as saved collections, export playlists as M3U8, and
 add songs or albums through native contextual playlist submenus.

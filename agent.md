@@ -16,8 +16,7 @@ Nao implementar:
 
 ## Estado do Projeto
 
-O projeto tem um MVP funcional; a arvore principal esta em desenvolvimento
-0.2.2 e a ultima release publica e a 0.2.1. Ele inicia pelo lancador,
+O projeto tem um MVP funcional; a ultima release publica e a 0.2.2. Ele inicia pelo lancador,
 Flatpak ou ambiente de desenvolvimento, escaneia o diretorio XDG de musicas,
 mostra albums/artistas/faixas, reproduz via GStreamer e pode continuar em
 segundo plano quando a janela e fechada.
@@ -44,8 +43,7 @@ Pontos importantes:
 - `data/soundsgood.gresource.xml` foi removido porque estava vazio; a UI segue programatica em Python.
 - `docs/MANUAL_TESTS.md` contem o roteiro de validacao manual.
 
-Ultima validacao conhecida, em 19 de julho de 2026 para a arvore de
-desenvolvimento 0.2.2:
+Ultima validacao conhecida, em 19 de julho de 2026 para a release 0.2.2:
 
 - 61 testes automatizados passando, incluindo a verificacao estatica dos
   aliases de traducao usados por factories GTK.
@@ -54,8 +52,7 @@ desenvolvimento 0.2.2:
   impediram as assercoes de UI.
 - `py_compile` passando para app e testes.
 - `meson setup builddir --reconfigure`, `meson compile -C builddir` e `meson test -C builddir` passando.
-- CI publica do GNOME 50 passou para o commit da release
-  `968fc3fa4d7556a3e7dffb9f082d0d56c1fd931b`.
+- A release 0.2.2 deve aguardar seu proprio CI publico antes da tag.
 - App inicia pelo lancador, `flatpak run io.github.n1ghthill.soundsgood` ou
   `./builddir/local-soundsgood`; pode aparecer o warning local
   `Unknown key gtk-modules` do GTK.

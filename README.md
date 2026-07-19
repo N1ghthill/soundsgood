@@ -99,18 +99,13 @@ Versioned Flatpak bundles are also available on
 
 ## Latest Release
 
-SoundsGood 0.2.1 adds native right-click menus to songs and albums, with a live
+SoundsGood 0.2.2 restores album thumbnails and song rows in artist details and
+adds a source-integrity regression check for GTK factory translation aliases.
+It includes the native right-click menus introduced in 0.2.1, with a live
 “Add to Playlist” submenu and direct access to playlist creation. Visible add
 buttons remain available for touch and keyboard use. It includes the persistent
 playlists, import/export, background playback, optional system tray indicator,
 virtualized detail lists, and compact responsive player from earlier releases.
-
-## Current Development
-
-The `main` branch is version 0.2.2. It fixes album and song rendering in artist
-details after the contextual-menu release and adds a source-integrity check for
-translation aliases used only when GTK factories instantiate their rows. The
-latest published Flatpak remains 0.2.1 until the hotfix release workflow.
 
 ## Command Line
 
@@ -215,7 +210,7 @@ scripts/generate-assets.sh
 ## Project Status
 
 SoundsGood is a functional local-first MVP moving toward beta quality. Version
-0.2.1 can
+0.2.2 can
 scan a local music folder, reopen quickly from a persistent library index,
 search tracks, play audio, remain active in the background, expose media
 controls, manage saved playlists, and update through its signed Flatpak

@@ -10,11 +10,11 @@ SoundsGood is a private, local-first music player for Linux. It indexes music
 already on the computer, reads real metadata and artwork, organizes albums and
 artists, provides fast search and playback queues, and integrates with desktop
 media controls without requiring an account or uploading a library. Version
-0.2.1 can remain active after its window closes, exposes an optional tray menu
+0.2.2 can remain active after its window closes, exposes an optional tray menu
 on compatible desktops, and manages named persistent playlists through direct
 actions and native context menus.
 
-The evaluated v0.2.1 release separates temporary playback queues from named
+The evaluated v0.2.2 release separates temporary playback queues from named
 persistent playlists and supports playlist import and export.
 
 ## Problem and impact
@@ -64,8 +64,8 @@ network service, or API key is required.
 - [x] Confirm the project builds from a clean clone.
 - [x] Run automated tests, contextual-menu model/action tests,
       AppStream/manifest validation, Flatpak build, public update, and GNOME 50
-      CI for v0.2.1. The graphical smoke remains display-dependent and is
-      covered by the manual matrix below.
+      CI for v0.2.2. The graphical smoke passed on the real display inside an
+      isolated GNOME SDK session.
 - [ ] Complete and record the full manual matrix with large real collections
       and 360/600/900/1200 px widths.
 - [ ] Record the demo against the final commit.
@@ -80,6 +80,6 @@ network service, or API key is required.
 
 Verified release references:
 
-- Release: <https://github.com/N1ghthill/soundsgood/releases/tag/v0.2.1>
-- CI: <https://github.com/N1ghthill/soundsgood/actions/runs/29676931211>
+- Release: <https://github.com/N1ghthill/soundsgood/releases/tag/v0.2.2>
+- CI: <https://github.com/N1ghthill/soundsgood/actions>
 - Flatpak app ID: `io.github.n1ghthill.soundsgood`

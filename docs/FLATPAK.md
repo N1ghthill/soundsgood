@@ -4,7 +4,7 @@ O formato de distribuicao atual do SoundsGood e um repositorio Flatpak proprio,
 hospedado via GitHub Pages. O app nao depende de listagem no Flathub para ser
 instalado ou atualizado.
 
-Os exemplos de bundle abaixo apontam para a ultima release publica, 0.2.1.
+Os exemplos de bundle abaixo apontam para a ultima release publica, 0.2.2.
 
 ## Instalar pelo repositorio
 
@@ -74,14 +74,14 @@ flatpak run io.github.n1ghthill.soundsgood
 Gerar bundle versionado para GitHub Releases:
 
 ```bash
-flatpak build-bundle ~/.local/share/flatpak/repo SoundsGood-0.2.1-x86_64.flatpak io.github.n1ghthill.soundsgood stable
+flatpak build-bundle ~/.local/share/flatpak/repo SoundsGood-0.2.2-x86_64.flatpak io.github.n1ghthill.soundsgood stable
 ```
 
 Tambem publique uma copia com nome estavel para permitir o link
 `releases/latest/download`:
 
 ```bash
-cp SoundsGood-0.2.1-x86_64.flatpak SoundsGood-x86_64.flatpak
+cp SoundsGood-0.2.2-x86_64.flatpak SoundsGood-x86_64.flatpak
 ```
 
 Instalar a ultima release publicada:
@@ -130,7 +130,7 @@ exemplo:
 sources:
   - type: git
     url: https://github.com/N1ghthill/soundsgood.git
-    tag: v0.2.1
+    tag: v0.2.2
     commit: COMMIT_DA_TAG
 ```
 
@@ -189,13 +189,10 @@ Se o app passar a depender somente de portal/document portal para pastas escolhi
 - Validar os metadados AppStream.
 - Rodar `flatpak-builder-lint`.
 
-## Estado da Release 0.2.1
+## Estado da Release 0.2.2
 
-- Tag assinada: `v0.2.1`.
-- Commit de codigo: `968fc3fa4d7556a3e7dffb9f082d0d56c1fd931b`.
-- Commit publicado no repositorio Flatpak:
-  `3973dfeca78689cffd36a5dbdf4e8e300085b9cffc7ec43898dd225b76e62252`.
-- Menus contextuais de musicas e albums foram validados antes da publicacao.
+- Tag assinada: `v0.2.2`.
+- Renderizacao de albums e faixas na tela de artistas validada antes da
+  publicacao.
 - Assets versionado e estavel publicados na GitHub Release.
-- Build, testes e validacao Flatpak aprovados no
-  [CI publico do GNOME 50](https://github.com/N1ghthill/soundsgood/actions/runs/29676931211).
+- Build, testes e validacao Flatpak executados no GNOME 50.
