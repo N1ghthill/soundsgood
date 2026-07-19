@@ -4,8 +4,7 @@ O formato de distribuicao atual do SoundsGood e um repositorio Flatpak proprio,
 hospedado via GitHub Pages. O app nao depende de listagem no Flathub para ser
 instalado ou atualizado.
 
-Os exemplos de bundle abaixo apontam para a candidata 0.2.4. A ultima release
-publica permanece 0.2.3 ate a verificacao dos artefatos abaixo.
+Os exemplos de bundle abaixo apontam para a ultima release publica, 0.2.4.
 
 ## Instalar pelo repositorio
 
@@ -132,7 +131,7 @@ sources:
   - type: git
     url: https://github.com/N1ghthill/soundsgood.git
     tag: v0.2.4
-    commit: COMMIT_DA_TAG
+    commit: bd4a5cf4fe580465dba08b9bda97e794894c15d4
 ```
 
 ## Validacao
@@ -209,7 +208,16 @@ Se o app passar a depender somente de portal/document portal para pastas escolhi
 
 ## Estado da Release 0.2.4
 
-- Candidata validada com 66 testes, smoke grafico sobre o botao real e teste
-  manual do funcionamento e acabamento na instalacao principal.
-- Tag, commit, CI, OSTree e assets devem ser preenchidos somente depois da
-  verificacao publica; nenhum resultado pendente e declarado como concluido.
+- Tag GPG: `v0.2.4`.
+- Commit da tag: `bd4a5cf4fe580465dba08b9bda97e794894c15d4`.
+- Commit OSTree publicado:
+  `1858aca6c11348fd41b1b9a53c043796089469d61672c2272a581b85eb0d7096`.
+- [CI GNOME 50](https://github.com/N1ghthill/soundsgood/actions/runs/29707434750)
+  e [deploy do repositorio Flatpak](https://github.com/N1ghthill/soundsgood/actions/runs/29707444945)
+  concluidos com sucesso.
+- Release publica: <https://github.com/N1ghthill/soundsgood/releases/tag/v0.2.4>.
+- Bundles `SoundsGood-0.2.4-x86_64.flatpak` e
+  `SoundsGood-x86_64.flatpak` publicados e o link `releases/latest` verificado.
+- Remote publico verificado oferecendo a versao 0.2.4 no commit OSTree acima.
+- Build, 66 testes, smoke grafico sobre o botao real, metadados pedantic, lint,
+  composicao Flatpak e teste manual do funcionamento e acabamento concluidos.

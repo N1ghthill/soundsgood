@@ -101,8 +101,8 @@ Versioned Flatpak bundles are also available on
 
 ## Latest Release
 
-SoundsGood 0.2.3 makes saved playlists suitable for dependable
-daily use. The playlist editor now includes searchable multi-song selection
+SoundsGood 0.2.4 builds on the dependable saved-playlist workflow introduced
+in 0.2.3. The playlist editor includes searchable multi-song selection
 from the local library, filters songs already present, exposes deletion
 directly, preserves focus and scrolling during edits, and keeps selection
 predictable after a playlist is removed. Destination selection is virtualized for large
@@ -113,7 +113,7 @@ recoverable failures, and reject storage limits before partially changing a
 collection. The release regression covers 50 playlists, 5,000 entries,
 repeated restarts, reordering, automatic saves, and simulated disk failure.
 
-The 0.2.4 release candidate fixes the right-click destination path by replacing
+SoundsGood 0.2.4 fixes the right-click destination path by replacing
 indirect menu-action routing with a compact, virtualized playlist popover whose
 rows call `PlaylistManager` directly. Each destination shows its current song
 count, stays synchronized as the playlist changes, and is covered by a

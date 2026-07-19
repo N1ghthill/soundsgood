@@ -88,7 +88,7 @@ adds isolated stress coverage for 5,000 entries, repeated restarts, and
 recoverable write failure. This later release does not change the evaluated
 Build Week v0.2.2 release or its verified test claims.
 
-The 0.2.4 release candidate repairs the real right-click destination path and
+The current 0.2.4 release repairs the real right-click destination path and
 refines it into a compact, virtualized playlist popover. This maintenance
 release also remains outside the evaluated Build Week v0.2.2 claims.
 
