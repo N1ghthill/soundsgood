@@ -62,8 +62,10 @@ network service, or API key is required.
 - [ ] Join the challenge and confirm eligibility in Devpost.
 - [ ] Confirm the selected track is **Apps for your life**.
 - [x] Confirm the project builds from a clean clone.
-- [x] Run automated tests, graphical smoke test, AppStream/manifest validation,
-      Flatpak build and local GNOME 50 validation for v0.2.1.
+- [x] Run automated tests, contextual-menu model/action tests,
+      AppStream/manifest validation, Flatpak build, public update, and GNOME 50
+      CI for v0.2.1. The graphical smoke remains display-dependent and is
+      covered by the manual matrix below.
 - [ ] Complete and record the full manual matrix with large real collections
       and 360/600/900/1200 px widths.
 - [ ] Record the demo against the final commit.
@@ -79,5 +81,5 @@ network service, or API key is required.
 Verified release references:
 
 - Release: <https://github.com/N1ghthill/soundsgood/releases/tag/v0.2.1>
-- CI: <https://github.com/N1ghthill/soundsgood/actions>
+- CI: <https://github.com/N1ghthill/soundsgood/actions/runs/29676931211>
 - Flatpak app ID: `io.github.n1ghthill.soundsgood`

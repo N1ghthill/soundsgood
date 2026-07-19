@@ -49,8 +49,8 @@ Ultima validacao conhecida, em 19 de julho de 2026 para a release 0.2.1:
   display; nesta rodada ele foi ignorado de forma explicita no GNOME SDK 50.
 - `py_compile` passando para app e testes.
 - `meson setup builddir --reconfigure`, `meson compile -C builddir` e `meson test -C builddir` passando.
-- A ultima CI publica concluida antes desta preparacao foi a da versao 0.2.0; a
-  release 0.2.1 deve aguardar seu proprio job antes da tag.
+- CI publica do GNOME 50 passou para o commit da release
+  `968fc3fa4d7556a3e7dffb9f082d0d56c1fd931b`.
 - App inicia pelo lancador, `flatpak run io.github.n1ghthill.soundsgood` ou
   `./builddir/local-soundsgood`; pode aparecer o warning local
   `Unknown key gtk-modules` do GTK.
