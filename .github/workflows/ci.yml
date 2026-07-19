@@ -24,4 +24,3 @@ jobs:
           manifest-path: io.github.n1ghthill.soundsgood.yml
           run-tests: true
           cache-key: flatpak-builder-${{ github.sha }}
-          artifact-name: soundsgood-${{ github.sha }}.flatpak

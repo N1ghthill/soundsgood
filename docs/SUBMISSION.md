@@ -55,7 +55,7 @@ network service, or API key is required.
 
 - [ ] Join the challenge and confirm eligibility in Devpost.
 - [ ] Confirm the selected track is **Apps for your life**.
-- [ ] Confirm the project builds from a clean clone.
+- [x] Confirm the project builds from a clean clone.
 - [ ] Run all automated and manual release checks.
 - [ ] Record the demo against the final commit.
 - [ ] Upload a public YouTube video shorter than three minutes.
