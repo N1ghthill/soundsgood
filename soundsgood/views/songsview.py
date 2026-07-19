@@ -48,6 +48,7 @@ class SongsView(Adw.Bin):
         self._choose_button = Gtk.Button(label=_("Choose Music Folder"))
         self._choose_button.set_icon_name("folder-music-symbolic")
         self._choose_button.add_css_class("suggested-action")
+        self._choose_button.add_css_class("compact-pill")
         self._choose_button.connect("clicked", self._on_choose_folder_clicked)
         set_accessible_label(self._choose_button, _("Choose Music Folder"))
         self._status.append(self._choose_button)

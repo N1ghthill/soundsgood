@@ -14,6 +14,8 @@ integration, and UI.
   registration must have an explicit lifecycle owner and teardown path.
 - A malformed media file must be reported and skipped, never terminate a scan.
 - Prefer adaptive libadwaita layout primitives over fixed size requests.
+- Reuse the semantic classes in `soundsgood/style.css`; icon actions must stay
+  vertically centered and must not inherit the height of adjacent artwork.
 
 The detailed architecture and metadata rules remain in `agent.md` and
 `docs/ARCHITECTURE.md`.

@@ -89,6 +89,8 @@ class PreferencesDialog:
             subtitle=self._settings.get_string("music-dir") or _("Default: ~/Music"),
         )
         button = Gtk.Button(label=_("Select"))
+        button.add_css_class("compact-pill")
+        button.set_valign(Gtk.Align.CENTER)
         button.connect("clicked", self._on_select_folder)
         self._folder_row.add_suffix(button)
         self._folder_row.set_activatable_widget(button)
@@ -99,6 +101,8 @@ class PreferencesDialog:
             subtitle=_("Rescan the music folder and refresh file metadata"),
         )
         rescan_button = Gtk.Button(label=_("Rescan Now"))
+        rescan_button.add_css_class("compact-pill")
+        rescan_button.set_valign(Gtk.Align.CENTER)
         rescan_button.connect("clicked", self._on_rescan_library)
         rescan_row.add_suffix(rescan_button)
         rescan_row.set_activatable_widget(rescan_button)
@@ -112,6 +116,8 @@ class PreferencesDialog:
             subtitle=str(diagnostics_file()),
         )
         diagnostics_button = Gtk.Button(label=_("Open Folder"))
+        diagnostics_button.add_css_class("compact-pill")
+        diagnostics_button.set_valign(Gtk.Align.CENTER)
         diagnostics_button.connect("clicked", self._on_open_diagnostics)
         diagnostics_row.add_suffix(diagnostics_button)
         diagnostics_row.set_activatable_widget(diagnostics_button)

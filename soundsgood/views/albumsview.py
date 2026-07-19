@@ -21,14 +21,17 @@ class AlbumTile(Gtk.Box):
 
     def __init__(self):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=5)
-        self.set_size_request(132, -1)
-        self.set_margin_top(8)
-        self.set_margin_bottom(8)
-        self.set_margin_start(8)
-        self.set_margin_end(8)
+        self._album = None
+        self._album_handlers = []
+        self.add_css_class("album-tile")
+        self.set_size_request(120, -1)
+        self.set_margin_top(4)
+        self.set_margin_bottom(4)
+        self.set_margin_start(4)
+        self.set_margin_end(4)
 
         self._cover = Gtk.Image(icon_name="media-optical-cd-audio-symbolic")
-        self._cover.set_pixel_size(112)
+        self._cover.set_pixel_size(104)
         self._cover.add_css_class("album-cover")
         self.append(self._cover)
 
@@ -51,14 +54,33 @@ class AlbumTile(Gtk.Box):
         self.append(self._count)
 
     def bind(self, album):
-        if album.props.thumbnail:
-            self._cover.set_from_file(album.props.thumbnail)
+        self.unbind()
+        self._album = album
+        self._album_handlers = [
+            album.connect(f"notify::{prop}", self._sync)
+            for prop in ("thumbnail", "title", "artist", "song-count")
+        ]
+        self._sync()
+
+    def unbind(self):
+        if self._album is not None:
+            for handler_id in self._album_handlers:
+                if self._album.handler_is_connected(handler_id):
+                    self._album.disconnect(handler_id)
+        self._album_handlers.clear()
+        self._album = None
+
+    def _sync(self, *_args):
+        if self._album is None:
+            return
+        if self._album.props.thumbnail:
+            self._cover.set_from_file(self._album.props.thumbnail)
         else:
             self._cover.set_from_icon_name("media-optical-cd-audio-symbolic")
-        self._title.set_label(album.props.title)
-        self._artist.set_label(album.props.artist)
-        self._count.set_label(_("%d songs") % album.props.song_count)
-        set_accessible_label(self, _("Open album %s") % album.props.title)
+        self._title.set_label(self._album.props.title)
+        self._artist.set_label(self._album.props.artist)
+        self._count.set_label(_("%d songs") % self._album.props.song_count)
+        set_accessible_label(self, _("Open album %s") % self._album.props.title)
 
 
 def create_album_factory():
@@ -68,6 +90,7 @@ def create_album_factory():
         "bind",
         lambda _factory, item: item.get_child().bind(item.get_item()),
     )
+    factory.connect("unbind", lambda _factory, item: item.get_child().unbind())
     return factory
 
 
@@ -107,17 +130,18 @@ class AlbumsView(Adw.Bin):
         self._status_button = Gtk.Button(label=_("Choose Music Folder"))
         self._status_button.set_icon_name("folder-music-symbolic")
         self._status_button.add_css_class("suggested-action")
+        self._status_button.add_css_class("compact-pill")
         self._status_button.connect("clicked", self._on_choose_folder_clicked)
         set_accessible_label(self._status_button, _("Choose Music Folder"))
         self._status_box.append(self._status_button)
         self._grid_stack.add_named(self._status_box, "status")
         self._stack.add_named(self._grid_stack, "grid")
 
-        self._album_page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=18)
-        self._album_page.set_margin_top(18)
-        self._album_page.set_margin_bottom(18)
-        self._album_page.set_margin_start(18)
-        self._album_page.set_margin_end(18)
+        self._album_page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        self._album_page.set_margin_top(14)
+        self._album_page.set_margin_bottom(14)
+        self._album_page.set_margin_start(14)
+        self._album_page.set_margin_end(14)
 
         detail_scrolled = Gtk.ScrolledWindow()
         detail_scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
@@ -179,6 +203,8 @@ class AlbumsView(Adw.Bin):
         self._selected_album = album
 
         back_button = Gtk.Button(icon_name="go-previous-symbolic")
+        back_button.add_css_class("flat")
+        back_button.add_css_class("compact-icon")
         back_button.set_tooltip_text(_("Back to albums"))
         set_accessible_label(back_button, _("Back to albums"))
         back_button.set_halign(Gtk.Align.START)
@@ -190,12 +216,14 @@ class AlbumsView(Adw.Bin):
                 Gtk.Orientation.VERTICAL
                 if self._compact else Gtk.Orientation.HORIZONTAL
             ),
-            spacing=18,
+            spacing=14,
         )
+        header.add_css_class("detail-header")
         header.set_valign(Gtk.Align.START)
 
         cover = Gtk.Image(icon_name="media-optical-cd-audio-symbolic")
-        cover.set_pixel_size(140 if self._compact else 180)
+        cover.set_pixel_size(120 if self._compact else 160)
+        cover.add_css_class("album-cover")
         if album.props.thumbnail:
             cover.set_from_file(album.props.thumbnail)
         header.append(cover)
@@ -206,7 +234,7 @@ class AlbumsView(Adw.Bin):
         title = Gtk.Label(label=album.props.title, xalign=0)
         title.set_wrap(True)
         title.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
-        title.add_css_class("title-1")
+        title.add_css_class("title-2")
         metadata.append(title)
 
         artist = Gtk.Label(label=album.props.artist, xalign=0)
@@ -228,6 +256,7 @@ class AlbumsView(Adw.Bin):
         play_button.set_icon_name("media-playback-start-symbolic")
         set_accessible_label(play_button, _("Play album"))
         play_button.add_css_class("suggested-action")
+        play_button.add_css_class("compact-pill")
         play_button.set_halign(Gtk.Align.START)
         play_button.connect("clicked", lambda *_: self._play_album(album))
         metadata.append(play_button)
@@ -236,6 +265,7 @@ class AlbumsView(Adw.Bin):
         self._album_page.append(header)
 
         songs_list = Gtk.ListBox()
+        songs_list.add_css_class("boxed-list")
         songs_list.set_selection_mode(Gtk.SelectionMode.SINGLE)
         songs_list.set_activate_on_single_click(False)
         songs_list.connect("row-activated", self._on_album_song_activated)

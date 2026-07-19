@@ -18,13 +18,17 @@ from soundsgood.widgets.songrow import SongRow, set_accessible_label
 
 class ArtistListItem(Gtk.Box):
     def __init__(self):
-        super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        self.set_margin_top(7)
-        self.set_margin_bottom(7)
-        self.set_margin_start(10)
-        self.set_margin_end(10)
+        super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=9)
+        self._artist = None
+        self._artist_handlers = []
+        self.add_css_class("song-item")
+        self.set_margin_top(5)
+        self.set_margin_bottom(5)
+        self.set_margin_start(9)
+        self.set_margin_end(9)
         image = Gtk.Image(icon_name="avatar-default-symbolic")
-        image.set_pixel_size(32)
+        image.set_pixel_size(28)
+        image.add_css_class("artist-avatar")
         self.append(image)
         labels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
         labels.set_hexpand(True)
@@ -39,10 +43,29 @@ class ArtistListItem(Gtk.Box):
         self.append(labels)
 
     def bind(self, artist):
-        self._name.set_label(artist.props.name)
+        self.unbind()
+        self._artist = artist
+        self._artist_handlers = [
+            artist.connect(f"notify::{prop}", self._sync)
+            for prop in ("name", "album-count", "song-count")
+        ]
+        self._sync()
+
+    def unbind(self):
+        if self._artist is not None:
+            for handler_id in self._artist_handlers:
+                if self._artist.handler_is_connected(handler_id):
+                    self._artist.disconnect(handler_id)
+        self._artist_handlers.clear()
+        self._artist = None
+
+    def _sync(self, *_args):
+        if self._artist is None:
+            return
+        self._name.set_label(self._artist.props.name)
         self._summary.set_label(
             _("%d albums, %d songs")
-            % (artist.props.album_count, artist.props.song_count)
+            % (self._artist.props.album_count, self._artist.props.song_count)
         )
 
 
@@ -53,6 +76,7 @@ def create_artist_factory():
         "bind",
         lambda _factory, item: item.get_child().bind(item.get_item()),
     )
+    factory.connect("unbind", lambda _factory, item: item.get_child().unbind())
     return factory
 
 
@@ -97,11 +121,11 @@ class ArtistsView(Adw.Bin):
         self._sidebar_stack.add_named(self._sidebar_status, "status")
         sidebar_page = Adw.NavigationPage.new(self._sidebar_stack, _("Artists"))
 
-        self._artist_detail = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=18)
-        self._artist_detail.set_margin_top(18)
-        self._artist_detail.set_margin_bottom(18)
-        self._artist_detail.set_margin_start(18)
-        self._artist_detail.set_margin_end(18)
+        self._artist_detail = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        self._artist_detail.set_margin_top(14)
+        self._artist_detail.set_margin_bottom(14)
+        self._artist_detail.set_margin_start(14)
+        self._artist_detail.set_margin_end(14)
 
         songs_scroll = Gtk.ScrolledWindow()
         songs_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
@@ -161,6 +185,8 @@ class ArtistsView(Adw.Bin):
 
         if self._compact:
             back_button = Gtk.Button(icon_name="go-previous-symbolic")
+            back_button.add_css_class("flat")
+            back_button.add_css_class("compact-icon")
             back_button.set_halign(Gtk.Align.START)
             back_button.set_tooltip_text(_("Back to artists"))
             set_accessible_label(back_button, _("Back to artists"))
@@ -170,11 +196,13 @@ class ArtistsView(Adw.Bin):
             )
             self._artist_detail.append(back_button)
 
-        header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
+        header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=14)
+        header.add_css_class("detail-header")
         header.set_valign(Gtk.Align.START)
 
         image = Gtk.Image(icon_name="avatar-default-symbolic")
-        image.set_pixel_size(96)
+        image.set_pixel_size(72)
+        image.add_css_class("artist-avatar")
         header.append(image)
 
         metadata = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
@@ -183,7 +211,7 @@ class ArtistsView(Adw.Bin):
         name = Gtk.Label(label=artist.props.name, xalign=0)
         name.set_wrap(True)
         name.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
-        name.add_css_class("title-1")
+        name.add_css_class("title-2")
         metadata.append(name)
 
         summary = Gtk.Label(
@@ -200,6 +228,7 @@ class ArtistsView(Adw.Bin):
         play_button.set_icon_name("media-playback-start-symbolic")
         set_accessible_label(play_button, _("Play artist"))
         play_button.add_css_class("suggested-action")
+        play_button.add_css_class("compact-pill")
         play_button.set_halign(Gtk.Align.START)
         play_button.connect("clicked", lambda *_: self._play_artist())
         metadata.append(play_button)
@@ -217,12 +246,14 @@ class ArtistsView(Adw.Bin):
 
     def _album_section(self, album, artist_name):
         section = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        section.add_css_class("section-header")
 
         header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        header.set_margin_top(12)
+        header.set_margin_top(8)
 
         cover = Gtk.Image(icon_name="media-optical-cd-audio-symbolic")
-        cover.set_pixel_size(64)
+        cover.set_pixel_size(56)
+        cover.add_css_class("album-cover")
         if album.props.thumbnail:
             cover.set_from_file(album.props.thumbnail)
         header.append(cover)
@@ -246,6 +277,9 @@ class ArtistsView(Adw.Bin):
         header.append(labels)
 
         play_button = Gtk.Button(icon_name="media-playback-start-symbolic")
+        play_button.add_css_class("flat")
+        play_button.add_css_class("compact-icon")
+        play_button.set_valign(Gtk.Align.CENTER)
         play_button.set_tooltip_text(_("Play album"))
         set_accessible_label(play_button, _("Play album"))
         play_button.set_halign(Gtk.Align.END)
@@ -255,6 +289,7 @@ class ArtistsView(Adw.Bin):
         section.append(header)
 
         songs_list = Gtk.ListBox()
+        songs_list.add_css_class("boxed-list")
         songs_list.set_selection_mode(Gtk.SelectionMode.SINGLE)
         songs_list.set_activate_on_single_click(False)
         songs_list.album = album
@@ -328,6 +363,7 @@ class ArtistsView(Adw.Bin):
             button = Gtk.Button(label=_("Choose Music Folder"))
             button.set_icon_name("folder-music-symbolic")
             button.add_css_class("suggested-action")
+            button.add_css_class("compact-pill")
             button.connect("clicked", self._on_choose_folder_clicked)
             set_accessible_label(button, _("Choose Music Folder"))
             box.append(button)

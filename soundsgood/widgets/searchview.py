@@ -25,11 +25,11 @@ class SearchView(Adw.Bin):
         self._player = application.props.player
         self._search_source_id = 0
 
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-        box.set_margin_top(12)
-        box.set_margin_bottom(12)
-        box.set_margin_start(12)
-        box.set_margin_end(12)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        box.set_margin_top(10)
+        box.set_margin_bottom(10)
+        box.set_margin_start(10)
+        box.set_margin_end(10)
 
         self._entry = Gtk.SearchEntry()
         self._entry.set_placeholder_text(_("Search songs, albums, artists..."))
@@ -37,6 +37,7 @@ class SearchView(Adw.Bin):
         box.append(self._entry)
 
         self._results = Gtk.ListBox()
+        self._results.add_css_class("boxed-list")
         self._results.set_selection_mode(Gtk.SelectionMode.SINGLE)
         self._results.set_activate_on_single_click(False)
         self._results.connect("row-activated", self._on_row_activated)
@@ -109,10 +110,10 @@ class SearchView(Adw.Bin):
 
         label = Gtk.Label(label=title, xalign=0)
         label.add_css_class("heading")
-        label.set_margin_top(12)
-        label.set_margin_bottom(6)
-        label.set_margin_start(12)
-        label.set_margin_end(12)
+        label.set_margin_top(9)
+        label.set_margin_bottom(4)
+        label.set_margin_start(9)
+        label.set_margin_end(9)
         row.set_child(label)
         self._results.append(row)
 
@@ -121,14 +122,15 @@ class SearchView(Adw.Bin):
         row.artist = artist
         row.result_type = "artist"
 
-        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        box.set_margin_top(8)
-        box.set_margin_bottom(8)
-        box.set_margin_start(12)
-        box.set_margin_end(12)
+        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=9)
+        box.set_margin_top(5)
+        box.set_margin_bottom(5)
+        box.set_margin_start(9)
+        box.set_margin_end(9)
 
         image = Gtk.Image(icon_name="avatar-default-symbolic")
-        image.set_pixel_size(40)
+        image.set_pixel_size(34)
+        image.add_css_class("artist-avatar")
         box.append(image)
 
         labels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
@@ -156,14 +158,15 @@ class SearchView(Adw.Bin):
         row.album = album
         row.result_type = "album"
 
-        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        box.set_margin_top(8)
-        box.set_margin_bottom(8)
-        box.set_margin_start(12)
-        box.set_margin_end(12)
+        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=9)
+        box.set_margin_top(5)
+        box.set_margin_bottom(5)
+        box.set_margin_start(9)
+        box.set_margin_end(9)
 
         image = Gtk.Image(icon_name="media-optical-cd-audio-symbolic")
-        image.set_pixel_size(40)
+        image.set_pixel_size(34)
+        image.add_css_class("album-cover")
         if album.props.thumbnail:
             image.set_from_file(album.props.thumbnail)
         box.append(image)

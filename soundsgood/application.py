@@ -4,6 +4,7 @@
 import os
 import sys
 import gi
+from pathlib import Path
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
@@ -314,26 +315,7 @@ class SoundsGoodApplication(Adw.Application):
 
         # Load CSS
         css_provider = Gtk.CssProvider()
-        css = """
-        .album-cover {
-            border-radius: 8px;
-        }
-        .artist-avatar {
-            border-radius: 50%;
-        }
-        .player-toolbar {
-            background: alpha(@window_bg_color, 0.95);
-            border-top: 1px solid @borders;
-        }
-        row.playing {
-            background: alpha(@accent_color, 0.12);
-        }
-        row.playing label.song-title {
-            color: @accent_color;
-            font-weight: 700;
-        }
-        """
-        css_provider.load_from_string(css)
+        css_provider.load_from_path(str(Path(__file__).with_name("style.css")))
         Gtk.StyleContext.add_provider_for_display(
             Gdk.Display.get_default(),
             css_provider,

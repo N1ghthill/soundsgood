@@ -148,6 +148,24 @@ Views devem:
 - Desconectar sinais no `unbind`/`teardown` da factory ou no `unroot` do widget.
 - Adaptar composicao por breakpoints, incluindo navegacao sequencial de artistas em telas estreitas.
 
+### Sistema visual
+
+O estilo da aplicacao fica centralizado em `soundsgood/style.css`. Widgets
+adicionam classes semanticas em vez de repetir CSS ou tamanhos locais:
+
+- `compact-icon`: acao secundaria de icone, com alvo visual de 28 px.
+- `row-play`: reproducao contextual dentro de listas.
+- `primary-play`: controle principal circular do player.
+- `compact-pill`: acao textual curta, como Play, Select ou Rescan.
+- `album-tile`, `song-item` e `detail-header`: densidade e superficies de
+  conteudo.
+
+Controles devem manter tooltip e nome acessivel mesmo quando forem apenas
+icones. Botoes em `Gtk.Box` horizontal devem usar alinhamento vertical central
+para nao crescer com capas ou cabecalhos vizinhos. Novos tamanhos fixos so sao
+aceitaveis para arte ou limites de popover; layout e navegacao continuam
+responsivos.
+
 Views nao devem:
 
 - Ler arquivos do disco.

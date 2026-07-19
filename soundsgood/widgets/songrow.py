@@ -48,15 +48,18 @@ class SongRow(Gtk.ListBoxRow):
         gesture.connect("released", self._on_click_released)
         self.add_controller(gesture)
 
-        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        box.set_margin_top(8)
-        box.set_margin_bottom(8)
-        box.set_margin_start(12)
-        box.set_margin_end(12)
+        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=9)
+        box.add_css_class("song-item")
+        box.set_margin_top(5)
+        box.set_margin_bottom(5)
+        box.set_margin_start(9)
+        box.set_margin_end(9)
 
         if self._on_activate:
             self._play_button = Gtk.Button(icon_name="media-playback-start-symbolic")
             self._play_button.add_css_class("flat")
+            self._play_button.add_css_class("row-play")
+            self._play_button.set_valign(Gtk.Align.CENTER)
             self._play_button.set_tooltip_text("Play")
             set_accessible_label(self._play_button, "Play")
             self._play_button.connect("clicked", self._on_play_clicked)
@@ -65,7 +68,8 @@ class SongRow(Gtk.ListBoxRow):
             self._play_button = None
 
         cover = Gtk.Image(icon_name="audio-x-generic-symbolic")
-        cover.set_pixel_size(40)
+        cover.set_pixel_size(34)
+        cover.add_css_class("album-cover")
         if song.props.thumbnail:
             cover.set_from_file(song.props.thumbnail)
         box.append(cover)
@@ -158,24 +162,28 @@ class SongListItem(Gtk.Box):
     """Factory-backed song item whose signal lifetime follows its binding."""
 
     def __init__(self, player, on_activate, show_context: bool):
-        super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=9)
+        self.add_css_class("song-item")
         self._player = player
         self._on_activate = on_activate
         self._show_context = show_context
         self._song = None
         self._player_handlers = []
-        self.set_margin_top(6)
-        self.set_margin_bottom(6)
-        self.set_margin_start(10)
-        self.set_margin_end(10)
+        self.set_margin_top(5)
+        self.set_margin_bottom(5)
+        self.set_margin_start(9)
+        self.set_margin_end(9)
 
         self._play_button = Gtk.Button(icon_name="media-playback-start-symbolic")
         self._play_button.add_css_class("flat")
+        self._play_button.add_css_class("row-play")
+        self._play_button.set_valign(Gtk.Align.CENTER)
         self._play_button.connect("clicked", self._on_play_clicked)
         self.append(self._play_button)
 
         self._cover = Gtk.Image(icon_name="audio-x-generic-symbolic")
-        self._cover.set_pixel_size(36)
+        self._cover.set_pixel_size(34)
+        self._cover.add_css_class("album-cover")
         self.append(self._cover)
 
         self._track = Gtk.Label(xalign=1, width_chars=3)

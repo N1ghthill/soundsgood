@@ -21,8 +21,8 @@ class QueueListItem(Gtk.Box):
     def __init__(self, on_remove):
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         self._index = -1
-        self.set_margin_top(8)
-        self.set_margin_bottom(8)
+        self.set_margin_top(5)
+        self.set_margin_bottom(5)
         self.set_margin_start(8)
         self.set_margin_end(8)
 
@@ -49,6 +49,8 @@ class QueueListItem(Gtk.Box):
 
         remove_button = Gtk.Button(icon_name="list-remove-symbolic")
         remove_button.add_css_class("flat")
+        remove_button.add_css_class("compact-icon")
+        remove_button.set_valign(Gtk.Align.CENTER)
         remove_button.set_tooltip_text(_("Remove from queue"))
         set_accessible_label(remove_button, _("Remove from queue"))
         remove_button.connect("clicked", lambda *_: on_remove(self._index))
@@ -67,63 +69,75 @@ class PlayerToolbar(Gtk.Box):
     """Bottom playback controls."""
 
     def __init__(self, application):
-        super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=3)
         self._app = application
         self._player = application.props.player
         self._updating = False
 
         self.add_css_class("player-toolbar")
-        self.set_margin_top(6)
-        self.set_margin_bottom(6)
-        self.set_margin_start(12)
-        self.set_margin_end(12)
+        self.set_margin_top(5)
+        self.set_margin_bottom(5)
+        self.set_margin_start(8)
+        self.set_margin_end(8)
         self.set_visible(False)
 
-        controls_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        controls_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         controls_row.set_hexpand(True)
         self.append(controls_row)
 
         self._previous_button = Gtk.Button(icon_name="media-skip-backward-symbolic")
+        self._previous_button.add_css_class("flat")
+        self._previous_button.add_css_class("compact-icon")
+        self._previous_button.set_valign(Gtk.Align.CENTER)
         self._previous_button.set_tooltip_text(_("Previous"))
         set_accessible_label(self._previous_button, _("Previous"))
         self._previous_button.connect("clicked", lambda *_: self._player.previous())
-        controls_row.append(self._previous_button)
 
         self._play_button = Gtk.Button(icon_name="media-playback-start-symbolic")
         self._play_button.add_css_class("suggested-action")
+        self._play_button.add_css_class("primary-play")
+        self._play_button.set_valign(Gtk.Align.CENTER)
         self._play_button.set_tooltip_text(_("Play/Pause"))
         set_accessible_label(self._play_button, _("Play/Pause"))
         self._play_button.connect("clicked", lambda *_: self._player.play_pause())
-        controls_row.append(self._play_button)
 
         self._next_button = Gtk.Button(icon_name="media-skip-forward-symbolic")
+        self._next_button.add_css_class("flat")
+        self._next_button.add_css_class("compact-icon")
+        self._next_button.set_valign(Gtk.Align.CENTER)
         self._next_button.set_tooltip_text(_("Next"))
         set_accessible_label(self._next_button, _("Next"))
         self._next_button.connect("clicked", lambda *_: self._player.next())
-        controls_row.append(self._next_button)
 
         self._cover = Gtk.Image(icon_name="audio-x-generic-symbolic")
-        self._cover.set_pixel_size(48)
-        controls_row.append(self._cover)
+        self._cover.set_pixel_size(40)
+        self._cover.add_css_class("player-cover")
 
         info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
         info_box.set_hexpand(True)
         self._title_label = Gtk.Label(label=_("Not playing"), xalign=0)
         self._title_label.set_ellipsize(Pango.EllipsizeMode.END)
+        self._title_label.add_css_class("player-title")
         self._artist_label = Gtk.Label(xalign=0)
         self._artist_label.set_ellipsize(Pango.EllipsizeMode.END)
         self._artist_label.add_css_class("caption")
         self._artist_label.add_css_class("dim-label")
         info_box.append(self._title_label)
         info_box.append(self._artist_label)
+        # Artwork and context lead the row; transport controls stay compact on
+        # the trailing side and no longer dominate narrow windows.
+        controls_row.append(self._cover)
         controls_row.append(info_box)
+        controls_row.append(self._previous_button)
+        controls_row.append(self._play_button)
+        controls_row.append(self._next_button)
 
         self._position_label = Gtk.Label(label="0:00")
-        self._position_label.set_width_chars(6)
+        self._position_label.set_width_chars(5)
         self._position_label.add_css_class("caption")
         self._position_label.add_css_class("dim-label")
 
-        progress_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        progress_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         progress_row.set_hexpand(True)
         self.append(progress_row)
         progress_row.append(self._position_label)
@@ -137,12 +151,15 @@ class PlayerToolbar(Gtk.Box):
         progress_row.append(self._progress)
 
         self._duration_label = Gtk.Label(label="--:--")
-        self._duration_label.set_width_chars(6)
+        self._duration_label.set_width_chars(5)
         self._duration_label.add_css_class("caption")
         self._duration_label.add_css_class("dim-label")
         progress_row.append(self._duration_label)
 
         self._repeat_button = Gtk.Button(icon_name="media-playlist-consecutive-symbolic")
+        self._repeat_button.add_css_class("flat")
+        self._repeat_button.add_css_class("compact-icon")
+        self._repeat_button.set_valign(Gtk.Align.CENTER)
         self._repeat_button.set_tooltip_text(_("Repeat mode"))
         set_accessible_label(self._repeat_button, _("Repeat mode"))
         self._repeat_button.connect("clicked", self._on_repeat_clicked)
@@ -161,6 +178,8 @@ class PlayerToolbar(Gtk.Box):
         queue_title.set_hexpand(True)
         queue_header.append(queue_title)
         clear_button = Gtk.Button(icon_name="edit-clear-symbolic")
+        clear_button.add_css_class("flat")
+        clear_button.add_css_class("compact-icon")
         clear_button.set_tooltip_text(_("Clear queue"))
         set_accessible_label(clear_button, _("Clear queue"))
         clear_button.connect("clicked", self._on_clear_queue)
@@ -195,6 +214,9 @@ class PlayerToolbar(Gtk.Box):
         self._queue_popover.set_child(queue_box)
 
         self._queue_button = Gtk.MenuButton(icon_name="view-list-symbolic")
+        self._queue_button.add_css_class("flat")
+        self._queue_button.add_css_class("compact-icon")
+        self._queue_button.set_valign(Gtk.Align.CENTER)
         self._queue_button.set_tooltip_text(_("Queue"))
         set_accessible_label(self._queue_button, _("Queue"))
         self._queue_button.set_popover(self._queue_popover)
@@ -202,7 +224,7 @@ class PlayerToolbar(Gtk.Box):
 
         self._volume = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 1, 0.01)
         self._volume.set_draw_value(False)
-        self._volume.set_size_request(96, -1)
+        self._volume.set_size_request(160, -1)
         self._volume.set_tooltip_text(_("Volume"))
         set_accessible_label(self._volume, _("Volume"))
         self._volume.set_value(self._player.props.volume)
@@ -230,7 +252,10 @@ class PlayerToolbar(Gtk.Box):
 
         self._secondary_popover = Gtk.Popover()
         self._secondary_popover.set_child(secondary_box)
-        self._secondary_button = Gtk.MenuButton(icon_name="emblem-system-symbolic")
+        self._secondary_button = Gtk.MenuButton(icon_name="audio-volume-high-symbolic")
+        self._secondary_button.add_css_class("flat")
+        self._secondary_button.add_css_class("compact-icon")
+        self._secondary_button.set_valign(Gtk.Align.CENTER)
         self._secondary_button.set_tooltip_text(_("Playback options"))
         set_accessible_label(self._secondary_button, _("Playback options"))
         self._secondary_button.set_popover(self._secondary_popover)

@@ -8,7 +8,9 @@ gi.require_version("GLib", "2.0")
 from gi.repository import Gdk, GLib
 
 from soundsgood.application import SoundsGoodApplication
-from soundsgood.models import Song
+from soundsgood.models import Album, Artist, Song
+from soundsgood.views.albumsview import AlbumTile
+from soundsgood.views.artistsview import ArtistListItem
 from soundsgood.widgets.songrow import SongListItem
 
 
@@ -45,6 +47,18 @@ class WindowSmokeTest(unittest.TestCase):
                     page_names,
                     {"albums", "artists", "songs", "search"},
                 )
+                for child in (
+                    window._albums_view,
+                    window._artists_view,
+                    window._songs_view,
+                    window._search_view,
+                ):
+                    self.assertTrue(window._stack.get_page(child).get_icon_name())
+
+                toolbar = window._player_toolbar
+                self.assertTrue(toolbar._play_button.has_css_class("primary-play"))
+                self.assertTrue(toolbar._previous_button.has_css_class("compact-icon"))
+                self.assertTrue(toolbar._queue_button.has_css_class("compact-icon"))
 
                 window._artists_view.set_compact(True)
                 self.assertTrue(window._artists_view._split_view.get_collapsed())
@@ -57,12 +71,29 @@ class WindowSmokeTest(unittest.TestCase):
                 item.unbind()
                 self.assertEqual(item._player_handlers, [])
 
+                album_tile = AlbumTile()
+                album = Album(title="Reactive album", song_count=0)
+                album_tile.bind(album)
+                album.props.song_count = 2
+                self.assertEqual(album_tile._count.get_label(), "2 songs")
+                album_tile.unbind()
+                self.assertEqual(album_tile._album_handlers, [])
+
+                artist_item = ArtistListItem()
+                artist = Artist(name="Reactive artist", album_count=0, song_count=0)
+                artist_item.bind(artist)
+                artist.props.album_count = 1
+                artist.props.song_count = 2
+                self.assertEqual(artist_item._summary.get_label(), "1 albums, 2 songs")
+                artist_item.unbind()
+                self.assertEqual(artist_item._artist_handlers, [])
+
                 player = app.props.player
                 player._load_song = lambda _song: True
                 first = Song(title="First", url="file:///tmp/first.wav")
                 second = Song(title="Second", url="file:///tmp/second.wav")
                 player.play_song(first, [first, second])
-                queue = window._player_toolbar
+                queue = toolbar
                 self.assertEqual(queue._queue_model.get_n_items(), 2)
                 self.assertEqual(queue._queue_selection.get_selected(), 0)
                 queue._on_remove_queue_item(0)

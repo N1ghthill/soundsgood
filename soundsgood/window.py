@@ -45,11 +45,14 @@ class Window(Adw.ApplicationWindow):
         self._stack.set_vexpand(True)
 
         self._switcher = Adw.ViewSwitcher()
+        self._switcher.add_css_class("navigation-switcher")
         self._switcher.set_stack(self._stack)
         self._switcher.set_policy(Adw.ViewSwitcherPolicy.WIDE)
         self._headerbar.set_title_widget(self._switcher)
 
         self._search_button = Gtk.Button(icon_name="system-search-symbolic")
+        self._search_button.add_css_class("flat")
+        self._search_button.add_css_class("compact-icon")
         self._search_button.set_tooltip_text(_("Search"))
         self._search_button.connect("clicked", self._show_search)
         self._headerbar.pack_end(self._search_button)
@@ -59,6 +62,8 @@ class Window(Adw.ApplicationWindow):
         menu.append(_("Preferences"), "app.preferences")
         menu.append(_("About SoundsGood"), "app.about")
         self._menu_button = Gtk.MenuButton(icon_name="open-menu-symbolic")
+        self._menu_button.add_css_class("flat")
+        self._menu_button.add_css_class("compact-icon")
         self._menu_button.set_menu_model(menu)
         self._headerbar.pack_end(self._menu_button)
 
@@ -67,10 +72,20 @@ class Window(Adw.ApplicationWindow):
         self._songs_view = SongsView(application)
         self._search_view = SearchView(application)
 
-        self._stack.add_titled(self._albums_view, "albums", _("Albums"))
-        self._stack.add_titled(self._artists_view, "artists", _("Artists"))
-        self._stack.add_titled(self._songs_view, "songs", _("Songs"))
-        self._stack.add_titled(self._search_view, "search", _("Search"))
+        pages = (
+            (
+                self._albums_view,
+                "albums",
+                _("Albums"),
+                "media-optical-cd-audio-symbolic",
+            ),
+            (self._artists_view, "artists", _("Artists"), "avatar-default-symbolic"),
+            (self._songs_view, "songs", _("Songs"), "audio-x-generic-symbolic"),
+            (self._search_view, "search", _("Search"), "system-search-symbolic"),
+        )
+        for child, name, title, icon_name in pages:
+            page = self._stack.add_titled(child, name, title)
+            page.set_icon_name(icon_name)
 
         self._bottom_switcher = Adw.ViewSwitcherBar()
         self._bottom_switcher.set_stack(self._stack)

@@ -1,0 +1,89 @@
+/* Copyright 2025 SoundsGood developers
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ */
+
+.navigation-switcher button {
+  min-height: 28px;
+  padding: 3px 14px;
+}
+
+button.compact-icon {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 3px;
+  border-radius: 8px;
+}
+
+button.row-play {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 3px;
+  border-radius: 9999px;
+}
+
+button.primary-play {
+  min-width: 34px;
+  min-height: 34px;
+  padding: 4px;
+  border-radius: 9999px;
+}
+
+button.compact-pill {
+  min-height: 30px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+}
+
+.album-cover {
+  border-radius: 10px;
+}
+
+.album-tile {
+  padding: 7px;
+  border-radius: 12px;
+}
+
+.album-tile:hover {
+  background-color: alpha(@view_fg_color, 0.06);
+}
+
+.artist-avatar {
+  border-radius: 9999px;
+}
+
+.song-item {
+  border-radius: 8px;
+}
+
+.player-toolbar {
+  background-color: alpha(@headerbar_bg_color, 0.94);
+  border-top: 1px solid alpha(@borders, 0.8);
+  box-shadow: 0 -2px 8px alpha(black, 0.08);
+}
+
+.player-title {
+  font-weight: 600;
+}
+
+.player-cover {
+  border-radius: 7px;
+}
+
+row.playing,
+.playing {
+  background-color: alpha(@accent_color, 0.11);
+}
+
+row.playing label.song-title,
+.playing label.song-title {
+  color: @accent_color;
+  font-weight: 700;
+}
+
+.detail-header {
+  padding: 4px;
+}
+
+.section-header {
+  padding-top: 4px;
+}
