@@ -69,14 +69,14 @@ flatpak run io.github.n1ghthill.soundsgood
 Gerar bundle versionado para GitHub Releases:
 
 ```bash
-flatpak build-bundle ~/.local/share/flatpak/repo SoundsGood-0.1.7-x86_64.flatpak io.github.n1ghthill.soundsgood stable
+flatpak build-bundle ~/.local/share/flatpak/repo SoundsGood-0.1.8-x86_64.flatpak io.github.n1ghthill.soundsgood stable
 ```
 
 Tambem publique uma copia com nome estavel para permitir o link
 `releases/latest/download`:
 
 ```bash
-cp SoundsGood-0.1.7-x86_64.flatpak SoundsGood-x86_64.flatpak
+cp SoundsGood-0.1.8-x86_64.flatpak SoundsGood-x86_64.flatpak
 ```
 
 Instalar a ultima release publicada:
@@ -163,6 +163,8 @@ O manifest concede:
 - PulseAudio para reproducao.
 - `xdg-music:ro` para escanear musicas locais.
 - `org.mpris.MediaPlayer2.SoundsGood` para publicar controles MPRIS.
+- `org.kde.StatusNotifierWatcher` apenas para registrar o indicador opcional
+  em desktops compativeis.
 - Notificacoes e inibicao de suspensao usam as APIs de aplicacao/portais do desktop.
 
 Se o app passar a depender somente de portal/document portal para pastas escolhidas pelo usuario, a permissao `xdg-music:ro` pode ser reavaliada.

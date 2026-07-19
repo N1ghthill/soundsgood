@@ -133,7 +133,7 @@ class Window(Adw.ApplicationWindow):
         self._settings.set_int("window-width", width)
         self._settings.set_int("window-height", height)
         self._settings.set_boolean("window-maximized", self.is_maximized())
-        return False
+        return self._app.handle_close_request(self)
 
     def _on_player_error(self, _player, message):
         self.show_message(message)

@@ -48,6 +48,9 @@ class FakeApplication:
     def _ensure_window(self):
         self.window_created = True
 
+    def show_main_window(self):
+        self._window.present()
+
     def _open_files(self, files):
         SoundsGoodApplication._open_files(self, files)
 

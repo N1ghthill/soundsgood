@@ -96,18 +96,26 @@ class MprisService:
             self._on_name_lost,
         )
 
-        for prop in (
-            "current-song",
-            "play-state",
-            "repeat-mode",
-            "volume",
-            "position",
-            "duration",
-        ):
+        self._player_handlers = [
             self._player.connect(f"notify::{prop}", self._on_player_changed)
-        self._player.connect("playlist-changed", self._on_playlist_changed)
+            for prop in (
+                "current-song",
+                "play-state",
+                "repeat-mode",
+                "volume",
+                "position",
+                "duration",
+            )
+        ]
+        self._player_handlers.append(
+            self._player.connect("playlist-changed", self._on_playlist_changed)
+        )
 
     def shutdown(self):
+        for handler_id in self._player_handlers:
+            if self._player.handler_is_connected(handler_id):
+                self._player.disconnect(handler_id)
+        self._player_handlers.clear()
         if self._connection:
             for registration_id in self._registration_ids:
                 self._connection.unregister_object(registration_id)
@@ -180,11 +188,9 @@ class MprisService:
 
     def _handle_root_method(self, method_name: str):
         if method_name == "Raise":
-            window = self._app.props.window
-            if window:
-                window.present()
+            self._app.show_main_window()
         elif method_name == "Quit":
-            self._app.quit()
+            self._app.quit_application()
 
     def _handle_player_method(self, method_name: str, parameters):
         if method_name == "Next":

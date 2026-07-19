@@ -43,11 +43,6 @@ class SongRow(Gtk.ListBoxRow):
         self.set_selectable(True)
         set_accessible_label(self, song.props.title)
 
-        gesture = Gtk.GestureClick()
-        gesture.set_button(0)
-        gesture.connect("released", self._on_click_released)
-        self.add_controller(gesture)
-
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=9)
         box.add_css_class("song-item")
         box.set_margin_top(5)
@@ -127,10 +122,6 @@ class SongRow(Gtk.ListBoxRow):
             if self._player.handler_is_connected(handler_id):
                 self._player.disconnect(handler_id)
         self._player_handlers.clear()
-
-    def _on_click_released(self, _gesture, n_press, _x, _y):
-        if n_press == 2 and self._on_activate:
-            self._on_activate(self.song)
 
     def _on_play_clicked(self, _button):
         if self._player and self._player.props.current_song == self.song:

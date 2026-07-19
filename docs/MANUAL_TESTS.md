@@ -58,7 +58,15 @@ meson test -C builddir
 - Testar volume e mute.
 - Testar repeat none, repeat all, repeat song e shuffle.
 - Abrir a fila, selecionar uma faixa, remover item individual e limpar fila.
+- Com `Run in Background` ativo, fechar a janela e confirmar que o audio
+  continua; reabrir pelo lancador e confirmar que a mesma sessao reaparece.
+- No KDE/desktop com StatusNotifier, testar abrir, play/pause, anterior,
+  proxima e sair pelo menu do icone. Em GNOME sem host, confirmar que a ausencia
+  do icone nao impede reabrir pelo lancador ou controlar por MPRIS.
+- Desativar `Run in Background` e confirmar que fechar encerra o processo.
 - Confirmar que a faixa atual fica destacada nas listas.
+- Abrir artistas e albuns grandes e confirmar rolagem fluida sem criar todas as
+  linhas de faixas de uma vez.
 - Confirmar que uma notificacao aparece quando uma nova faixa comeca, se a preferencia estiver ativa.
 - Confirmar que a sessao nao entra em suspensao enquanto ha musica tocando, se a preferencia estiver ativa.
 - Alternar as preferencias de notificacao e prevencao de suspensao e confirmar que os comportamentos mudam sem reiniciar o app.

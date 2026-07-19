@@ -17,11 +17,7 @@ from soundsgood.player import Player
 from soundsgood.library import Library
 from soundsgood.mpris import MprisService
 from soundsgood.models import PlayState, RepeatMode
-from soundsgood.views.albumsview import AlbumsView
-from soundsgood.views.artistsview import ArtistsView
-from soundsgood.views.songsview import SongsView
-from soundsgood.widgets.playertoolbar import PlayerToolbar
-from soundsgood.widgets.searchview import SearchView
+from soundsgood.background import BackgroundController
 from soundsgood.widgets.preferencesdialog import PreferencesDialog
 from soundsgood.widgets.aboutdialog import AboutDialog
 from soundsgood.diagnostics import configure_logging, diagnostics_file, get_logger
@@ -44,6 +40,7 @@ class MemorySettings:
         "color-scheme": "system",
         "enable-notifications": True,
         "inhibit-suspend": True,
+        "run-in-background": True,
     }
 
     def __init__(self):
@@ -107,14 +104,14 @@ class SoundsGoodApplication(Adw.Application):
         self._library = Library(self)
         self._player = Player(self)
         self._mpris = MprisService(self)
-        self._player.connect("notify::current-song", self._on_player_activity_changed)
-        self._player.connect("notify::play-state", self._on_player_activity_changed)
-
-        # Views
-        self._albums_view = None
-        self._artists_view = None
-        self._songs_view = None
-        self._search_view = None
+        self._background = BackgroundController(self)
+        self._status_notifier = None
+        self._player_handlers = [
+            self._player.connect(
+                "notify::current-song", self._on_player_activity_changed
+            ),
+            self._player.connect("notify::play-state", self._on_player_activity_changed),
+        ]
 
         self._setup_actions()
 
@@ -139,6 +136,7 @@ class SoundsGoodApplication(Adw.Application):
             ("about", self._on_about, ("app.about", ["F1"])),
             ("preferences", self._on_preferences, ("app.preferences", ["<Ctrl>comma"])),
             ("quit", self._on_quit, ("app.quit", ["<Ctrl>Q"])),
+            ("show", self._on_show, None),
             ("select_music_folder", self._on_select_music_folder, None),
             ("reindex_library", self._on_reindex_library, ("app.reindex_library", ["<Ctrl><Shift>R"])),
             ("play_pause", self._on_play_pause, ("app.play_pause", ["<Ctrl>space", "AudioPlay", "AudioPause"])),
@@ -167,8 +165,10 @@ class SoundsGoodApplication(Adw.Application):
         dialog.present(self._window)
 
     def _on_quit(self, action, param):
-        if self._window:
-            self._window.destroy()
+        self.quit_application()
+
+    def _on_show(self, action, param):
+        self.show_main_window()
 
     def _on_select_music_folder(self, action, param):
         self.select_music_folder(self._window)
@@ -259,6 +259,17 @@ class SoundsGoodApplication(Adw.Application):
 
     def sync_desktop_integration(self):
         self._sync_suspend_inhibition()
+        self._background.sync_preference()
+
+    def handle_close_request(self, window):
+        return self._background.handle_close(window)
+
+    def show_main_window(self):
+        self._ensure_window()
+        self._background.show_window(self._window)
+
+    def quit_application(self):
+        self._background.quit()
 
     def _on_player_activity_changed(self, *_args):
         self._sync_suspend_inhibition()
@@ -321,6 +332,9 @@ class SoundsGoodApplication(Adw.Application):
             css_provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
         )
+        from soundsgood.statusnotifier import StatusNotifierService
+
+        self._status_notifier = StatusNotifierService(self)
 
     def do_activate(self):
         LOGGER.info("Application activate")
@@ -329,7 +343,7 @@ class SoundsGoodApplication(Adw.Application):
         # Start library scan
         self._library.scan()
         self._sync_suspend_inhibition()
-        self._window.present()
+        self.show_main_window()
 
     def do_open(self, files, n_files, hint):
         LOGGER.info("Opening %d external file(s)", n_files)
@@ -338,7 +352,7 @@ class SoundsGoodApplication(Adw.Application):
         # Keep the library available while treating opened files as a temporary queue.
         self._library.scan()
         self._open_files(files)
-        self._window.present()
+        self.show_main_window()
 
     def _ensure_window(self):
         if not self._window:
@@ -359,6 +373,17 @@ class SoundsGoodApplication(Adw.Application):
 
     def do_shutdown(self):
         LOGGER.info("Application shutdown")
+        self._background.shutdown()
+        if self._status_notifier:
+            self._status_notifier.shutdown()
+            self._status_notifier = None
+        for handler_id in self._player_handlers:
+            if self._player.handler_is_connected(handler_id):
+                self._player.disconnect(handler_id)
+        self._player_handlers.clear()
+        if self._settings_changed_handler and hasattr(self._settings, "disconnect"):
+            self._settings.disconnect(self._settings_changed_handler)
+            self._settings_changed_handler = None
         if self._inhibit_cookie:
             self.uninhibit(self._inhibit_cookie)
             self._inhibit_cookie = 0
@@ -371,7 +396,7 @@ class SoundsGoodApplication(Adw.Application):
 
 def main():
     application_id = os.environ.get("APPLICATION_ID", "io.github.n1ghthill.soundsgood")
-    version = os.environ.get("VERSION", "0.1.6")
+    version = os.environ.get("VERSION", "0.1.8")
 
     logger = configure_logging(version)
     try:

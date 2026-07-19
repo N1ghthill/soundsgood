@@ -80,6 +80,23 @@ class PreferencesDialog:
         inhibit_row.set_activatable_widget(self._inhibit_switch)
         playback_group.add(inhibit_row)
 
+        self._background_switch = Gtk.Switch()
+        self._background_switch.set_valign(Gtk.Align.CENTER)
+        self._background_switch.set_active(
+            self._settings.get_boolean("run-in-background")
+        )
+        self._background_switch.connect(
+            "notify::active",
+            self._on_background_toggled,
+        )
+        background_row = Adw.ActionRow(
+            title=_("Run in Background"),
+            subtitle=_("Closing the window keeps playback and media controls available"),
+        )
+        background_row.add_suffix(self._background_switch)
+        background_row.set_activatable_widget(self._background_switch)
+        playback_group.add(background_row)
+
         page.add(playback_group)
 
         group = Adw.PreferencesGroup(title=_("Music Library"))
@@ -159,4 +176,8 @@ class PreferencesDialog:
 
     def _on_inhibit_toggled(self, switch, _param):
         self._settings.set_boolean("inhibit-suspend", switch.get_active())
+        self._app.sync_desktop_integration()
+
+    def _on_background_toggled(self, switch, _param):
+        self._settings.set_boolean("run-in-background", switch.get_active())
         self._app.sync_desktop_integration()

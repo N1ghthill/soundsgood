@@ -5,7 +5,7 @@ import gi
 gi.require_version("Gdk", "4.0")
 gi.require_version("GLib", "2.0")
 
-from gi.repository import Gdk, GLib
+from gi.repository import Gdk, Gio, GLib
 
 from soundsgood.application import SoundsGoodApplication
 from soundsgood.models import Album, Artist, Song
@@ -88,6 +88,34 @@ class WindowSmokeTest(unittest.TestCase):
                 album_tile.unbind()
                 self.assertEqual(album_tile._album_handlers, [])
 
+                detail_songs = Gio.ListStore(item_type=Song)
+                detail_songs.append(
+                    Song(title="Disc one", disc_number=1, url="file:///tmp/one.wav")
+                )
+                detail_songs.append(
+                    Song(title="Disc two", disc_number=2, url="file:///tmp/two.wav")
+                )
+                detail_album = Album(
+                    title="Virtual detail",
+                    artist="Factory",
+                    song_count=2,
+                    songs=detail_songs,
+                )
+                album_model = window._albums_view._build_song_model(detail_album)
+                self.assertEqual(album_model.get_n_items(), 4)
+                self.assertEqual(album_model.get_item(0).props.kind, "heading")
+                window._albums_view._show_album(detail_album)
+                self.assertEqual(
+                    window._albums_view._stack.get_visible_child_name(),
+                    "album",
+                )
+                artist_model = window._artists_view._build_artist_model(
+                    [detail_album],
+                    "Factory",
+                )
+                self.assertEqual(artist_model.get_n_items(), 5)
+                self.assertEqual(artist_model.get_item(0).props.kind, "album")
+
                 artist_item = ArtistListItem()
                 artist = Artist(name="Reactive artist", album_count=0, song_count=0)
                 artist_item.bind(artist)
@@ -107,10 +135,17 @@ class WindowSmokeTest(unittest.TestCase):
                 self.assertEqual(queue._queue_selection.get_selected(), 0)
                 queue._on_remove_queue_item(0)
                 self.assertEqual(queue._queue_model.get_n_items(), 1)
+
+                app.props.settings.set_boolean("run-in-background", True)
+                app._background._request_background_permission = lambda: None
+                self.assertTrue(window._on_close_request())
+                self.assertFalse(window.get_visible())
+                app.show_main_window()
+                self.assertTrue(window.get_visible())
             except Exception as error:
                 failures.append(error)
             finally:
-                app.quit()
+                app.quit_application()
             return GLib.SOURCE_REMOVE
 
         GLib.timeout_add(100, inspect_window)

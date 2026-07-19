@@ -10,10 +10,11 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Adw, Gtk, Pango
+from gi.repository import Adw, Gio, Gtk, Pango
 
 from soundsgood.models import LibraryState
-from soundsgood.widgets.songrow import SongRow, set_accessible_label
+from soundsgood.widgets.detailrow import DetailEntry, create_detail_factory
+from soundsgood.widgets.songrow import set_accessible_label
 
 
 class ArtistListItem(Gtk.Box):
@@ -127,10 +128,7 @@ class ArtistsView(Adw.Bin):
         self._artist_detail.set_margin_start(14)
         self._artist_detail.set_margin_end(14)
 
-        songs_scroll = Gtk.ScrolledWindow()
-        songs_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-        songs_scroll.set_child(self._artist_detail)
-        content_page = Adw.NavigationPage.new(songs_scroll, _("Artist"))
+        content_page = Adw.NavigationPage.new(self._artist_detail, _("Artist"))
 
         self._split_view.set_sidebar(sidebar_page)
         self._split_view.set_content(content_page)
@@ -241,90 +239,59 @@ class ArtistsView(Adw.Bin):
             self._artist_detail.append(self._placeholder(_("No songs found"), show_button=False))
             return
 
+        self._artist_song_model = self._build_artist_model(albums, artist.props.name)
+        selection = Gtk.NoSelection.new(self._artist_song_model)
+        songs_list = Gtk.ListView.new(
+            selection,
+            create_detail_factory(
+                self._player,
+                self._play_album,
+                self._play_album_song,
+            ),
+        )
+        songs_list.set_single_click_activate(False)
+        songs_list.connect("activate", self._on_artist_song_activated)
+        songs_scroller = Gtk.ScrolledWindow()
+        songs_scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        songs_scroller.set_vexpand(True)
+        songs_scroller.set_child(songs_list)
+        self._artist_detail.append(songs_scroller)
+
+    def _build_artist_model(self, albums, artist_name):
+        model = Gio.ListStore(item_type=DetailEntry)
         for album in albums:
-            self._artist_detail.append(self._album_section(album, artist.props.name))
-
-    def _album_section(self, album, artist_name):
-        section = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        section.add_css_class("section-header")
-
-        header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        header.set_margin_top(8)
-
-        cover = Gtk.Image(icon_name="media-optical-cd-audio-symbolic")
-        cover.set_pixel_size(56)
-        cover.add_css_class("album-cover")
-        if album.props.thumbnail:
-            cover.set_from_file(album.props.thumbnail)
-        header.append(cover)
-
-        labels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        labels.set_hexpand(True)
-        title = Gtk.Label(label=album.props.title, xalign=0)
-        title.set_wrap(True)
-        title.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
-        title.add_css_class("title-4")
-        labels.append(title)
-
-        details = []
-        if album.props.year:
-            details.append(album.props.year)
-        details.append(_("%d songs") % album.props.song_count)
-        subtitle = Gtk.Label(label=" - ".join(details), xalign=0)
-        subtitle.add_css_class("caption")
-        subtitle.add_css_class("dim-label")
-        labels.append(subtitle)
-        header.append(labels)
-
-        play_button = Gtk.Button(icon_name="media-playback-start-symbolic")
-        play_button.add_css_class("flat")
-        play_button.add_css_class("compact-icon")
-        play_button.set_valign(Gtk.Align.CENTER)
-        play_button.set_tooltip_text(_("Play album"))
-        set_accessible_label(play_button, _("Play album"))
-        play_button.set_halign(Gtk.Align.END)
-        play_button.connect("clicked", lambda *_: self._play_album(album))
-        header.append(play_button)
-
-        section.append(header)
-
-        songs_list = Gtk.ListBox()
-        songs_list.add_css_class("boxed-list")
-        songs_list.set_selection_mode(Gtk.SelectionMode.SINGLE)
-        songs_list.set_activate_on_single_click(False)
-        songs_list.album = album
-        songs_list.connect("row-activated", self._on_album_song_activated)
-
-        self._append_song_rows(songs_list, album, artist_name)
-
-        section.append(songs_list)
-        return section
-
-    def _append_song_rows(self, songs_list, album, artist_name):
-        songs_model = album.props.songs
-        show_disc_headers = self._should_show_disc_headers(songs_model, album, artist_name)
-        current_disc = None
-        for index in range(songs_model.get_n_items()):
-            song = songs_model.get_item(index)
-            if song.props.artist != artist_name and album.props.artist != artist_name:
-                continue
-
-            disc_number = song.props.disc_number or 1
-            if show_disc_headers and disc_number != current_disc:
-                songs_list.append(self._disc_header(disc_number))
-                current_disc = disc_number
-
-            songs_list.append(
-                SongRow(
-                    song,
-                    show_context=False,
-                    on_activate=lambda selected, current_album=album: self._play_album_song(
-                        current_album,
-                        selected,
-                    ),
-                    player=self._player,
+            details = []
+            if album.props.year:
+                details.append(album.props.year)
+            details.append(_("%d songs") % album.props.song_count)
+            model.append(
+                DetailEntry(
+                    kind="album",
+                    item=album,
+                    title=album.props.title,
+                    subtitle=" - ".join(details),
                 )
             )
+            songs_model = album.props.songs
+            show_disc_headers = self._should_show_disc_headers(
+                songs_model, album, artist_name
+            )
+            current_disc = None
+            for index in range(songs_model.get_n_items()):
+                song = songs_model.get_item(index)
+                if song.props.artist != artist_name and album.props.artist != artist_name:
+                    continue
+                disc_number = song.props.disc_number or 1
+                if show_disc_headers and disc_number != current_disc:
+                    model.append(
+                        DetailEntry(
+                            kind="heading",
+                            title=_("Disc %d") % disc_number,
+                        )
+                    )
+                    current_disc = disc_number
+                model.append(DetailEntry(kind="song", item=song, context=album))
+        return model
 
     def _should_show_disc_headers(self, songs_model, album, artist_name) -> bool:
         discs = set()
@@ -334,20 +301,6 @@ class ArtistsView(Adw.Bin):
                 continue
             discs.add(song.props.disc_number or 1)
         return len(discs) > 1 or any(disc > 1 for disc in discs)
-
-    def _disc_header(self, disc_number: int):
-        row = Gtk.ListBoxRow()
-        row.set_selectable(False)
-        row.set_activatable(False)
-        label = Gtk.Label(label=_("Disc %d") % disc_number, xalign=0)
-        label.add_css_class("heading")
-        label.add_css_class("dim-label")
-        label.set_margin_top(12)
-        label.set_margin_bottom(6)
-        label.set_margin_start(12)
-        label.set_margin_end(12)
-        row.set_child(label)
-        return row
 
     def _placeholder(self, text, show_button: bool = True):
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
@@ -416,11 +369,10 @@ class ArtistsView(Adw.Bin):
         songs = [songs_model.get_item(i) for i in range(songs_model.get_n_items())]
         self._player.play_song(song, songs)
 
-    def _on_album_song_activated(self, listbox, row):
-        song = getattr(row, "song", None)
-        album = getattr(listbox, "album", None)
-        if song and album:
-            self._play_album_song(album, song)
+    def _on_artist_song_activated(self, _listview, position):
+        entry = self._artist_song_model.get_item(position)
+        if entry and entry.props.kind == "song":
+            self._play_album_song(entry.props.context, entry.props.item)
 
     def _on_choose_folder_clicked(self, _button):
         self._app.select_music_folder(self.get_root())

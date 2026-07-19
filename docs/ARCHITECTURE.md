@@ -212,6 +212,7 @@ Configuracoes atuais:
 - `color-scheme`
 - `enable-notifications`
 - `inhibit-suspend`
+- `run-in-background`
 
 Use GSettings para preferencias persistentes. Nao use arquivos ad hoc de configuracao enquanto GSettings resolver o caso.
 
@@ -243,3 +244,9 @@ Dependencias a avaliar:
 - A acao manual de reindexacao força rescan e releitura de metadados.
 - Playlists `.m3u`, `.m3u8` e `.pls` sao aceitas no fluxo externo de abertura, mas nao sao indexadas como parte da biblioteca.
 - Notificacoes e inibicao de suspensao ficam em `Application`, reagindo ao estado publico do `Player`.
+- `BackgroundController` possui o `GApplication.hold()` usado ao ocultar a
+  janela e separa fechar/ocultar da acao explicita de sair.
+- O StatusNotifier e complementar: registra-se somente quando ha um watcher
+  compativel e nunca substitui lancador, MPRIS ou notificacoes.
+- Detalhes de album e artista usam `Gio.ListStore` e factories; nenhuma colecao
+  de faixas potencialmente grande deve ser materializada como `Gtk.ListBox`.

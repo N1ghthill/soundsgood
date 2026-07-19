@@ -31,6 +31,10 @@ Codex was used to:
 - introduce factory-backed, virtualized song rendering;
 - redesign navigation and playback controls around adaptive libadwaita
   patterns;
+- separate background lifetime from window lifetime and add optional,
+  cross-desktop StatusNotifier integration;
+- virtualize album and artist detail collections and remove duplicate playback
+  activation paths;
 - add lifecycle, failure, cache, GTK smoke, and responsive-width tests;
 - prepare reproducible demo data and submission documentation.
 
@@ -58,6 +62,8 @@ The project owner made the decisions that define the product:
 7. Narrow layouts are a first-class design target, not a CSS afterthought.
 8. Playback uses a compact, adaptive three-zone bar: track context, centered
    transport controls, and secondary actions, with a dedicated seek line.
+9. Closing the window can preserve playback without weakening explicit
+   shutdown; tray integration remains optional and MPRIS stays authoritative.
 
 ## Official submission requirements
 

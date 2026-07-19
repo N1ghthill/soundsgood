@@ -10,10 +10,11 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Adw, Gtk, Pango
+from gi.repository import Adw, Gio, Gtk, Pango
 
 from soundsgood.models import LibraryState
-from soundsgood.widgets.songrow import SongRow, set_accessible_label
+from soundsgood.widgets.detailrow import DetailEntry, create_detail_factory
+from soundsgood.widgets.songrow import set_accessible_label
 
 
 class AlbumTile(Gtk.Box):
@@ -143,10 +144,7 @@ class AlbumsView(Adw.Bin):
         self._album_page.set_margin_start(14)
         self._album_page.set_margin_end(14)
 
-        detail_scrolled = Gtk.ScrolledWindow()
-        detail_scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-        detail_scrolled.set_child(self._album_page)
-        self._stack.add_named(detail_scrolled, "album")
+        self._stack.add_named(self._album_page, "album")
         self.set_child(self._stack)
 
         self._library.connect("scan-started", self._on_scan_started)
@@ -264,16 +262,24 @@ class AlbumsView(Adw.Bin):
         header.append(metadata)
         self._album_page.append(header)
 
-        songs_list = Gtk.ListBox()
+        self._album_song_model = self._build_song_model(album)
+        selection = Gtk.NoSelection.new(self._album_song_model)
+        songs_list = Gtk.ListView.new(
+            selection,
+            create_detail_factory(
+                self._player,
+                self._play_album,
+                self._play_album_song,
+            ),
+        )
         songs_list.add_css_class("boxed-list")
-        songs_list.set_selection_mode(Gtk.SelectionMode.SINGLE)
-        songs_list.set_activate_on_single_click(False)
-        songs_list.connect("row-activated", self._on_album_song_activated)
-        songs_list.album = album
-
-        self._append_song_rows(songs_list, album)
-
-        self._album_page.append(songs_list)
+        songs_list.set_single_click_activate(False)
+        songs_list.connect("activate", self._on_album_song_activated)
+        songs_scroller = Gtk.ScrolledWindow()
+        songs_scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        songs_scroller.set_vexpand(True)
+        songs_scroller.set_child(songs_list)
+        self._album_page.append(songs_scroller)
         self._stack.set_visible_child_name("album")
 
     def set_compact(self, compact: bool):
@@ -294,13 +300,13 @@ class AlbumsView(Adw.Bin):
         songs = [songs_model.get_item(i) for i in range(songs_model.get_n_items())]
         self._player.play_song(song, songs)
 
-    def _on_album_song_activated(self, _listbox, row):
-        song = getattr(row, "song", None)
-        album = getattr(_listbox, "album", None)
-        if song and album:
-            self._play_album_song(album, song)
+    def _on_album_song_activated(self, _listview, position):
+        entry = self._album_song_model.get_item(position)
+        if entry and entry.props.kind == "song":
+            self._play_album_song(entry.props.context, entry.props.item)
 
-    def _append_song_rows(self, songs_list, album):
+    def _build_song_model(self, album):
+        model = Gio.ListStore(item_type=DetailEntry)
         songs_model = album.props.songs
         show_disc_headers = self._should_show_disc_headers(songs_model)
         current_disc = None
@@ -308,20 +314,14 @@ class AlbumsView(Adw.Bin):
             song = songs_model.get_item(index)
             disc_number = song.props.disc_number or 1
             if show_disc_headers and disc_number != current_disc:
-                songs_list.append(self._disc_header(disc_number))
-                current_disc = disc_number
-
-            songs_list.append(
-                SongRow(
-                    song,
-                    show_context=False,
-                    player=self._player,
-                    on_activate=lambda selected, current_album=album: self._play_album_song(
-                        current_album,
-                        selected,
-                    ),
+                model.append(
+                    DetailEntry(kind="heading", title=_("Disc %d") % disc_number)
                 )
+                current_disc = disc_number
+            model.append(
+                DetailEntry(kind="song", item=song, context=album)
             )
+        return model
 
     def _should_show_disc_headers(self, songs_model) -> bool:
         discs = {
@@ -329,20 +329,6 @@ class AlbumsView(Adw.Bin):
             for index in range(songs_model.get_n_items())
         }
         return len(discs) > 1 or any(disc > 1 for disc in discs)
-
-    def _disc_header(self, disc_number: int):
-        row = Gtk.ListBoxRow()
-        row.set_selectable(False)
-        row.set_activatable(False)
-        label = Gtk.Label(label=_("Disc %d") % disc_number, xalign=0)
-        label.add_css_class("heading")
-        label.add_css_class("dim-label")
-        label.set_margin_top(12)
-        label.set_margin_bottom(6)
-        label.set_margin_start(12)
-        label.set_margin_end(12)
-        row.set_child(label)
-        return row
 
     def _clear_box(self, box):
         child = box.get_first_child()

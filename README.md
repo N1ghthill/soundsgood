@@ -63,6 +63,8 @@ and [docs/SUBMISSION.md](docs/SUBMISSION.md). The final recording script is in
 - Expose MPRIS controls on `org.mpris.MediaPlayer2.SoundsGood`.
 - Show optional desktop notifications for the current track.
 - Prevent session suspend while music is playing.
+- Keep playback running after closing the window, with an optional
+  StatusNotifier tray menu on compatible desktops.
 
 ## Installation
 
@@ -86,9 +88,9 @@ Versioned Flatpak bundles are also available on
 
 ## Latest Release
 
-SoundsGood 0.1.7 introduces a compact adaptive player bar, smaller controls,
-and polished responsive navigation. Version 0.1.6 added playlist opening for
-`.m3u`, `.m3u8`, and `.pls` files.
+SoundsGood 0.1.8 adds background playback, an optional system tray indicator,
+and virtualized album and artist detail lists. Version 0.1.7 introduced the
+compact adaptive player bar and polished responsive navigation.
 
 ## Command Line
 
