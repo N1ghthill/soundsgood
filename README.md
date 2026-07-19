@@ -105,6 +105,13 @@ buttons remain available for touch and keyboard use. It includes the persistent
 playlists, import/export, background playback, optional system tray indicator,
 virtualized detail lists, and compact responsive player from earlier releases.
 
+## Current Development
+
+The `main` branch is version 0.2.2. It fixes album and song rendering in artist
+details after the contextual-menu release and adds a source-integrity check for
+translation aliases used only when GTK factories instantiate their rows. The
+latest published Flatpak remains 0.2.1 until the hotfix release workflow.
+
 ## Command Line
 
 For Flatpak installations, run SoundsGood from a terminal with:

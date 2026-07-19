@@ -445,7 +445,7 @@ class SoundsGoodApplication(Adw.Application):
 
 def main():
     application_id = os.environ.get("APPLICATION_ID", "io.github.n1ghthill.soundsgood")
-    version = os.environ.get("VERSION", "0.2.1")
+    version = os.environ.get("VERSION", "0.2.2")
 
     logger = configure_logging(version)
     try:

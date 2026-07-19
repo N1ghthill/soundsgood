@@ -1,6 +1,7 @@
 # Roadmap
 
-Atualizado em 19 de julho de 2026 para a release publica 0.2.1.
+Atualizado em 19 de julho de 2026 para a arvore de desenvolvimento 0.2.2. A
+ultima release publica e a 0.2.1.
 
 O SoundsGood prioriza um player local estavel e integrado ao desktop antes de
 recursos avancados. O produto permanece inspirado no GNOME Music e mantem fora
@@ -126,6 +127,8 @@ playlist salva com a fila temporaria do player.
   arquivo ausente.
 - [x] Expor menus contextuais nativos em musicas e albums, com submenu dinamico
   de playlists e acesso a criacao de uma nova colecao.
+- [x] Corrigir a regressao 0.2.1 que impedia factories de detalhe de renderizar
+  thumbnails de albums e faixas na tela de artistas.
 - [x] Tocar uma playlist inteira, criando a fila apenas quando solicitado.
 - [x] Importar `.m3u`, `.m3u8` e `.pls` como playlists salvas sem quebrar o
   comportamento atual de abertura temporaria.

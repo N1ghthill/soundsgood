@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from gettext import gettext as _
+
 import gi
 
 gi.require_version("Gtk", "4.0")
