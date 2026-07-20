@@ -42,10 +42,14 @@ and [docs/SUBMISSION.md](docs/SUBMISSION.md). The final recording script is in
 
 ![Search view](docs/screenshots/search.png)
 
+![Playlists view](docs/screenshots/playlists.png)
+
 ## Features
 
 - Browse local music by albums, artists, and songs.
 - Search by title, artist, album, album artist, genre, and year.
+- Open search as a focused mode with `Ctrl+F` and return to the previous library
+  view with `Escape`.
 - Open local audio files from the file manager when SoundsGood is the default
   music app.
 - Open `.m3u`, `.m3u8`, and `.pls` playlists as temporary playback queues.
@@ -101,23 +105,16 @@ Versioned Flatpak bundles are also available on
 
 ## Latest Release
 
-SoundsGood 0.2.4 builds on the dependable saved-playlist workflow introduced
-in 0.2.3. The playlist editor includes searchable multi-song selection
-from the local library, filters songs already present, exposes deletion
-directly, preserves focus and scrolling during edits, and keeps selection
-predictable after a playlist is removed. Destination selection is virtualized for large
-collections.
+SoundsGood 0.2.5 refreshes the library experience with larger album artwork,
+consistent list and detail surfaces, clearer empty and scanning states, and a
+more prominent adaptive player. Album, artist, and playlist details now share
+the same visual hierarchy in light and dark themes.
 
-Playlist writes are coalesced during rapid edits, remain atomic, report
-recoverable failures, and reject storage limits before partially changing a
-collection. The release regression covers 50 playlists, 5,000 entries,
-repeated restarts, reordering, automatic saves, and simulated disk failure.
-
-SoundsGood 0.2.4 fixes the right-click destination path by replacing
-indirect menu-action routing with a compact, virtualized playlist popover whose
-rows call `PlaylistManager` directly. Each destination shows its current song
-count, stays synchronized as the playlist changes, and is covered by a
-graphical regression that clicks the real button.
+Global search is now a focused mode opened from the header bar or with
+`Ctrl+F`. It restores the previous library view with `Escape` and renders mixed
+artist, album, and song results through a factory-backed `Gio.ListModel`,
+keeping large result sets responsive. The release retains the reliable saved
+playlist workflow and compact contextual destination picker from 0.2.4.
 
 ## Command Line
 

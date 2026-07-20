@@ -25,6 +25,10 @@ The public 0.2.4 release fixes and visually refines the right-click playlist
 destination popover. It does not change the evaluated v0.2.2 submission or its
 verified claims.
 
+The 0.2.5 release includes a broader visual refinement and contextual,
+virtualized global search. It remains separate from the evaluated v0.2.2
+release and must not be presented as part of those verified submission claims.
+
 ## Problem and impact
 
 People with personal music collections often have to choose between dated

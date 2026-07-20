@@ -119,7 +119,7 @@ class PlayerToolbar(Gtk.Box):
         self._next_button.connect("clicked", lambda *_: self._player.next())
 
         self._cover = Gtk.Image(icon_name="audio-x-generic-symbolic")
-        self._cover.set_pixel_size(36)
+        self._cover.set_pixel_size(44)
         self._cover.add_css_class("player-cover")
 
         self._info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
@@ -158,6 +158,7 @@ class PlayerToolbar(Gtk.Box):
         self._duration_label.set_width_chars(5)
         self._duration_label.add_css_class("caption")
         self._duration_label.add_css_class("dim-label")
+        self._duration_label.add_css_class("song-duration")
 
         self._time_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
         self._time_box.add_css_class("player-time")
@@ -296,7 +297,7 @@ class PlayerToolbar(Gtk.Box):
         """Reduce secondary information without changing player behavior."""
         self._artist_label.set_visible(not compact)
         self._time_box.set_visible(not compact)
-        self._cover.set_pixel_size(32 if compact else 36)
+        self._cover.set_pixel_size(34 if compact else 44)
         self._title_label.set_max_width_chars(12 if compact else 28)
 
     def _sync(self, *_args):

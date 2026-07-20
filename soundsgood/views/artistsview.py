@@ -105,6 +105,7 @@ class ArtistsView(Adw.Bin):
             self._artist_selection,
             create_artist_factory(),
         )
+        self._artists_list.add_css_class("sidebar-pane")
         self._artists_list.set_single_click_activate(True)
 
         artists_scroll = Gtk.ScrolledWindow()
@@ -123,10 +124,7 @@ class ArtistsView(Adw.Bin):
         sidebar_page = Adw.NavigationPage.new(self._sidebar_stack, _("Artists"))
 
         self._artist_detail = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
-        self._artist_detail.set_margin_top(14)
-        self._artist_detail.set_margin_bottom(14)
-        self._artist_detail.set_margin_start(14)
-        self._artist_detail.set_margin_end(14)
+        self._artist_detail.add_css_class("detail-surface")
 
         content_page = Adw.NavigationPage.new(self._artist_detail, _("Artist"))
 
@@ -196,6 +194,7 @@ class ArtistsView(Adw.Bin):
 
         header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=14)
         header.add_css_class("detail-header")
+        header.add_css_class("detail-hero")
         header.set_valign(Gtk.Align.START)
 
         image = Gtk.Image(icon_name="avatar-default-symbolic")
@@ -262,6 +261,7 @@ class ArtistsView(Adw.Bin):
             ),
         )
         songs_list.set_single_click_activate(False)
+        songs_list.add_css_class("detail-list")
         songs_list.connect("activate", self._on_artist_song_activated)
         songs_scroller = Gtk.ScrolledWindow()
         songs_scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)

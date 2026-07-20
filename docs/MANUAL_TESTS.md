@@ -40,8 +40,14 @@ meson test -C builddir
 - Abrir um artista e confirmar albums agrupados.
 - Buscar por titulo, artista e album.
 - Buscar ignorando acentos, por exemplo `musica` para `Música`.
+- Abrir Search pelo botao e por `Ctrl+F`; fechar pelo retorno e por `Escape` e
+  confirmar que a pagina anterior e restaurada.
+- Confirmar que busca vazia, nenhum resultado e resultados agrupados exibem
+  estados distintos e que listas grandes continuam fluidas/virtualizadas.
 - Iniciar reproducao por faixa, album, artista e resultado de busca.
 - Redimensionar para 1200, 900, 600 e 360 px e confirmar que nao ha corte ou rolagem horizontal.
+- Repetir a matriz nos temas claro e escuro, verificando contraste de hover,
+  foco, selecao, faixa atual e superficies de detalhe.
 - Em largura estreita, confirmar o switcher inferior, retorno da tela de artista e cabecalho vertical do album.
 - Com uma faixa tocando, confirmar que a barra inferior permanece compacta,
   centraliza os controles e oculta tempo/artista abaixo de 600 px sem cortar o

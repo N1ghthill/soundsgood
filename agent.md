@@ -16,7 +16,7 @@ Nao implementar:
 
 ## Estado do Projeto
 
-O projeto tem um MVP funcional; a ultima release publica e a 0.2.4. Ele inicia
+O projeto tem um MVP funcional; a release atual e a 0.2.5. Ele inicia
 pelo lancador,
 Flatpak ou ambiente de desenvolvimento, escaneia o diretorio XDG de musicas,
 mostra albums/artistas/faixas, reproduz via GStreamer e pode continuar em
@@ -44,13 +44,16 @@ Pontos importantes:
 - `data/soundsgood.gresource.xml` foi removido porque estava vazio; a UI segue programatica em Python.
 - `docs/MANUAL_TESTS.md` contem o roteiro de validacao manual.
 
-Ultima validacao conhecida, em 19 de julho de 2026 para a 0.2.4:
+Ultima validacao conhecida, em 20 de julho de 2026 para a 0.2.5:
 
 - 66 testes automatizados passando, incluindo resistencia de playlists e a
   verificacao estatica dos aliases de traducao usados por factories GTK.
 - O smoke grafico passou no display real dentro de uma sessao D-Bus isolada do
   GNOME SDK 50; warnings de portal, EGL e accessibility bus do sandbox nao
   impediram as assercoes de UI.
+- O refinamento visual da 0.2.5 manteve 66 testes passando no GNOME SDK 50,
+  incluindo busca contextual virtualizada, retorno a pagina anterior e a
+  matriz adaptativa; as capturas e os assets da release foram renovados.
 - `py_compile` passando para app e testes.
 - `meson setup builddir --reconfigure`, `meson compile -C builddir` e `meson test -C builddir` passando.
 - O CI publico da release 0.2.3 passou no commit

@@ -1,6 +1,6 @@
 # Roadmap
 
-Atualizado em 19 de julho de 2026 para a release publica 0.2.4.
+Atualizado em 20 de julho de 2026 para a release 0.2.5.
 
 O SoundsGood prioriza um player local estavel e integrado ao desktop antes de
 recursos avancados. O produto permanece inspirado no GNOME Music e mantem fora
@@ -9,7 +9,7 @@ do escopo radio, podcasts, streaming, contas e servicos remotos obrigatorios.
 ## Estado Atual
 
 A base do MVP, a biblioteca local, a navegacao, o player, o acabamento visual e
-o empacotamento Flatpak estao implementados. A versao 0.2.4 tambem oferece
+o empacotamento Flatpak estao implementados. A versao 0.2.5 tambem oferece
 reproducao opcional em segundo plano, indicador de bandeja em desktops
 compativeis e listas de detalhe virtualizadas.
 
@@ -168,6 +168,28 @@ playlists salvas com a fila temporaria.
 - [x] Validar manualmente o fluxo de clique contextual e o acabamento visual
   com a biblioteca principal do mantenedor antes da publicacao.
 
+## Fase 6.2: Refinamento visual — concluida na 0.2.5
+
+Objetivo: dar mais hierarquia e consistencia a interface sem alterar a
+separacao entre biblioteca, reproducao, playlists e widgets.
+
+- [x] Ampliar capas e melhorar a distribuicao do grid de albums.
+- [x] Criar superficies semanticas compartilhadas para listas, detalhes,
+  sidebars, busca e estados de interacao.
+- [x] Padronizar estados vazios e de scan de Albums e Songs com libadwaita.
+- [x] Transformar Search em modo contextual com `Ctrl+F`/`Escape`, preservando
+  a pagina anterior.
+- [x] Virtualizar resultados mistos de busca com `Gio.ListStore` e
+  `Gtk.ListView`.
+- [x] Reforcar visualmente detalhes de album, artista e playlist e a barra do
+  player.
+- [x] Cobrir navegacao contextual, virtualizacao e tamanhos adaptativos no
+  smoke grafico.
+- [x] Executar a matriz visual manual em temas claro/escuro e 360/600/900/1200
+  px em display real.
+- [x] Atualizar screenshots do README, AppStream e kit de midia depois da
+  aprovacao visual humana.
+
 ## Fase 7: Beta e Acessibilidade — planejada
 
 Objetivo: validar o uso diario em ambientes e bibliotecas mais diversos.
@@ -185,7 +207,8 @@ Objetivo: validar o uso diario em ambientes e bibliotecas mais diversos.
 
 1. Concluir os itens ainda abertos da submissao Build Week em
    `docs/SUBMISSION.md`, especialmente `/feedback`, video e envio no Devpost.
-2. Executar e registrar a regressao manual final em colecoes e larguras reais.
+2. Validar a atualizacao publica da 0.2.5 e preservar o registro da matriz
+   visual executada para a release.
 3. Validar playlists com colecoes reais e ampliar a cobertura de regressao.
 4. Prosseguir para a auditoria de acessibilidade e os criterios de beta.
 

@@ -4,7 +4,7 @@ O formato de distribuicao atual do SoundsGood e um repositorio Flatpak proprio,
 hospedado via GitHub Pages. O app nao depende de listagem no Flathub para ser
 instalado ou atualizado.
 
-Os exemplos de bundle abaixo apontam para a ultima release publica, 0.2.4.
+Os exemplos de bundle abaixo apontam para a release 0.2.5.
 
 ## Instalar pelo repositorio
 
@@ -74,14 +74,14 @@ flatpak run io.github.n1ghthill.soundsgood
 Gerar bundle versionado para GitHub Releases:
 
 ```bash
-flatpak build-bundle ~/.local/share/flatpak/repo SoundsGood-0.2.4-x86_64.flatpak io.github.n1ghthill.soundsgood stable
+flatpak build-bundle ~/.local/share/flatpak/repo SoundsGood-0.2.5-x86_64.flatpak io.github.n1ghthill.soundsgood stable
 ```
 
 Tambem publique uma copia com nome estavel para permitir o link
 `releases/latest/download`:
 
 ```bash
-cp SoundsGood-0.2.4-x86_64.flatpak SoundsGood-x86_64.flatpak
+cp SoundsGood-0.2.5-x86_64.flatpak SoundsGood-x86_64.flatpak
 ```
 
 Instalar a ultima release publicada:
@@ -130,8 +130,7 @@ exemplo:
 sources:
   - type: git
     url: https://github.com/N1ghthill/soundsgood.git
-    tag: v0.2.4
-    commit: bd4a5cf4fe580465dba08b9bda97e794894c15d4
+    tag: v0.2.5
 ```
 
 ## Validacao

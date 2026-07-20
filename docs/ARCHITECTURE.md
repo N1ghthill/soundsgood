@@ -174,7 +174,9 @@ Estrutura sugerida:
 - `AlbumsView`: grid de albums e detalhe de album.
 - `ArtistsView`: lista de artistas e painel de detalhes com albums agrupados.
 - `SongsView`: lista de faixas.
-- `SearchView`: busca global com secoes de artistas, albums e musicas.
+- `SearchView`: modo contextual de busca global, aberto pelo cabecalho ou
+  `Ctrl+F`, com secoes virtualizadas de artistas, albums e musicas sobre um
+  unico `Gio.ListStore`. Ao fechar, a janela restaura a view anterior.
 - `PlaylistsView`: navegacao adaptativa, CRUD, ordenacao, importacao e
   exportacao de colecoes salvas. O editor permite selecionar varias faixas da
   biblioteca por busca local, sem abrir um seletor de arquivos para o caso
@@ -210,8 +212,14 @@ adicionam classes semanticas em vez de repetir CSS ou tamanhos locais:
 - `row-play`: reproducao contextual dentro de listas.
 - `primary-play`: controle principal circular do player.
 - `compact-pill`: acao textual curta, como Play, Select ou Rescan.
-- `album-tile`, `song-item` e `detail-header`: densidade e superficies de
-  conteudo.
+- `album-tile` e `song-item`: densidade dos itens de biblioteca.
+- `library-grid`, `library-list` e `detail-list`: ritmo e superficies das
+  colecoes virtualizadas.
+- `detail-surface` e `detail-hero`: moldura e hierarquia das paginas de detalhe.
+- `sidebar-pane`, `page-toolbar`, `search-section` e `search-result`: estrutura
+  semantica de navegacao lateral e busca contextual.
+- `visual-status`: espacamento comum dos estados vazios, de busca e scan
+  implementados com `Adw.StatusPage`.
 
 Controles devem manter tooltip e nome acessivel mesmo quando forem apenas
 icones. Botoes em `Gtk.Box` horizontal devem usar alinhamento vertical central

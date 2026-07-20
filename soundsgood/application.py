@@ -167,6 +167,7 @@ class SoundsGoodApplication(Adw.Application):
             ("show", self._on_show, None),
             ("select_music_folder", self._on_select_music_folder, None),
             ("reindex_library", self._on_reindex_library, ("app.reindex_library", ["<Ctrl><Shift>R"])),
+            ("search", self._on_search, ("app.search", ["<Ctrl>F"])),
             ("play_pause", self._on_play_pause, ("app.play_pause", ["<Ctrl>space", "AudioPlay", "AudioPause"])),
             ("song_next", self._on_song_next, ("app.song_next", ["<Ctrl>N", "AudioNext"])),
             ("song_previous", self._on_song_previous, ("app.song_previous", ["<Ctrl>B", "AudioPrev"])),
@@ -203,6 +204,10 @@ class SoundsGoodApplication(Adw.Application):
 
     def _on_reindex_library(self, action, param):
         self.reindex_library()
+
+    def _on_search(self, action, param):
+        if self._window is not None:
+            self._window.show_search()
 
     def _on_play_pause(self, action, param):
         self._player.play_pause()

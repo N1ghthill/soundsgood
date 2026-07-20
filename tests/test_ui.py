@@ -76,9 +76,21 @@ class WindowSmokeTest(unittest.TestCase):
                     window._artists_view,
                     window._songs_view,
                     window._playlists_view,
-                    window._search_view,
                 ):
                     self.assertTrue(window._stack.get_page(child).get_icon_name())
+                self.assertIsNone(
+                    window._stack.get_page(window._search_view).get_title()
+                )
+                window._stack.set_visible_child_name("songs")
+                window.show_search()
+                self.assertEqual(window._stack.get_visible_child_name(), "search")
+                self.assertTrue(
+                    window._on_key_pressed(None, Gdk.KEY_Escape, 0, 0)
+                )
+                self.assertEqual(window._stack.get_visible_child_name(), "songs")
+                self.assertFalse(
+                    window._on_key_pressed(None, Gdk.KEY_Escape, 0, 0)
+                )
 
                 toolbar = window._player_toolbar
                 self.assertTrue(toolbar._play_button.has_css_class("primary-play"))
@@ -88,11 +100,11 @@ class WindowSmokeTest(unittest.TestCase):
                 toolbar.set_compact(True)
                 self.assertFalse(toolbar._artist_label.get_visible())
                 self.assertFalse(toolbar._time_box.get_visible())
-                self.assertEqual(toolbar._cover.get_pixel_size(), 32)
+                self.assertEqual(toolbar._cover.get_pixel_size(), 34)
                 toolbar.set_compact(False)
                 self.assertTrue(toolbar._artist_label.get_visible())
                 self.assertTrue(toolbar._time_box.get_visible())
-                self.assertEqual(toolbar._cover.get_pixel_size(), 36)
+                self.assertEqual(toolbar._cover.get_pixel_size(), 44)
 
                 window._artists_view.set_compact(True)
                 self.assertTrue(window._artists_view._split_view.get_collapsed())
@@ -193,6 +205,12 @@ class WindowSmokeTest(unittest.TestCase):
                     url="file:///tmp/library-picker.wav",
                 )
                 app.props.library.props.songs.append(library_song)
+                search = window._search_view
+                search._run_search("cafe")
+                self.assertIsInstance(search._results, Gtk.ListView)
+                self.assertEqual(search._model.get_n_items(), 2)
+                self.assertEqual(search._model.get_item(0).props.kind, "section")
+                self.assertIs(search._model.get_item(1).props.item, library_song)
                 song_chooser = PlaylistSongChooserDialog(app, saved)
                 song_chooser.present(window)
                 song_chooser._search.set_text("cafe")

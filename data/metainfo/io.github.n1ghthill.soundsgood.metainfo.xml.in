@@ -9,7 +9,7 @@
   </developer>
   <summary>Play and organize your music collection</summary>
   <description>
-    <p>A simple and fast music player for Linux. Browse your music by album or artist, play songs, manage the current playback queue, and create persistent playlists with searchable library selection.</p>
+    <p>A simple and fast music player for Linux. Browse your music by album or artist, search a local library, play songs, manage the current playback queue, and create persistent playlists with searchable library selection.</p>
   </description>
   <categories>
     <category>AudioVideo</category>
@@ -23,26 +23,35 @@
   <screenshots>
     <screenshot type="default">
       <caption>Main library view</caption>
-      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.1.8/data/screenshots/soundsgood-main.png</image>
+      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.2.5/data/screenshots/soundsgood-main.png</image>
     </screenshot>
     <screenshot>
       <caption>Album grid</caption>
-      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.1.8/docs/screenshots/albums.png</image>
+      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.2.5/docs/screenshots/albums.png</image>
     </screenshot>
     <screenshot>
       <caption>Artists view</caption>
-      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.1.8/docs/screenshots/artists.png</image>
+      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.2.5/docs/screenshots/artists.png</image>
     </screenshot>
     <screenshot>
       <caption>Songs view</caption>
-      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.1.8/docs/screenshots/songs.png</image>
+      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.2.5/docs/screenshots/songs.png</image>
     </screenshot>
     <screenshot>
       <caption>Search results</caption>
-      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.1.8/docs/screenshots/search.png</image>
+      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.2.5/docs/screenshots/search.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Persistent playlists</caption>
+      <image>https://raw.githubusercontent.com/N1ghthill/soundsgood/v0.2.5/docs/screenshots/playlists.png</image>
     </screenshot>
   </screenshots>
   <releases>
+    <release version="0.2.5" date="2026-07-20">
+      <description>
+        <p>Refines the library with larger album artwork, consistent content surfaces and status pages, stronger detail and player hierarchy, and contextual global search backed by a virtualized list model.</p>
+      </description>
+    </release>
     <release version="0.2.4" date="2026-07-19">
       <description>
         <p>Fixes right-click playlist destinations with a compact, virtualized popover that invokes playlist operations directly, shows current song counts, and is covered by a real button-click regression.</p>

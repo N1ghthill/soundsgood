@@ -26,14 +26,14 @@ class AlbumTile(Gtk.Box):
         self._album = None
         self._album_handlers = []
         self.add_css_class("album-tile")
-        self.set_size_request(120, -1)
+        self.set_size_request(144, -1)
         self.set_margin_top(4)
         self.set_margin_bottom(4)
         self.set_margin_start(4)
         self.set_margin_end(4)
 
         self._cover = Gtk.Image(icon_name="media-optical-cd-audio-symbolic")
-        self._cover.set_pixel_size(104)
+        self._cover.set_pixel_size(132)
         self._cover.add_css_class("album-cover")
         self.append(self._cover)
 
@@ -137,6 +137,7 @@ class AlbumsView(Adw.Bin):
         )
         self._grid.set_min_columns(1)
         self._grid.set_max_columns(8)
+        self._grid.add_css_class("library-grid")
         self._grid.set_single_click_activate(True)
         self._grid.connect("activate", self._on_album_activated)
 
@@ -146,27 +147,24 @@ class AlbumsView(Adw.Bin):
 
         self._grid_stack = Gtk.Stack()
         self._grid_stack.add_named(scrolled, "albums")
-        self._status_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-        self._status_box.set_halign(Gtk.Align.CENTER)
-        self._status_box.set_valign(Gtk.Align.CENTER)
-        self._status_label = Gtk.Label()
-        self._status_label.add_css_class("dim-label")
-        self._status_box.append(self._status_label)
+        self._status_box = Adw.StatusPage()
+        self._status_box.add_css_class("compact")
+        self._status_box.add_css_class("visual-status")
+        self._status_box.set_icon_name("folder-music-symbolic")
+        self._status_box.set_title(_("Your albums will appear here"))
+        self._status_label = self._status_box
         self._status_button = Gtk.Button(label=_("Choose Music Folder"))
         self._status_button.set_icon_name("folder-music-symbolic")
         self._status_button.add_css_class("suggested-action")
         self._status_button.add_css_class("compact-pill")
         self._status_button.connect("clicked", self._on_choose_folder_clicked)
         set_accessible_label(self._status_button, _("Choose Music Folder"))
-        self._status_box.append(self._status_button)
+        self._status_box.set_child(self._status_button)
         self._grid_stack.add_named(self._status_box, "status")
         self._stack.add_named(self._grid_stack, "grid")
 
         self._album_page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
-        self._album_page.set_margin_top(14)
-        self._album_page.set_margin_bottom(14)
-        self._album_page.set_margin_start(14)
-        self._album_page.set_margin_end(14)
+        self._album_page.add_css_class("detail-surface")
 
         self._stack.add_named(self._album_page, "album")
         self.set_child(self._stack)
@@ -192,7 +190,7 @@ class AlbumsView(Adw.Bin):
 
         albums = self._library.props.albums
         if albums.get_n_items() == 0:
-            self._status_label.set_label(
+            self._status_label.set_description(
                 self._library.props.status_message or _("No albums found")
             )
             self._status_button.set_visible(True)
@@ -206,7 +204,12 @@ class AlbumsView(Adw.Bin):
             message = _("Scanning music...")
         elif not message:
             message = _("No albums found")
-        self._status_label.set_label(message)
+        self._status_label.set_title(
+            _("Scanning your music")
+            if self._library.props.scan_state == int(LibraryState.SCANNING)
+            else _("Your albums will appear here")
+        )
+        self._status_label.set_description(message)
         self._status_button.set_visible(
             self._library.props.scan_state != int(LibraryState.SCANNING)
         )
@@ -241,6 +244,7 @@ class AlbumsView(Adw.Bin):
             spacing=14,
         )
         header.add_css_class("detail-header")
+        header.add_css_class("detail-hero")
         header.set_valign(Gtk.Align.START)
 
         cover = Gtk.Image(icon_name="media-optical-cd-audio-symbolic")
@@ -316,6 +320,7 @@ class AlbumsView(Adw.Bin):
                 self._app,
             ),
         )
+        songs_list.add_css_class("detail-list")
         songs_list.add_css_class("boxed-list")
         songs_list.set_single_click_activate(False)
         songs_list.connect("activate", self._on_album_song_activated)

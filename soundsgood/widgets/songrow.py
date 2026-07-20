@@ -112,6 +112,7 @@ class SongRow(Gtk.ListBoxRow):
         duration = Gtk.Label(label=format_duration(song.props.duration))
         duration.set_width_chars(6)
         duration.add_css_class("dim-label")
+        duration.add_css_class("song-duration")
         box.append(duration)
 
         if self._on_add:
@@ -237,6 +238,7 @@ class SongListItem(Gtk.Box):
 
         self._duration = Gtk.Label(width_chars=6)
         self._duration.add_css_class("dim-label")
+        self._duration.add_css_class("song-duration")
         self.append(self._duration)
 
         if self._on_add:

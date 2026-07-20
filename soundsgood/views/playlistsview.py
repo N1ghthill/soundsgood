@@ -42,6 +42,7 @@ class PlaylistsView(Adw.Bin):
         sidebar.set_margin_bottom(8)
         sidebar.set_margin_start(8)
         sidebar.set_margin_end(8)
+        sidebar.add_css_class("sidebar-pane")
 
         create_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         self._name_entry = Gtk.Entry()
@@ -82,10 +83,7 @@ class PlaylistsView(Adw.Bin):
         sidebar.append(self._sidebar_status)
 
         self._detail = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-        self._detail.set_margin_top(12)
-        self._detail.set_margin_bottom(12)
-        self._detail.set_margin_start(12)
-        self._detail.set_margin_end(12)
+        self._detail.add_css_class("detail-surface")
         self._detail_status = Gtk.Label(label=_("Select or create a playlist"))
         self._detail_status.set_halign(Gtk.Align.CENTER)
         self._detail_status.set_valign(Gtk.Align.CENTER)
@@ -172,6 +170,7 @@ class PlaylistsView(Adw.Bin):
 
         header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         header.add_css_class("detail-header")
+        header.add_css_class("detail-hero")
         labels = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
         labels.set_hexpand(True)
         self._detail_title = Gtk.Label(label=playlist.props.name, xalign=0)
@@ -260,6 +259,7 @@ class PlaylistsView(Adw.Bin):
             create_entry_factory(self._play_entry, self._move_entry, self._remove_entry),
         )
         self._entries_list.set_single_click_activate(False)
+        self._entries_list.add_css_class("detail-list")
         self._entries_list.connect("activate", self._entry_activated)
         scroller = Gtk.ScrolledWindow()
         scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)

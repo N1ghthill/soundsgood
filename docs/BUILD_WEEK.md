@@ -92,6 +92,10 @@ The current 0.2.4 release repairs the real right-click destination path and
 refines it into a compact, virtualized playlist popover. This maintenance
 release also remains outside the evaluated Build Week v0.2.2 claims.
 
+The 0.2.5 release adds a broader visual refinement and virtualizes mixed global
+search results. Its automated GNOME SDK 50 suite passes 66 tests, but it remains
+separate from the evaluated Build Week v0.2.2 claims.
+
 ## Official submission requirements
 
 The challenge requires a working project, category, project description,

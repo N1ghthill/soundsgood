@@ -38,6 +38,7 @@ class SongsView(Adw.Bin):
             ),
         )
         self._listview.set_single_click_activate(False)
+        self._listview.add_css_class("library-list")
         self._listview.connect("activate", self._on_item_activated)
 
         scrolled = Gtk.ScrolledWindow()
@@ -45,19 +46,19 @@ class SongsView(Adw.Bin):
         scrolled.set_child(self._listview)
         self._stack.add_named(scrolled, "songs")
 
-        self._status = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-        self._status.set_halign(Gtk.Align.CENTER)
-        self._status.set_valign(Gtk.Align.CENTER)
-        self._status_label = Gtk.Label()
-        self._status_label.add_css_class("dim-label")
-        self._status.append(self._status_label)
+        self._status = Adw.StatusPage()
+        self._status.add_css_class("compact")
+        self._status.add_css_class("visual-status")
+        self._status.set_icon_name("audio-x-generic-symbolic")
+        self._status.set_title(_("Your songs will appear here"))
+        self._status_label = self._status
         self._choose_button = Gtk.Button(label=_("Choose Music Folder"))
         self._choose_button.set_icon_name("folder-music-symbolic")
         self._choose_button.add_css_class("suggested-action")
         self._choose_button.add_css_class("compact-pill")
         self._choose_button.connect("clicked", self._on_choose_folder_clicked)
         set_accessible_label(self._choose_button, _("Choose Music Folder"))
-        self._status.append(self._choose_button)
+        self._status.set_child(self._choose_button)
         self._stack.add_named(self._status, "status")
         self.set_child(self._stack)
 
@@ -81,7 +82,12 @@ class SongsView(Adw.Bin):
             message = _("Scanning music...")
         elif not message:
             message = _("No songs found")
-        self._status_label.set_label(message)
+        self._status_label.set_title(
+            _("Scanning your music")
+            if self._library.props.scan_state == int(LibraryState.SCANNING)
+            else _("Your songs will appear here")
+        )
+        self._status_label.set_description(message)
         self._choose_button.set_visible(
             self._library.props.scan_state != int(LibraryState.SCANNING)
         )
@@ -93,7 +99,9 @@ class SongsView(Adw.Bin):
             return
 
         if self._library.props.songs.get_n_items() == 0:
-            self._status_label.set_label(self._library.props.status_message or _("No songs found"))
+            self._status_label.set_description(
+                self._library.props.status_message or _("No songs found")
+            )
             self._choose_button.set_visible(True)
             self._stack.set_visible_child_name("status")
             return

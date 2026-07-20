@@ -10,7 +10,7 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Adw, Gio, Gtk
+from gi.repository import Adw, Gdk, Gio, Gtk
 
 from soundsgood.views.albumsview import AlbumsView
 from soundsgood.views.artistsview import ArtistsView
@@ -27,6 +27,7 @@ class Window(Adw.ApplicationWindow):
         super().__init__(application=application)
         self._app = application
         self._settings = application.props.settings
+        self._page_before_search = "albums"
         self.set_title(_("SoundsGood"))
         self.set_icon_name(application.get_application_id())
         self.set_default_size(
@@ -72,7 +73,7 @@ class Window(Adw.ApplicationWindow):
         self._artists_view = ArtistsView(application)
         self._songs_view = SongsView(application)
         self._playlists_view = PlaylistsView(application)
-        self._search_view = SearchView(application)
+        self._search_view = SearchView(application, self.hide_search)
 
         pages = (
             (
@@ -89,11 +90,11 @@ class Window(Adw.ApplicationWindow):
                 _("Playlists"),
                 "view-list-symbolic",
             ),
-            (self._search_view, "search", _("Search"), "system-search-symbolic"),
         )
         for child, name, title, icon_name in pages:
             page = self._stack.add_titled(child, name, title)
             page.set_icon_name(icon_name)
+        self._stack.add_named(self._search_view, "search")
 
         self._bottom_switcher = Adw.ViewSwitcherBar()
         self._bottom_switcher.set_stack(self._stack)
@@ -112,6 +113,9 @@ class Window(Adw.ApplicationWindow):
         self._toolbar_view.set_content(self._toast_overlay)
 
         self.connect("close-request", self._on_close_request)
+        key_controller = Gtk.EventControllerKey()
+        key_controller.connect("key-pressed", self._on_key_pressed)
+        self.add_controller(key_controller)
 
         compact = Adw.Breakpoint.new(
             Adw.BreakpointCondition.parse("max-width: 600px")
@@ -135,8 +139,28 @@ class Window(Adw.ApplicationWindow):
         self.add_breakpoint(compact)
 
     def _show_search(self, _button):
+        self.show_search()
+
+    def show_search(self):
+        current = self._stack.get_visible_child_name()
+        if current != "search":
+            self._page_before_search = current or "albums"
         self._stack.set_visible_child_name("search")
         self._search_view.grab_search_focus()
+
+    def hide_search(self):
+        if self._stack.get_visible_child_name() != "search":
+            return
+        self._stack.set_visible_child_name(self._page_before_search)
+
+    def _on_key_pressed(self, _controller, keyval, _keycode, _state):
+        if (
+            keyval == Gdk.KEY_Escape
+            and self._stack.get_visible_child_name() == "search"
+        ):
+            self.hide_search()
+            return True
+        return False
 
     def _on_close_request(self, *_args):
         width, height = self.get_default_size()
