@@ -220,3 +220,22 @@ Se o app passar a depender somente de portal/document portal para pastas escolhi
 - Remote publico verificado oferecendo a versao 0.2.4 no commit OSTree acima.
 - Build, 66 testes, smoke grafico sobre o botao real, metadados pedantic, lint,
   composicao Flatpak e teste manual do funcionamento e acabamento concluidos.
+
+## Estado da Release 0.2.5
+
+- Tag GPG: `v0.2.5`.
+- Commit da tag: `208e025b1d7d7550554519599dc0992da4d483d1`.
+- Commit OSTree publicado:
+  `eaf3c491863991a51c21797d650d459dd69ac5bcde46499a5a8346c085644656`.
+- [CI GNOME 50](https://github.com/N1ghthill/soundsgood/actions/runs/29715105176)
+  concluido com sucesso; o repositorio Flatpak assinado foi publicado em
+  <https://n1ghthill.github.io/soundsgood/>.
+- Release publica: <https://github.com/N1ghthill/soundsgood/releases/tag/v0.2.5>.
+- Bundles `SoundsGood-0.2.5-x86_64.flatpak` e
+  `SoundsGood-x86_64.flatpak` publicados com SHA-256
+  `0472a1daee9335428a642c19335b36a61abc278f74e66fdff658847a8ab6ffac`.
+- Remote publico verificado oferecendo a versao 0.2.5 no commit OSTree acima;
+  a instalacao local foi refeita a partir desse remote.
+- Build, 66 testes, smoke grafico, matriz visual em 360/600/900/1200 px nos
+  temas claro e escuro, metadados pedantic, lint e composicao Flatpak
+  concluidos.

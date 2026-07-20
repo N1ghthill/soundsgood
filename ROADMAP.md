@@ -207,10 +207,8 @@ Objetivo: validar o uso diario em ambientes e bibliotecas mais diversos.
 
 1. Concluir os itens ainda abertos da submissao Build Week em
    `docs/SUBMISSION.md`, especialmente `/feedback`, video e envio no Devpost.
-2. Validar a atualizacao publica da 0.2.5 e preservar o registro da matriz
-   visual executada para a release.
-3. Validar playlists com colecoes reais e ampliar a cobertura de regressao.
-4. Prosseguir para a auditoria de acessibilidade e os criterios de beta.
+2. Validar playlists com colecoes reais e ampliar a cobertura de regressao.
+3. Prosseguir para a auditoria de acessibilidade e os criterios de beta.
 
 ## Fora de Escopo
 

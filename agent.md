@@ -54,6 +54,12 @@ Ultima validacao conhecida, em 20 de julho de 2026 para a 0.2.5:
 - O refinamento visual da 0.2.5 manteve 66 testes passando no GNOME SDK 50,
   incluindo busca contextual virtualizada, retorno a pagina anterior e a
   matriz adaptativa; as capturas e os assets da release foram renovados.
+- O CI publico da release 0.2.5 passou no commit
+  `208e025b1d7d7550554519599dc0992da4d483d1`, associado a tag GPG
+  `v0.2.5`; o repositorio Flatpak publico oferece o commit OSTree
+  `eaf3c491863991a51c21797d650d459dd69ac5bcde46499a5a8346c085644656`.
+- A instalacao local foi refeita a partir do remote publico assinado
+  `soundsgood` e confirmou a versao 0.2.5 no mesmo commit OSTree.
 - `py_compile` passando para app e testes.
 - `meson setup builddir --reconfigure`, `meson compile -C builddir` e `meson test -C builddir` passando.
 - O CI publico da release 0.2.3 passou no commit
